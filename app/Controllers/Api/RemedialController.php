@@ -1,0 +1,12 @@
+<?php
+namespace App\Controllers\Api;
+use App\Models\RemedialTugasModel;
+class RemedialController extends BaseApiController
+{
+ private RemedialTugasModel $model;public function __construct(){$this->model=new RemedialTugasModel();}
+ public function index(){ $q=$this->model->select('remedial_tugas.*,kelas.nama_kelas,siswa.nis,siswa.nama_lengkap,mata_pelajaran.nama_mata_pelajaran')->join('kelas','kelas.id=remedial_tugas.kelas_id')->join('siswa','siswa.id=remedial_tugas.siswa_id','left')->join('mata_pelajaran','mata_pelajaran.id=remedial_tugas.mata_pelajaran_id');$u=$this->currentUser();if(($u['peran']??'')==='siswa')$q->where('siswa.nis',$u['nis']);elseif($id=(int)$this->request->getGet('kelas_id'))$q->where('remedial_tugas.kelas_id',$id);return $this->respond(['data'=>$q->orderBy('batas_waktu')->paginate(25)]);}
+ public function create(){return $this->persist();}
+ public function update(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Remedial atau tugas tidak ditemukan.'],404);return $this->persist($id);}
+ public function delete(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Remedial atau tugas tidak ditemukan.'],404);$this->model->delete($id);return $this->respond(['ok'=>true]);}
+ private function persist(?int $id=null){$p=$this->payload();$e=$this->validatePayload($p,['kelas_id'=>'required|is_natural_no_zero','siswa_id'=>'permit_empty|is_natural_no_zero','mata_pelajaran_id'=>'required|is_natural_no_zero','judul'=>'required|max_length[180]','deskripsi'=>'permit_empty|max_length[10000]','batas_waktu'=>'permit_empty|valid_date[Y-m-d H:i:s]','status'=>'required|in_list[Draft,Ditugaskan,Dikerjakan,Selesai,Dibatalkan]']);if($e)return $this->respond(['ok'=>false,'errors'=>$e],422);if(!empty($p['siswa_id'])&&!db_connect()->table('siswa')->where(['id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id']])->countAllResults())return $this->respond(['ok'=>false,'message'=>'Siswa tidak berada pada kelas yang dipilih.'],422);$d=['kelas_id'=>(int)$p['kelas_id'],'siswa_id'=>empty($p['siswa_id'])?null:(int)$p['siswa_id'],'mata_pelajaran_id'=>(int)$p['mata_pelajaran_id'],'judul'=>trim($p['judul']),'deskripsi'=>trim((string)($p['deskripsi']??''))?:null,'batas_waktu'=>empty($p['batas_waktu'])?null:$p['batas_waktu'],'status'=>$p['status'],'dibuat_oleh'=>$this->currentUser()['id']];if($id)$this->model->update($id,$d);else$id=$this->model->insert($d,true);return $this->respond(['ok'=>true,'data'=>$this->model->find($id)],$this->request->getMethod()==='POST'?201:200);}
+}

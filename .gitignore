@@ -1,0 +1,40 @@
+# Local environment and secrets
+.env
+
+# Dependencies
+/vendor/
+
+# CodeIgniter runtime data
+/writable/cache/*
+/writable/debugbar/*
+/writable/logs/*
+/writable/session/*
+/writable/uploads/*
+!/writable/cache/index.html
+!/writable/debugbar/index.html
+!/writable/logs/index.html
+!/writable/session/index.html
+!/writable/uploads/index.html
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Test and coverage output
+/build/
+/coverage/
+
+# Ignore all other writable runtime artifacts (browser/debug tooling included)
+/writable/*
+!/writable/cache/
+!/writable/cache/index.html
+!/writable/debugbar/
+!/writable/debugbar/index.html
+!/writable/logs/
+!/writable/logs/index.html
+!/writable/session/
+!/writable/session/index.html
+!/writable/uploads/
+!/writable/uploads/index.html

@@ -27,7 +27,7 @@
 <script src='<?= base_url('assets/attendance-recap-detail.js?v=20260914-september-data') ?>'></script>
 <script src='<?= base_url('assets/reports-tabs.js?v=20260914c') ?>'></script>
 <script src='<?= base_url('assets/schedule-actions.js?v=20260918-observer-fix') ?>'></script>
-<script src='<?= base_url('assets/maintenance-ui.js?v=20260920-maintenance') ?>'></script>
+<script src='<?= base_url('assets/maintenance-ui.js?v=20260920-maintenance2') ?>'></script>
 <script>
 (function(){
  function bindWorkspaceNavigation(){

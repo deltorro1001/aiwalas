@@ -35,9 +35,6 @@
     if (!root) return;
 
     root.innerHTML = '<div class="page maintenance-page">' +
-      '<div class="page-heading"><div><div class="eyebrow">OPERASI VPS</div>' +
-      '<h1>Maintenance</h1><p>Kelola patch aplikasi dengan backup otomatis.</p></div>' +
-      '<button class="outline-btn" id="makePatchManifest" type="button">Buat manifest</button></div>' +
       '<section class="panel"><h2>Update aplikasi</h2>' +
       '<p class="maintenance-help">Unggah file ZIP patch yang hanya berisi folder <code>app/</code>, <code>public/</code>, atau file Composer.</p>' +
       '<label class="maintenance-upload-label" for="patchFile">File patch ZIP</label>' +
@@ -54,15 +51,6 @@
     var applyButton = document.getElementById('applyPatch');
     var status = document.getElementById('patchStatus');
     var patchName = '';
-
-    document.getElementById('makePatchManifest').onclick = function () {
-      var manifest = 'AIWALAS PATCH MANIFEST\n\nSinkronkan: app/ public/ composer.json composer.lock\nPasca-deploy: composer install --no-dev --optimize-autoloader; php spark migrate; php spark cache:clear\n';
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(new Blob([manifest], { type: 'text/plain' }));
-      link.download = 'aiwalas-patch-manifest.txt';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    };
 
     uploadButton.onclick = function () {
       var file = fileInput.files[0];

@@ -56,6 +56,15 @@ Aplikasi menggunakan session CI4, CSRF, filter autentikasi/role, validasi server
 
 WhatsApp menyimpan histori sebagai `Disiapkan`, membuat URL `wa.me`, lalu dapat menandainya `Dibuka`; aplikasi tidak mengklaim pesan terkirim tanpa WhatsApp Business API. PDF memakai dialog cetak browser. CSV dapat dibuka di Excel dan menjadi fallback saat pustaka SheetJS CDN tidak tersedia.
 
+## Development dan deployment
+
+Panduan lengkap tersedia di:
+
+- [Development dua komputer](docs/DEVELOPMENT.md)
+- [Deployment dan sinkronisasi VPS](docs/DEPLOYMENT.md)
+
+Alur standar: developer bekerja pada branch fitur, Pull Request di-merge ke `master`, lalu VPS menjalankan `git pull --ff-only`, Composer, migration, dan pembersihan cache. File `.env` serta folder `writable/` tetap khusus setiap environment.
+
 ## Pemeriksaan
 
 ```bash

@@ -416,3 +416,6 @@
 /* Scanner QR Camera disembunyikan pada menu Absensi Harian */
 .attendance-action-buttons #scanQr{display:none!important}
 
+
+.teacher-journal-table .journal-action-col{width:80px}.teacher-journal-table td:last-child,.teacher-journal-table th:last-child{text-align:center;white-space:nowrap}
+

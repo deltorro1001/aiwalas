@@ -33,7 +33,7 @@
 <script src='<?= base_url('assets/ledger-import.js?v=20260914-report-data') ?>'></script>
 <script src='<?= base_url('assets/ledger-page.js?v=20260918-name-left') ?>'></script>
 <script src='<?= base_url('assets/hud-chart.js?v=20260914-trends4') ?>'></script>
-<script src='<?= base_url('assets/dashboard-summary.js?v=20260925-wib') ?>'></script>
+<script src='<?= base_url('assets/dashboard-summary.js?v=20260926-absence-card') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
 <script src='<?= base_url('assets/attendance-ui.js?v=20260919-qr-realtime') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20260919') ?>'></script>

@@ -1,4 +1,4 @@
-﻿<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="brand"><img class="brand-logo" src="<?= base_url('assets/logo-gold.png') ?>" alt="AIWalas"></div>
   <div class="workspace-switch"><img class="profile-thumbnail" src="<?= base_url('assets/thumbnail.jpg') ?>" alt="Sumantoro Kasdhani"><div><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><small>Wali Kelas 1PF1</small><div class="academic-year-row"><span class="academic-year-label">Tahun Ajaran</span><select id="academicYearSelect" class="academic-year-select" aria-label="Pilih tahun ajaran"><option value="2026-2027">2026-2027</option><option value="__input__">-input tahun ajaran-</option></select></div><div class="academic-year-row"><span class="academic-year-label">Kelas</span><select id="classRolloutSelect" class="academic-year-select" aria-label="Pilih kelas"><option value="Kelas 11PF1">Kelas 11PF1</option><option value="__input__">-input kelas-</option></select></div></div><span class="chevron"></span></div>
   <nav class="nav-group">
@@ -25,7 +25,7 @@
     <button class="nav-item" data-page="remedial"><span></span> Remedial &amp; Tugas</button>
     <button class="nav-item" data-page="notifications"><span></span> Notifikasi <b class="nav-badge light">3</b></button>
   </nav>
-  <div class="sidebar-bottom"><button class="nav-item"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button>Tanya sekarang <span></span></button></div><div class="sidebar-footer">AIWalas v1.0 <span></span> Mode demo</div></div>
+  <div class="sidebar-bottom"><button class="nav-item" data-page="settings"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button>Tanya sekarang <span></span></button></div><div class="sidebar-footer">AIWalas v1.0 <span></span> Mode demo</div></div>
 </aside>
 
 

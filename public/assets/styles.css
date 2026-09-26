@@ -412,3 +412,7 @@
 /* Sidebar dapat digulir saat daftar menu melebihi tinggi layar */
 .sidebar{height:100vh;max-height:100vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#40506a transparent}.sidebar::-webkit-scrollbar{width:6px}.sidebar::-webkit-scrollbar-track{background:transparent}.sidebar::-webkit-scrollbar-thumb{background:#40506a;border-radius:8px}.sidebar-bottom{padding-bottom:2px}
 
+
+/* Scanner QR Camera disembunyikan pada menu Absensi Harian */
+.attendance-action-buttons #scanQr{display:none!important}
+

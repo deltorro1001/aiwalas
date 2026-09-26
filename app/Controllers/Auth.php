@@ -104,6 +104,18 @@ class Auth extends BaseController
         return $this->json(['ok' => true]);
     }
 
+    public function changePassword()
+    {
+        $user = session()->get('pengguna');
+        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $password = (string) ($payload['password'] ?? '');
+        $confirmation = (string) ($payload['confirmation'] ?? '');
+        if (! $user || (int) ($user['id'] ?? 0) < 1) return $this->json(['ok' => false, 'message' => 'Akun ini tidak dapat mengubah password melalui halaman ini.'], 422);
+        if (strlen($password) < 8 || $password !== $confirmation) return $this->json(['ok' => false, 'message' => 'Password minimal 8 karakter dan konfirmasi harus sama.'], 422);
+        $model = new PenggunaModel();
+        $model->update((int) $user['id'], ['kata_sandi' => password_hash($password, PASSWORD_DEFAULT)]);
+        return $this->json(['ok' => true, 'message' => 'Password berhasil diubah.']);
+    }
     private function frontendUser(array $pengguna): array
     {
         $roleMap = ['wali_kelas' => 'walas', 'sekretaris' => 'assistant', 'siswa' => 'student', 'guru' => 'teacher', 'guest' => 'guest'];

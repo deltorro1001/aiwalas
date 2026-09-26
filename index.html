@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <title>AIWalas — Dashboard 11PF1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260909b">
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo-wrap"><img class="login-logo" src="logo-gold.png" alt="AIWalas"></div>
+      <div class="eyebrow">Portal kelas 11PF1</div>
+      <h1>Selamat datang kembali</h1>
+      <p class="login-subtitle">Masuk untuk mengakses workspace AIWalas.</p>
+      <form id="loginForm">
+        <label>Masuk sebagai
+          <select id="loginRole">
+            <option value="walas">Wali Kelas</option>
+            <option value="assistant">Sekretaris Kelas</option>
+            <option value="student">Siswa</option>
+          </select>
+        </label>
+        <label>Username
+          <input id="loginUsername" autocomplete="username" placeholder="Masukkan username" required>
+        </label>
+        <label>Password
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
+        </label>
+        <button class="primary-btn login-submit" type="submit">Masuk ke AIWalas</button>
+        <p class="login-error" id="loginError" role="alert"></p>
+      </form>
+      <div class="login-note" id="loginNote">Siswa menggunakan NIS sebagai username dan password.</div>
+    </div>
+  </section>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><img class="brand-logo" src="logo-gold.png" alt="AIWalas"></div>
+      <div class="workspace-switch"><img class="profile-thumbnail" src="thumbnail.jpg" alt="Sumantoro Kasdhani"><div><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><small>Wali Kelas · 11PF1</small></div><span class="chevron">⌄</span></div>
+      <nav class="nav-group">
+        <span class="nav-label">Workspace</span>
+        <button class="nav-item active" data-page="dashboard"><span>◈</span> Beranda <b class="nav-badge">4</b></button>
+        <button class="nav-item" data-page="attendance"><span>◷</span> Absensi Harian</button>
+        <button class="nav-item" data-page="schedule"><span>▦</span> Jadwal Kelas</button>
+        <button class="nav-item" data-page="journal"><span>▤</span> Jurnal Kelas</button>
+        <button class="nav-item" data-page="students"><span>♙</span> Daftar Siswa</button>
+        <button class="nav-item" data-page="teachers"><span>♙</span> Guru Mapel</button>
+        <button class="nav-item" data-page="schoolTeachers"><span>♙</span> Daftar Guru SMKN 19</button>
+        <button class="nav-item" data-page="grades"><span>▤</span> Ledger Nilai</button>
+        <button class="nav-item" data-page="reports"><span>▤</span> Laporan Wali Kelas</button>
+      </nav>
+      <nav class="nav-group second">
+        <span class="nav-label">Aktivitas</span>
+        <button class="nav-item" data-page="communication"><span>◌</span> Komunikasi <b class="nav-dot"></b></button>
+        <button class="nav-item" data-page="remedial"><span>↗</span> Remedial & Tugas</button>
+        <button class="nav-item" data-page="notifications"><span>♢</span> Notifikasi <b class="nav-badge light">3</b></button>
+      </nav>
+      <div class="sidebar-bottom"><button class="nav-item"><span>⚙</span> Pengaturan</button><div class="help-card"><span class="sparkle">✦</span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button>Tanya sekarang <span>→</span></button></div><div class="sidebar-footer">AIWalas v1.0 <span>•</span> Mode demo</div></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><button class="mobile-menu" id="mobileMenu">☰</button><div class="breadcrumb"><span>Workspace</span><b>/</b><strong id="breadcrumbCurrent">Beranda</strong></div><div class="top-actions"><button class="icon-btn" id="globalSearch" aria-label="Cari">⌕</button><button class="icon-btn notification-trigger" data-page="notifications" aria-label="Notifikasi">♧<i></i></button><img class="profile-thumbnail top-avatar" src="thumbnail.jpg" alt="Sumantoro Kasdhani"><button class="logout-btn" id="logoutBtn">Keluar</button></div></header>
+      <div id="pageContent"></div>
+    </main>
+  </div>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal-backdrop" id="modalBackdrop"><div class="modal" id="modalContent"></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="student-details.js?v=20260909a"></script>
+  <script src="app.js?v=20260909j"></script>
+  <script src="school-teachers.js?v=20260909h"></script>
+</body>
+</html>

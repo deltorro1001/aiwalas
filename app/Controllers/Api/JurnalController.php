@@ -1,0 +1,12 @@
+<?php
+namespace App\Controllers\Api;
+use App\Models\JurnalKelasModel;
+class JurnalController extends BaseApiController
+{
+ private JurnalKelasModel $model;public function __construct(){$this->model=new JurnalKelasModel();}
+ public function index(){ $q=$this->model->select('jurnal_kelas.*,kelas.nama_kelas,mata_pelajaran.nama_mata_pelajaran,guru.nama_lengkap AS nama_guru,pengguna.nama_lengkap AS nama_pembuat')->join('kelas','kelas.id=jurnal_kelas.kelas_id')->join('mata_pelajaran','mata_pelajaran.id=jurnal_kelas.mata_pelajaran_id')->join('guru','guru.id=jurnal_kelas.guru_id')->join('pengguna','pengguna.id=jurnal_kelas.dibuat_oleh');if($id=(int)$this->request->getGet('kelas_id'))$q->where('jurnal_kelas.kelas_id',$id);if($date=$this->request->getGet('tanggal'))$q->where('jurnal_kelas.tanggal',$date);return $this->respond(['data'=>$q->orderBy('tanggal','DESC')->orderBy('id','DESC')->paginate(25)]);}
+ public function create(){return $this->persist();}
+ public function update(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Jurnal tidak ditemukan.'],404);return $this->persist($id);}
+ public function delete(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Jurnal tidak ditemukan.'],404);$this->model->delete($id);return $this->respond(['ok'=>true]);}
+ private function persist(?int $id=null){$p=$this->payload();$e=$this->validatePayload($p,['kelas_id'=>'required|is_natural_no_zero','mata_pelajaran_id'=>'required|is_natural_no_zero','guru_id'=>'required|is_natural_no_zero','tanggal'=>'required|valid_date[Y-m-d]','materi'=>'required|max_length[10000]','catatan'=>'permit_empty|max_length[10000]','status'=>'required|in_list[Draft,Terbit,Dikoreksi]']);if($e)return $this->respond(['ok'=>false,'errors'=>$e],422);$d=['kelas_id'=>(int)$p['kelas_id'],'mata_pelajaran_id'=>(int)$p['mata_pelajaran_id'],'guru_id'=>(int)$p['guru_id'],'tanggal'=>$p['tanggal'],'materi'=>trim($p['materi']),'catatan'=>trim((string)($p['catatan']??''))?:null,'status'=>$p['status'],'dibuat_oleh'=>$this->currentUser()['id']];if($id)$this->model->update($id,$d);else$id=$this->model->insert($d,true);return $this->respond(['ok'=>true,'data'=>$this->model->find($id)],$this->request->getMethod()==='POST'?201:200);}
+}

@@ -1,0 +1,9 @@
+(function(){
+var role=document.getElementById('loginRole');if(role&&!role.querySelector('option[value=teacher]')){var o=document.createElement('option');o.value='teacher';o.textContent='Guru';role.insertBefore(o,role.querySelector('option[value=student]'))}
+var oldAccess=roleAccess;roleAccess=Object.assign({},oldAccess,{teacher:['dashboard','schedule','students','assessment','journal']});
+var oldApply=applyRoleAccess;applyRoleAccess=function(){oldApply();if(currentRole==='teacher'){document.querySelectorAll('[data-page]').forEach(function(x){x.style.display=['dashboard','schedule','students','assessment','journal'].indexOf(x.dataset.page)>=0?'flex':'none'});document.querySelectorAll('[data-student]').forEach(function(x){x.disabled=true;x.onclick=null;x.title='Detail siswa tidak tersedia untuk Guru'})}};
+function teacherLabel(){var x=document.querySelector('.workspace-switch small');if(currentRole==='teacher'&&x)x.textContent='Guru · 11PF1'}
+var oldFinish=finishLogin;finishLogin=function(user){currentRole=user.role;currentUser=user;return authRequest('api/bootstrap').then(function(data){applyBootstrapData(data);document.getElementById('loginScreen').classList.add('hidden');page='dashboard';applyRoleAccess();render()})};
+function loadTeacherPhones(){if(currentRole!=='teacher'||!activeClassId)return;authRequest('api/guru/siswa?kelas_id='+activeClassId).then(function(x){(x.data||[]).forEach(function(g){var s=students.find(function(v){return String(v[1])===String(g.nis)});if(s){s[5]=g.nomor_hp||'';s[6]=g.nomor_hp_orang_tua||''}});if(page==='students')render()}).catch(function(){})}
+var oldRender=window.render;window.render=function(){oldRender();if(currentRole==='teacher'){teacherLabel();loadTeacherPhones();document.querySelectorAll('[data-student]').forEach(function(x){x.disabled=true;x.onclick=null;x.title='Detail siswa tidak tersedia untuk Guru'})}};
+})();

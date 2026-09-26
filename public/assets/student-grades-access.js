@@ -1,0 +1,1 @@
+(function(){if(window.roleAccess)window.roleAccess.student=(window.roleAccess.student||[]).concat(['studentGrades']);var old=window.applyRoleAccess;window.applyRoleAccess=function(){old();if(typeof currentRole!=='undefined'&&currentRole==='student'){var b=document.querySelector('[data-page="studentGrades"]');if(b)b.style.display='flex'}}})();

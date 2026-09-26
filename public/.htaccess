@@ -1,0 +1,24 @@
+# AIWalas / CodeIgniter 4 - Apache rewrite
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    Options +FollowSymLinks
+    RewriteEngine On
+    RewriteBase /
+
+    # Jangan rewrite file/folder aset yang benar-benar ada
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Teruskan semua route aplikasi dan API ke front controller
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Pastikan header Authorization diteruskan ke PHP
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+# Nonaktifkan directory listing dan signature server
+ServerSignature Off

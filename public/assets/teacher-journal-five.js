@@ -1,0 +1,1 @@
+(function(){var old=window.render;window.render=function(){var r=old.apply(this,arguments);if(window.page==='journal')document.querySelectorAll('.teacher-journal-table tbody tr:nth-child(n+6)').forEach(function(x){x.remove()});return r}})();

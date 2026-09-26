@@ -1,0 +1,12 @@
+<?php
+namespace App\Controllers\Api;
+use App\Models\KomponenNilaiModel;
+class KomponenNilaiController extends BaseApiController
+{
+ private KomponenNilaiModel $model;public function __construct(){$this->model=new KomponenNilaiModel();}
+ public function index(){ $q=$this->model->orderBy('urutan');if($id=(int)$this->request->getGet('kelas_id'))$q->where('kelas_id',$id);if($id=(int)$this->request->getGet('mata_pelajaran_id'))$q->where('mata_pelajaran_id',$id);return $this->respond(['data'=>$q->findAll()]);}
+ public function create(){return $this->persist();}
+ public function update(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Komponen nilai tidak ditemukan.'],404);return $this->persist($id);}
+ public function delete(int $id){$row=$this->model->find($id);if(!$row)return $this->respond(['ok'=>false,'message'=>'Komponen nilai tidak ditemukan.'],404);if(db_connect()->table('nilai_siswa')->where('komponen_nilai_id',$id)->countAllResults()){$this->model->update($id,['aktif'=>0]);return $this->respond(['ok'=>true,'message'=>'Komponen dinonaktifkan karena sudah memiliki nilai.']);}$this->model->delete($id);return $this->respond(['ok'=>true]);}
+ private function persist(?int $id=null){$p=$this->payload();$rules=['kelas_id'=>'required|is_natural_no_zero','mata_pelajaran_id'=>'required|is_natural_no_zero','nama_komponen'=>'required|max_length[100]','jenis_komponen'=>'required|in_list[UH,Tugas]','urutan'=>'required|is_natural_no_zero','bobot'=>'required|decimal|greater_than_equal_to[0]|less_than_equal_to[100]','aktif'=>'permit_empty|in_list[0,1]'];$errors=$this->validatePayload($p,$rules);if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);$data=['kelas_id'=>(int)$p['kelas_id'],'mata_pelajaran_id'=>(int)$p['mata_pelajaran_id'],'nama_komponen'=>trim($p['nama_komponen']),'jenis_komponen'=>$p['jenis_komponen'],'urutan'=>(int)$p['urutan'],'bobot'=>(float)$p['bobot'],'aktif'=>(int)($p['aktif']??1)];$dupe=$this->model->where(['kelas_id'=>$data['kelas_id'],'mata_pelajaran_id'=>$data['mata_pelajaran_id'],'nama_komponen'=>$data['nama_komponen']]);if($id)$dupe->where('id !=',$id);if($dupe->first())return $this->respond(['ok'=>false,'message'=>'Nama komponen sudah digunakan.'],409);if($id)$this->model->update($id,$data);else$id=$this->model->insert($data,true);return $this->respond(['ok'=>true,'data'=>$this->model->find($id)],$id&&$this->response->getStatusCode()===201?201:($this->request->getMethod()==='POST'?201:200));}
+}

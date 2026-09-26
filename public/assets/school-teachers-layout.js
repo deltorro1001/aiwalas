@@ -1,0 +1,1 @@
+(function(){function adjust(){document.querySelectorAll('#schoolTeacherRows tr').forEach(function(row){var cell=row.cells[2];if(!cell||cell.dataset.wrapped)return;var text=cell.textContent.trim();if(text==='Manajemen Produksi, Naskah & Penyutradaraan'){cell.innerHTML='Manajemen Produksi,<br>Naskah &amp; Penyutradaraan';cell.dataset.wrapped='1'}})}setInterval(adjust,500)})();

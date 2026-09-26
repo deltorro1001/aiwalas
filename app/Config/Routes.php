@@ -13,7 +13,7 @@ $routes->get('api/auth/csrf', 'Auth::csrf');
 $routes->get('api/bootstrap', 'Api\BootstrapController::index', ['filter' => 'auth']);
 $routes->post('api/auth/login', 'Auth::attempt');
 $routes->post('api/auth/logout', 'Auth::logout');
-->post('api/auth/password', 'Auth::changePassword');
+$routes->post('api/auth/password', 'Auth::changePassword');
 
 // API data master; read access follows module needs, writes are restricted to Wali Kelas.
 $routes->get('api/tahun-ajaran', 'Api\TahunAjaranController::index', ['filter' => 'auth']);

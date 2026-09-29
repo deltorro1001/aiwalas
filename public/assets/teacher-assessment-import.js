@@ -16,8 +16,8 @@
       file.arrayBuffer().then(function(buffer){
         var workbook=XLSX.read(buffer,{type:'array'}), sheet=workbook.Sheets[workbook.SheetNames[0]], rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
         if(!rows.length)throw new Error('File Excel kosong.');
-        var norm=function(v){return String(v==null?'':v).toLowerCase().replace(/[\s_.-]/g,'')}, header=rows.shift().map(norm), find=function(names){return header.findIndex(function(v){return names.indexOf(v)>=0})};
-        var ni=find(['nis','nomorinduk','nomorinduksiswa']), ci=find([norm(column),norm(column.replace('Tugas','Tugas ')),norm(column.replace('UH','UH '))]); if(ci<0)ci=find(['nilai','score','value']); if(ci<0)ci=header.findIndex(function(v,i){return i!==ni});
+        var norm=function(v){return String(v==null?'':v).toLowerCase().replace(/[\s_.-]/g,'')}, headerIndex=rows.findIndex(function(row){return row.map(norm).some(function(h){return h==='nis'||h==='nomorinduk'||h==='nomorinduksiswa'||h!=='nisn'&&h.indexOf('nis')>=0})}), header=headerIndex>=0?rows.splice(0,headerIndex+1).pop().map(norm):[], find=function(names){return header.findIndex(function(v){return names.indexOf(v)>=0||v!=='nisn'&&names.some(function(n){return v.indexOf(n)>=0})})};
+        var ni=find(['nis','nomorinduk','nomorinduksiswa']);if(ni<0){var known={};(window.students||[]).forEach(function(st){known[String(st[1]).trim()]=1});for(var niCol=0;niCol<10&&ni<0;niCol++){var hits=rows.reduce(function(n,r){return n+(known[String(r[niCol]==null?'':r[niCol]).trim()]?1:0)},0);if(hits>0)ni=niCol}}var ci=find([norm(column),norm(column.replace('Tugas','Tugas ')),norm(column.replace('UH','UH '))]); if(ci<0)ci=find(['nilai','score','value']); if(ci<0)ci=header.findIndex(function(v,i){return i!==ni});
         if(ni<0||ci<0)throw new Error('Format Excel harus memiliki kolom NIS dan '+column+'.');
         var matched=0;
         rows.forEach(function(data){

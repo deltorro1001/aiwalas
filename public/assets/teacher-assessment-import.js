@@ -27,7 +27,7 @@
           var raw=data[ci]; if(raw===''||raw==null||isNaN(Number(raw)))return;
           target.value=Math.max(0,Math.min(100,Math.round(Number(raw)))); target.dispatchEvent(new Event('input',{bubbles:true})); matched++;
         });
-        toast(matched+' nilai '+column+' berhasil diimpor.');
+        sessionStorage.setItem('aiwalas.assessment.started','1');toast(matched+' nilai '+column+' berhasil diimpor.');
       }).catch(function(error){toast(error.message||'File Excel tidak dapat dibaca.')}).finally(function(){input.value=''});
     };
   }

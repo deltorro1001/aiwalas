@@ -1,17 +1,232 @@
-(function(){
-  var key='aiwalas.teacher.assessment.v4', old=window.render, parts=['UH1','UH2','UH3','UH4','UH5','UH6','ATS','ASS'];
-  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  function read(){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(e){return{}}}
-  function save(v){localStorage.setItem(key,JSON.stringify(v||{}))}
-  function num(v){if(v===null||v===undefined||String(v).trim()==='')return null;var n=Number(String(v).replace(',','.').replace(/[^0-9.-]/g,''));return isNaN(n)?null:Math.max(0,Math.min(100,n))}
-  function sid(v){return String(v==null?'':v).trim().replace(/\.0$/,'')}
-  function students(){return window.students||[]}
-  function activeParts(values){var out=[];parts.forEach(function(p){if(Object.keys(values).some(function(k){return num((values[k]||{})[p])!==null}))out.push(p)});return out}
-  function summary(v){var uh=parts.slice(0,6).map(function(p){return num(v[p])}).filter(function(x){return x!==null}),avg=uh.length?Math.round(uh.reduce(function(a,b){return a+b},0)/uh.length):null,ats=num(v.ATS),ass=num(v.ASS),nr=avg!==null&&ats!==null?(ass!==null?Math.round((3*avg+ats+2*ass)/6):Math.round((3*avg+ats)/4)):null;return {avg:avg,nr:nr}}
-  function table(){var values=read(),shown=activeParts(values),uhs=shown.filter(function(p){return p.indexOf('UH')===0}),hasUH=uhs.length>0,cols=uhs.slice();if(uhs.length>1)cols.push('Rerata UH');if(shown.indexOf('ATS')>=0)cols.push('ATS');if(shown.indexOf('ASS')>=0)cols.push('ASS');if(hasUH&&shown.indexOf('ATS')>=0)cols.push('NR');if(!cols.length)return '<div class="assessment-empty">Belum ada nilai. Klik Input Nilai untuk memulai.</div>';var body=students().map(function(s){var v=values[sid(s[1])]||{},sum=summary(v);return '<tr><td class="score-name"><strong>'+esc(s[0])+'</strong><small>NIS: '+esc(s[1])+'</small></td>'+cols.map(function(c){var x=c==='Rerata UH'?sum.avg:c==='NR'?sum.nr:num(v[c]);return '<td>'+(x===null?'—':esc(Math.round(x)))+'</td>'}).join('')+'</tr>'}).join('');return '<div class="score-sheet-wrap assessment-table-wrap"><table class="score-sheet assessment-table"><thead><tr><th>NAMA SISWA</th>'+cols.map(function(c){return '<th>'+esc(c)+'</th>'}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>'}
-  function parseFile(file,component,done){if(!window.XLSX){toast('Pembaca Excel belum tersedia.');return}file.arrayBuffer().then(function(buffer){var wb=XLSX.read(buffer,{type:'array'}),rows=[];wb.SheetNames.forEach(function(n){var r=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',range:0,raw:false});if(r.length>rows.length)rows=r});if(!rows.length)throw new Error('File Excel kosong.');var norm=function(v){return String(v==null?'':v).toLowerCase().replace(/[\s_.-]/g,'')},hi=rows.findIndex(function(r){return r.map(norm).some(function(h){return h==='nis'||h==='nomorinduk'||h==='noinduk'})}),header=hi>=0?rows.splice(0,hi+1).pop().map(norm):rows.shift().map(norm),find=function(names){return header.findIndex(function(h){return names.indexOf(h)>=0||names.some(function(n){return h.indexOf(n)>=0})})},ci=find([norm(component),norm(component.replace('UH','UH '))]);if(ci<0)ci=2+parts.indexOf(component);var out=read(),count=0;rows.forEach(function(row,i){var student=students()[i],k=student?sid(student[1]):sid(row[0]);if(!k)return;var n=num(row[ci]);if(n!==null){if(!out[k])out[k]={};out[k][component]=Math.round(n);count++}});done(out,count)}).catch(function(e){toast(e.message||'File Excel tidak dapat dibaca.')})}
-  function exportTemplate(){var headers=['NIS','Nama Siswa'].concat(parts),rows=[headers].concat(students().map(function(s){return [s[1],s[0]].concat(parts.map(function(){return ''}))}),url,a=document.createElement('a');try{if(window.XLSX){var wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Template Nilai');var bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.href=url;a.download='Template_Nilai_Aiwalas.xlsx'}else{throw new Error('XLSX unavailable')}}catch(e){var csv=rows.map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='Template_Nilai_Aiwalas.csv'}document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast('Template nilai berhasil diunduh.')}function input(){var values=read(),html='<form><label>Komponen Nilai<select id="assessmentV2Component">'+parts.map(function(p){return '<option>'+p+'</option>'}).join('')+'</select></label><div class="assessment-import-toolbar"><button type="button" class="outline-btn" id="assessmentV2Import">Choose File / Import</button><input id="assessmentV2File" type="file" accept=".xls,.xlsx,.csv" hidden></div><div class="score-sheet-wrap"><table class="score-sheet assessment-input-table"><thead><tr><th>Nama Siswa</th><th id="assessmentV2Head">UH1</th></tr></thead><tbody>'+students().map(function(s){return '<tr><td class="score-name"><strong>'+esc(s[0])+'</strong><small>NIS: '+esc(s[1])+'</small></td><td><input class="assessment-score" data-nis="'+esc(s[1])+'" id="assessmentV2-'+esc(s[1])+'" type="number" min="0" max="100" step="1" value="'+esc((values[sid(s[1])]||{}).UH1||'')+'"></td></tr>'}).join('')+'</tbody></table></div><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="assessmentV2Save">SAVE</button></div></form>';modal('Input Nilai','Pilih komponen, impor file, lalu simpan nilai.',html);var select=document.getElementById('assessmentV2Component'),head=document.getElementById('assessmentV2Head'),file=document.getElementById('assessmentV2File');function switchPart(){var c=select.value;head.textContent=c;students().forEach(function(s){var e=document.getElementById('assessmentV2-'+s[1]);if(e)e.value=(read()[sid(s[1])]||{})[c]||''})}select.onchange=switchPart;document.getElementById('assessmentV2Import').onclick=function(){file.click()};file.onchange=function(){var f=file.files&&file.files[0];if(!f)return;parseFile(f,select.value,function(out,count){save(out);students().forEach(function(s){var e=document.getElementById('assessmentV2-'+s[1]);if(e)e.value=(out[sid(s[1])]||{})[select.value]||''});toast(count+' nilai '+select.value+' terbaca.');file.value=''})};document.getElementById('assessmentV2Save').onclick=function(){var out=read(),c=select.value;students().forEach(function(s){var e=document.getElementById('assessmentV2-'+s[1]);if(!out[sid(s[1])])out[sid(s[1])]={};if(e&&e.value.trim()!=='')out[sid(s[1])][c]=Math.round(num(e.value));else delete out[sid(s[1])][c]});save(out);closeModal();render();toast('Nilai '+c+' berhasil disimpan.')}}
-  function page(){var subject=(document.getElementById('teacherSubjectSelect')||{}).value||'Mapel',year=(document.getElementById('academicYearSelect')||{}).value||'2026-2027',hasValues=activeParts(read()).length>0,content=hasValues?'<section class="panel table-panel"><div class="panel-head"><div><h2>Rekap Nilai</h2><p>Kolom muncul otomatis sesuai komponen yang telah diinput.</p></div><span class="pill teal">'+students().length+' siswa</span></div>'+table()+'</section>':'';return '<div class="page"><div class="page-heading"><div><div class="eyebrow">AKTIVITAS KELAS</div><h1>Nilai '+esc(subject)+'</h1><p>Input dan rekap nilai siswa Kelas 11PF1 - Tahun Ajaran '+esc(year)+'</p></div><div><button type="button" class="outline-btn" id="assessmentV2Export">Export Template</button><button type="button" class="primary-btn" id="assessmentV2Input">Input Nilai</button></div></div>'+content+'</div>'}
-  function render(){if(window.page==='assessment'||window.page==='grades'){document.getElementById('pageContent').innerHTML=page();document.getElementById('breadcrumbCurrent').textContent='Penilaian';document.querySelectorAll('.nav-item[data-page]').forEach(function(n){n.classList.toggle('active',n.dataset.page==='assessment')});var b=document.getElementById('assessmentV2Input');if(b)b.onclick=input;var e=document.getElementById('assessmentV2Export');if(e)e.onclick=exportTemplate;return}return old.apply(this,arguments)}
-  window.render=render;function normalizeAssessmentTable(){document.querySelectorAll('.assessment-table').forEach(function(t){var h=t.querySelector('thead tr');if(!h)return;var cells=Array.prototype.slice.call(h.children),names=cells.map(function(c){return c.textContent.trim().toUpperCase()}),order=names.map(function(n,i){return {n:n,i:i}}).sort(function(a,b){function rank(x){if(x.n==='NAMA SISWA')return 0;if(/^UH\d+$/.test(x.n))return 10+Number(x.n.slice(2));if(x.n==='RERATA UH')return 20;if(x.n==='ATS')return 30;if(x.n==='ASS')return 31;if(x.n==='NR'||x.n==='NILAI RAPORT')return 40;return 50}return rank(a.n)-rank(b.n)});if(order.every(function(x,i){return x.i===i}))return;var rows=t.querySelectorAll('tr');rows.forEach(function(row){var old=Array.prototype.slice.call(row.children);order.forEach(function(x){row.appendChild(old[x.i])})})})}setInterval(normalizeAssessmentTable,300);
+(function () {
+  var previousRender = window.render;
+  var components = ['UH1', 'UH2', 'UH3', 'UH4', 'UH5', 'UH6', 'ATS', 'ASS'];
+  var storagePrefix = 'aiwalas.assessment.v6';
+  var memoryValues = null;
+  var memoryComponent = null;
+
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+    });
+  }
+  function normalize(value) { return String(value == null ? '' : value).trim().replace(/[.]0$/, ''); }
+  function score(value) {
+    if (value == null || String(value).trim() === '') return null;
+    var parsed = Number(String(value).trim().replace(',', '.').replace(/[^0-9.-]/g, ''));
+    return isNaN(parsed) ? null : Math.max(0, Math.min(100, parsed));
+  }
+  function studentsList() { return window.students || []; }
+  function storageKey() {
+    var user = window.currentUser || {};
+    var identity = user.id || user.username || user.name || 'unknown-teacher';
+    return storagePrefix + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_');
+  }  function readValues() {
+    try { return JSON.parse(localStorage.getItem(storageKey()) || '{}'); }
+    catch (error) { return {}; }
+  }
+  function saveValues(values) { memoryValues = values || {}; localStorage.setItem(storageKey(), JSON.stringify(values || {})); }
+  function activeComponents(values) {
+    return components.filter(function (component) {
+      return Object.keys(values).some(function (nis) {
+        return score((values[nis] || {})[component]) !== null;
+      });
+    });
+  }
+  function calculate(row) {
+    var uhValues = components.slice(0, 6).map(function (component) {
+      return score(row[component]);
+    }).filter(function (value) { return value !== null; });
+    var average = uhValues.length
+      ? Math.round(uhValues.reduce(function (total, value) { return total + value; }, 0) / uhValues.length)
+      : null;
+    var ats = score(row.ATS);
+    var ass = score(row.ASS);
+    var report = null;
+    if (average !== null && ats !== null) {
+      report = ass === null
+        ? Math.round((3 * average + ats) / 4)
+        : Math.round((3 * average + ats + 2 * ass) / 6);
+    }
+    return { average: average, report: report };
+  }
+  function visibleColumns(values) {
+    var active = activeComponents(values);
+    var uhColumns = active.filter(function (component) { return /^UH[0-9]+$/.test(component); });
+    var columns = uhColumns.slice();
+    if (uhColumns.length >= 2) columns.push('Rerata UH');
+    if (active.indexOf('ATS') >= 0) columns.push('ATS');
+    if (active.indexOf('ASS') >= 0) columns.push('ASS');
+    if (uhColumns.length >= 1 && active.indexOf('ATS') >= 0) columns.push('Nilai Raport');
+    return columns;
+  }
+  function renderTable(values) {
+    var columns = visibleColumns(values);
+    if (!columns.length) return '';
+    var rows = studentsList().map(function (student) {
+      var scores = values[normalize(student[1])] || {};
+      var calculated = calculate(scores);
+      return '<tr><td class="score-name"><strong>' + esc(student[0]) + '</strong><small>NIS: ' + esc(student[1]) + '</small></td>' +
+        columns.map(function (column) {
+          var value = column === 'Rerata UH' ? calculated.average
+            : column === 'Nilai Raport' ? calculated.report : score(scores[column]);
+          return '<td>' + (value === null ? '&mdash;' : esc(Math.round(value))) + '</td>';
+        }).join('') + '</tr>';
+    }).join('');
+    return '<section class="panel table-panel"><div class="panel-head"><div><h2>Rekap Nilai</h2><p>Kolom tampil sesuai komponen yang sudah disimpan.</p></div><span class="pill teal">' + studentsList().length + ' siswa</span></div>' +
+      '<div class="score-sheet-wrap assessment-table-wrap"><table class="score-sheet assessment-table"><thead><tr><th>Nama Siswa</th>' +
+      columns.map(function (column) { return '<th>' + esc(column) + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div></section>';
+  }
+  function downloadTemplate() {
+    var rows = [['NIS', 'Nama Siswa'].concat(components)].concat(studentsList().map(function (student) {
+      return [student[1], student[0]].concat(components.map(function () { return ''; }));
+    }));
+    if (!window.XLSX) { toast('Pembuat Excel belum tersedia. Muat ulang halaman lalu coba lagi.'); return; }
+    try {
+      var workbook = XLSX.utils.book_new();
+      var sheet = XLSX.utils.aoa_to_sheet(rows);
+      sheet['!cols'] = [{ wch: 14 }, { wch: 34 }].concat(components.map(function () { return { wch: 10 }; }));
+      Object.keys(sheet).forEach(function (address) { if (address.charAt(0) !== '!') sheet[address].s = { protection: { locked: false, hidden: false } }; });
+      XLSX.utils.book_append_sheet(workbook, sheet, 'Template Nilai');
+      var bytes = XLSX.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
+      var url = URL.createObjectURL(new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'Template_Nilai_Aiwalas.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      toast('Template siap diedit. Jika Excel menampilkan Protected View, klik Enable Editing.');
+    } catch (error) { toast('Template gagal dibuat: ' + error.message); }
+  }
+  function readImport(file, component) {
+    return file.arrayBuffer().then(function (buffer) {
+      if (!window.XLSX) throw new Error('Pembaca Excel belum tersedia.');
+      var workbook = XLSX.read(buffer, { type: 'array' });
+      var bestRows = [];
+      workbook.SheetNames.forEach(function (name) {
+        var rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, defval: '', raw: false });
+        if (rows.length > bestRows.length) bestRows = rows;
+      });
+      if (!bestRows.length) throw new Error('File Excel kosong.');
+      var headerName = function (value) { return String(value == null ? '' : value).replace(/[\\uFEFF\\u200B]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+      var headerIndex = bestRows.findIndex(function (row) {
+        return row.some(function (cell) { var name = headerName(cell); return name === 'nis' || (name.indexOf('nis') >= 0 && name !== 'nisn'); });
+      });
+      if (headerIndex < 0) throw new Error('Template tidak memiliki kolom NIS.');
+      var headers = bestRows[headerIndex].map(headerName);
+      var nisIndex = headers.findIndex(function (name) { return name === 'nis' || (name.indexOf('nis') >= 0 && name !== 'nisn'); });
+      var componentIndex = headers.indexOf(headerName(component));
+      if (componentIndex < 0) throw new Error('Template tidak memiliki kolom ' + component + '.');
+      var knownNis = {};
+      studentsList().forEach(function (student) { knownNis[normalize(student[1])] = true; });
+      var draft = {};
+      var count = 0;
+      bestRows.slice(headerIndex + 1).forEach(function (row) {
+        var nis = normalize(row[nisIndex]);
+        var value = score(row[componentIndex]);
+        if (!knownNis[nis] || value === null) return;
+        draft[nis] = Math.round(value);
+        count++;
+      });
+      if (!count) throw new Error('Tidak ada nilai ' + component + ' yang cocok dengan NIS siswa.');
+      return { draft: draft, count: count };
+    });
+  }
+  function openInputModal() {
+    ['assessmentFileInput','assessmentExcelFile','importAssessment','importAssessmentExcel'].forEach(function (id) { var old = document.getElementById(id); if (old) old.remove(); });
+    var values = readValues();
+    var draft = {};
+    var selected = 'UH1';
+    var html = '<form><label>Komponen Nilai<select id="assessmentComponent">' +
+      components.map(function (component) { return '<option value="' + component + '">' + component + '</option>'; }).join('') +
+      '</select></label><div class="assessment-import-toolbar"><button type="button" class="outline-btn" id="chooseAssessmentFile">Choose File</button>' +
+      '<span id="assessmentFileName" class="stat-note">Belum ada file dipilih</span><input id="assessmentFile" type="file" accept=".xlsx,.xls" hidden></div>' +
+      '<div class="score-sheet-wrap"><table class="score-sheet assessment-input-table"><thead><tr><th>Nama Siswa</th><th id="assessmentInputHeader">UH1</th></tr></thead><tbody>' +
+      studentsList().map(function (student) {
+        return '<tr><td class="score-name"><strong>' + esc(student[0]) + '</strong><small>NIS: ' + esc(student[1]) + '</small></td>' +
+          '<td><input class="assessment-score" data-nis="' + esc(student[1]) + '" type="number" min="0" max="100" step="1"></td></tr>';
+      }).join('') + '</tbody></table></div><p class="login-error" id="assessmentError"></p><div class="modal-actions">' +
+      '<button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveAssessmentValues">SAVE</button></div></form>';
+    modal('Input Nilai', 'Pilih satu komponen, pilih template yang telah diisi, lalu tekan SAVE.', html);
+    var select = document.getElementById('assessmentComponent');
+    var fileInput = document.getElementById('assessmentFile');
+    var fileName = document.getElementById('assessmentFileName');
+    var errorBox = document.getElementById('assessmentError');
+    function fillInputs(component) {
+      document.getElementById('assessmentInputHeader').textContent = component;
+      document.querySelectorAll('.assessment-score').forEach(function (input) {
+        var nis = normalize(input.dataset.nis);
+        var value = Object.prototype.hasOwnProperty.call(draft, nis) ? draft[nis] : (values[nis] || {})[component];
+        input.value = value == null ? '' : value;
+      });
+    }
+    select.onchange = function () {
+      selected = select.value;
+      draft = {};
+      fileInput.value = '';
+      fileName.textContent = 'Belum ada file dipilih';
+      errorBox.textContent = '';
+      fillInputs(selected);
+    };
+    document.getElementById('chooseAssessmentFile').onclick = function () { fileInput.click(); };
+    fileInput.onchange = function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      fileName.textContent = file.name;
+      errorBox.textContent = '';
+      readImport(file, selected).then(function (result) {
+        draft = result.draft;
+        fillInputs(selected);
+        toast(result.count + ' nilai ' + selected + ' siap disimpan.');
+      }).catch(function (error) {
+        draft = {};
+        errorBox.textContent = error.message;
+        toast(error.message);
+      });
+    };
+    document.getElementById('saveAssessmentValues').onclick = function () {
+      var saved = 0;
+      document.querySelectorAll('.assessment-score').forEach(function (input) {
+        var nis = normalize(input.dataset.nis);
+        var value = score(input.value);
+        if (!values[nis]) values[nis] = {};
+        if (value === null) delete values[nis][selected];
+        else { values[nis][selected] = Math.round(value); saved++; }
+      });
+      if (!saved) { errorBox.textContent = 'Tidak ada nilai yang dapat disimpan.'; return; }
+      saveValues(values);
+      memoryValues = values;
+      closeModal();
+      renderAssessment();
+      if (!document.querySelector('#pageContent .assessment-table') && activeComponents(values).length) { setTimeout(renderAssessment, 0); }
+      toast(saved + ' nilai ' + selected + ' berhasil disimpan.');
+    };
+    fillInputs(selected);
+  }
+  function renderAssessment() {
+    var subjectSelect = document.getElementById('teacherSubjectSelect');
+    var yearSelect = document.getElementById('academicYearSelect');
+    var subject = subjectSelect ? subjectSelect.value : 'Mata Pelajaran';
+    var year = yearSelect ? yearSelect.value : '2026-2027';
+    var values = readValues();
+    document.getElementById('pageContent').innerHTML = '<div class="page"><div class="page-heading"><div><div class="eyebrow">AKTIVITAS KELAS</div>' +
+      '<h1>Nilai ' + esc(subject) + '</h1><p>Input dan rekap nilai siswa - Tahun Ajaran ' + esc(year) + '</p></div>' +
+      '<div class="assessment-page-actions"><button type="button" class="outline-btn" id="exportAssessmentTemplate">Export Template</button>' +
+      '<button type="button" class="primary-btn" id="openAssessmentInput">Input Nilai</button></div></div>' + renderTable(values) + '</div>';
+    var breadcrumb = document.getElementById('breadcrumbCurrent');
+    if (breadcrumb) breadcrumb.textContent = 'Penilaian';
+    document.querySelectorAll('.nav-item[data-page]').forEach(function (item) {
+      item.classList.toggle('active', item.dataset.page === 'assessment');
+    });
+    document.getElementById('exportAssessmentTemplate').onclick = downloadTemplate;
+    document.getElementById('openAssessmentInput').onclick = openInputModal;
+  }
+  window.renderAssessmentPage = renderAssessment;
+  window.render = function () {
+    if (window.page === 'assessment') { renderAssessment(); return; }
+    return previousRender.apply(this, arguments);
+  };
 })();

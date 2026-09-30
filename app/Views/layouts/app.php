@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20260929-final-table') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20260930-assessment-final') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
 <style>.grid-stats .absence-summary-card{overflow:visible!important}.grid-stats .absence-summary-card .absence-summary-list{display:grid!important;grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;position:relative!important;z-index:3!important}.grid-stats .absence-summary-card .absence-summary-row{display:flex!important;visibility:visible!important;opacity:1!important;min-height:10px!important}</style>
@@ -19,7 +19,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20260926-hide-absence-names') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20260930-report-ledger-tab') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20260925-absence-note1') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>
@@ -58,7 +58,7 @@
     event.stopImmediatePropagation();
     if(typeof window.render!=='function'){window.alert('AIWalas belum selesai memuat. Silakan tunggu sebentar.');return}
     window.page=button.dataset.page;
-    try{window.render()}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
+    try{if(button.dataset.page==='assessment'&&typeof window.renderAssessmentPage==='function'){window.renderAssessmentPage()}else{window.render()}}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
    },true);
   });
  }
@@ -66,10 +66,10 @@
  if(window.MutationObserver)new MutationObserver(bindWorkspaceNavigation).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
-<script src='<?= base_url('assets/teacher-assessment-ui.js?v=20260929-order-fix') ?>'></script>
-<script src='<?= base_url('assets/teacher-assessment-save.js?v=20260923-nis') ?>'></script>
-<script src='<?= base_url('assets/teacher-assessment-combined.js?v=20260920-clearable') ?>'></script>
-<script src='<?= base_url('assets/teacher-assessment-import.js?v=20260929-xls-fallback') ?>'></script>
+
+
+
+
 
 <script src='<?= base_url('assets/teacher-journal-ui.js?v=20260926-shared-journal') ?>'></script>
 <script src='<?= base_url('assets/settings-page.js?v=20260926-password-form') ?>'></script>
@@ -106,7 +106,8 @@
       .finally(function(){if(button){button.disabled=false;button.textContent='Masuk ke AIWalas'}});
   },true);
 })();
-</script><script src='<?= base_url('assets/assessment-redesign.js?v=20260929-v11-order') ?>'></script>
+</script><script src='<?= base_url('assets/assessment-redesign.js?v=20260930-nr-final') ?>'></script>
+<script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 </body>
 </html>
 

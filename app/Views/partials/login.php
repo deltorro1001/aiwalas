@@ -1,7 +1,7 @@
 <section class="login-screen" id="loginScreen">
     <div class="login-card">
       <div class="login-logo-wrap"><img class="login-logo" src="<?= base_url('assets/logo-gold.png') ?>" alt="AIWalas"></div>
-      <div class="eyebrow">Portal kelas 11PF1</div>
+      <div class="eyebrow">Portal kelas 11PF123</div>
       <h1>Selamat datang kembali</h1>
       <p class="login-subtitle">Masuk untuk mengakses workspace AIWalas.</p>
       <form id="loginForm">

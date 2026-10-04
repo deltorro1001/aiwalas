@@ -106,7 +106,11 @@
       .finally(function(){if(button){button.disabled=false;button.textContent='Masuk ke AIWalas'}});
   },true);
 })();
+<<<<<<< HEAD
 </script><script src='<?= base_url('assets/assessment-redesign.js?v=20261001-main-all-components') ?>'></script>
+=======
+</script><script src='<?= base_url('assets/assessment-redesign.js?v=20260930-nr-final') ?>'></script>
+>>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 </body>
 </html>

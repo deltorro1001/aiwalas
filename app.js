@@ -1,149 +1,2978 @@
-var students=[
-['ABDULLAH SYAFI\'IE','12985','Hadir','AS','L'],['AKHMAD AKMAL HIDAYATULLOH','12994','Hadir','AH','L'],['ALISAH PUTRI RAMADANI','12997','Hadir','AP','P'],['AURELIA ASSYIFA','13012','Hadir','AA','P'],['BINTANG AL FARISI','13019','Hadir','BA','L'],['BRAMANTIO PRATAMA','13020','Hadir','BP','L'],['DIN MUNIF HIDAYAT','13034','Hadir','DM','L'],['FARDHAN NUR ALAMSYAH','13041','Hadir','FA','L'],['HAIKAL MAHENDRA','13047','Hadir','HM','L'],['KANAYA SAFA AULIA','13062','Hadir','KS','P'],['KAYLA ARDELIA','13064','Hadir','KA','P'],['KHAIRA AURELIA PUTRI','13069','Hadir','KA','P'],['KHAIRATUNNISA AZMI KIRANA','13070','Hadir','KA','P'],['KIRANA ARLEEN DARASATI','13074','Hadir','KA','P'],['MALIKHA INTAN MADINAH','13079','Hadir','MI','P'],['MOHAMMAD REZA PRATAMA','13084','Hadir','MR','L'],['MOHAMMAD RIZKY','13085','Hadir','MR','L'],['MOURIN MACHRANI','13086','Hadir','MM','P'],['MUHAMAD FURQON PANATAGAMA','13088','Hadir','MF','L'],['MUHAMMAD DUDE SATRIYA','13093','Hadir','MD','L'],['MUHAMMAD FAQIH IHSAN','13096','Hadir','MF','L'],['MUHAMMAD RAYI AL GHIFARI','13101','Hadir','MR','L'],['MUHAMMAD RIZKI FAHREZI','13104','Hadir','MR','L'],['NAMIRA SYAWAL RAHMA','13116','Hadir','NS','P'],['PRITA AMALIA MINANDA','13130','Hadir','PA','P'],['PUTRI AISYAH APRILLIA','13133','Hadir','PA','P'],['RAFA DIMAR PRAMANA','13138','Hadir','RP','L'],['RICKY FAREL RAMADHAN','13146','Hadir','RF','L'],['RIZKI FATURRAHMAN','13151','Hadir','RF','L'],['SERUNI ALETHA KAMI DJUHAENI','13160','Hadir','SA','P'],['SYAFII QOTU AQIILAH QURROTU AINII','13176','Hadir','SQ','P'],['THALITA ZAFIRAH ISNAINI','13183','Hadir','TZ','P'],['TIMOTHY FRANS WURI','13186','Hadir','TF','L'],['WENNY ALISTANTIA WIJAYA','13190','Hadir','WA','P'],['ZEVANYA PUTRI RAMADHANI','13198','Hadir','ZP','P']];
-var studentContacts={
-'12985':{phone:'081386616665',parentPhone:'08118304400'},'12994':{phone:'085173228971',parentPhone:'087880064365'},'12997':{phone:'085731728459',parentPhone:'085775456717'},'13012':{phone:'088214344747',parentPhone:'081315198637'},'13019':{phone:'085777264246',parentPhone:'085781829985'},'13020':{phone:'085858592924',parentPhone:'085786993400'},'13034':{phone:'081315176937',parentPhone:'087722786042'},'13041':{phone:'085774306504',parentPhone:'085717807701'},'13047':{phone:'08152554993',parentPhone:'087811054786'},'13062':{phone:'085781131682',parentPhone:'085772275506'},'13064':{phone:'085775447989',parentPhone:'081959215698'},'13069':{phone:'081389208126',parentPhone:''},'13070':{phone:'081298771020',parentPhone:'081288887383'},'13074':{phone:'085814422087',parentPhone:'085711063048'},'13079':{phone:'081916743732',parentPhone:'0895629198162'},'13084':{phone:'085814422216',parentPhone:'087722785449'},'13085':{phone:'085816760439',parentPhone:'081384095025'},'13086':{phone:'088976098750',parentPhone:'081213049881'},'13088':{phone:'085781175525',parentPhone:'081517475605'},'13093':{phone:'08812145316',parentPhone:'085776777442'},'13096':{phone:'0895605080002',parentPhone:'083870001822'},'13101':{phone:'085219228325',parentPhone:'083891918409'},'13104':{phone:'089524972747',parentPhone:'0895384796940'},'13116':{phone:'085891172231',parentPhone:'085882877189'},'13130':{phone:'088213656781',parentPhone:'08817584416'},'13133':{phone:'085772005814',parentPhone:'085882921744'},'13138':{phone:'085782789194',parentPhone:'085664346246'},'13146':{phone:'085693003371',parentPhone:'082113657788'},'13151':{phone:'085921560866',parentPhone:'081776709984'},'13160':{phone:'082124992529',parentPhone:'088219426255'},'13176':{phone:'085711169804',parentPhone:'085716650787'},'13183':{phone:'085892434800',parentPhone:'085714063237'},'13186':{phone:'081389187292',parentPhone:'085163691572'},'13190':{phone:'083805531237',parentPhone:'085765855593'},'13198':{phone:'085714519540',parentPhone:'0895352815641'}};
-students.forEach(function(s){var contact=studentContacts[s[1]]||{};s[5]=contact.phone||'';s[6]=contact.parentPhone||''});
-students.forEach(function(s){s[2]='Hadir'});
-students[14][2]='Hadir';
-students[17][2]='Sakit';
-students[1][2]='Sakit';
-students[8][2]='Sakit';
-students[11][2]='Sakit';
-students[30][2]='Sakit';
-students[34][2]='Sakit';
-students[32][2]='Hadir';
-var page='dashboard',names={dashboard:'Beranda',students:'Daftar Siswa',attendance:'Absensi Harian',schedule:'Jadwal Kelas',journal:'Jurnal Kelas',reports:'Laporan Wali Kelas',teachers:'Guru Mapel',schoolTeachers:'Daftar Guru SMKN 19',grades:'Ledger Nilai',communication:'Komunikasi',remedial:'Remedial & Tugas',notifications:'Notifikasi'};
-var currentUser=null,currentRole=null;
-var roleAccess={walas:['dashboard','students','attendance','schedule','journal','reports','teachers','schoolTeachers','grades','communication','remedial','notifications'],assistant:['dashboard','attendance','schedule','journal'],student:['dashboard','attendance'],guest:['dashboard']};
-function initials(s){return s.split(' ').map(function(x){return x[0]}).slice(0,2).join('')}
-function studentDetailText(student){var d=studentDetails&&studentDetails[student[1]];if(!d)return '<strong>'+student[0]+'</strong><br>NIS: '+student[1]+'<br>Detail belum diisi.';var fields=[['NISN','NISN'],['Jenis Kelamin','Jenis Kelamin'],['Tempat Lahir','Tempat Lahir'],['Tanggal Lahir','Tanggal Lahir'],['Agama','Agama'],['Alamat','Alamat Lengkap'],['Tempat tinggal','Status tempat tinggal saat ini'],['Transportasi','Transportasi utama ke sekolah'],['Nama ayah','Nama Ayah'],['Nama ibu','Nama Ibu'],['Nama wali','Nama wali (jika tinggal bersama wali) '],['Hubungan wali','Hubungan wali dengan siswa'],['Saudara kandung','Jumlah saudara kandung'],['Anak ke','Anak ke '],['Pekerjaan ayah','Pekerjaan ayah'],['Pekerjaan ibu','Pekerjaan ibu'],['Bantuan pendidikan','Apakah siswa menerima bantuan pendidikan?'],['Penyakit bawaan','Apakah siswa mengidap penyakit/penyakit bawaan'],['Catatan penyakit','Jika jawaban YA, penyakit apa yang harus diketahui Wali Kelas'],['Hobi/kegiatan','Hobi/kegiatan yang sering dilakukan'],['Prestasi/kelebihan','Prestasi atau kelebihan yang pernah diraih ']];return '<strong>'+student[0]+'</strong><br>NIS: '+student[1]+'<div class="student-detail-grid">'+fields.map(function(field){var value=String(d[field[1]]||'').trim()||'—';return '<div><small>'+field[0]+'</small><span>'+value+'</span></div>'}).join('')+'</div>'}
-function statusClass(s){return s==='Hadir'?'present':s==='Terlambat'?'late':s==='Sakit'?'sick':s==='Izin'?'permission':s==='Menunggu keterangan'?'waiting':'absent'}
-function stat(label,num,note,icon,color){return '<div class="stat-card"><div class="stat-top"><span class="stat-label">'+label+'</span><span class="stat-icon '+color+'-bg">'+icon+'</span></div><div class="stat-number">'+num+'</div><div class="stat-note">'+note+'</div></div>'}
-function head(k,t,d,a){return '<div class="page-heading"><div><div class="eyebrow">'+k+'</div><h1>'+t+'</h1><p>'+d+'</p></div>'+(a||'')+'</div>'}
-function dashboard(){return '<div class="page">'+head('Senin, 14 Oktober 2024','Selamat pagi, Pak Sumantoro <span style="color:var(--amber)">✦</span>','Pantauan kondisi kelas 11PF1 hari ini. Berikut ringkasan yang perlu Anda perhatikan.','<button class="date-control">◷  Senin, 14 Okt 2024　⌄</button>')+'<div class="grid-stats">'+stat('Total siswa','35','Kelas 11PF1','♙','teal')+stat('Hadir hari ini','28','80% dari total siswa','✓','teal')+stat('Terlambat','3','Notifikasi orang tua terkirim','◷','amber')+stat('Tidak hadir (Sakit/Izin)','1','Menunggu keterangan','!','coral')+'</div><div class="dashboard-grid"><section class="panel"><div class="panel-head"><div><h2>Rekap absensi minggu ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart">'+[['Sen',78,8,2],['Sel',84,5,1],['Rab',88,3,1],['Kam',82,6,2],['Jum',80,4,1]].map(function(x){return '<div class="bar-group"><div class="bar" style="height:'+x[1]+'%"></div><div class="bar late" style="height:'+(x[2]*3)+'%"></div><div class="bar absent" style="height:'+(x[3]*5)+'%"></div><span class="bar-label">'+x[0]+'</span></div>'}).join('')+'</div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></section><section class="panel"><div class="panel-head"><div><h2>Aktivitas terbaru</h2><p>Pembaruan real-time kelas</p></div><button class="panel-action" data-page="notifications">Semua →</button></div><div class="activity-list"><div class="activity"><span class="activity-icon teal-bg">✓</span><div class="activity-text"><strong>Kegiatan sekolah</strong> Hari ini awal kembali masuk sekolah dan belajar seperti biasa.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">♡</span><div class="activity-text"><strong>Malikha Intan Madinah</strong> sakit dan tidak masuk sekolah.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Pesan orangtua Malikha</strong> diterima: sakit gigi dan izin tidak masuk sekolah.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Lima pesan orangtua diterima</strong> Zevanya Putri Ramadhani, Khaira Aurelia Putri, Haikal Mahendra, Akhmad Akmal Hidayatulloh, dan Syafii Qotu Aqiilah Qurrotu Ainii dilaporkan sakit dan tidak masuk sekolah.<span class="activity-time">Hari ini · Komunikasi WhatsApp</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Pesan orangtua Mourin</strong> “Assalamualaikun, maaf Pak, hari ini Mourin tidak bisa masuk karena sedang kurang enak badan. Terima kasih 🙏” <span class="activity-time">Hari ini · Komunikasi WhatsApp</span></div></div><div class="activity"><span class="activity-icon amber-bg">▤</span><div class="activity-text"><strong>Pak Putu Arya Ranesda</strong> belum mengonfirmasi jadwal.<span class="activity-time">Hari ini</span></div></div></div></section></div><div class="lower-grid"><section class="panel"><div class="panel-head"><div><h2>Perlu perhatian</h2><p>Siswa dengan skor pelanggaran yang perlu ditindaklanjuti</p></div><button class="panel-action" data-page="students">Lihat semua →</button></div><div class="risk-list">'+[['ABDULLAH SYAFI\'IE','3× terlambat','100 poin','coral'],['AKHMAD AKMAL HIDAYATULLOH','2× terlambat','60 poin','amber'],['ALISAH PUTRI RAMADANI','1× terlambat','30 poin','amber']].map(function(x){return '<div class="risk-row"><span class="risk-avatar">'+initials(x[0])+'</span><div class="risk-info"><strong>'+x[0]+'</strong><small>'+x[1]+'</small></div><span class="pill '+x[3]+'">'+x[2]+'</span></div>'}).join('')+'</div></section><section class="panel"><div class="panel-head"><div><h2>Pesan orang tua terbaru</h2><p>AIWalas membantu mengelompokkan pesan</p></div><button class="panel-action" data-page="communication">Buka inbox →</button></div><div class="message-card"><strong>Orangtua MALIKHA INTAN MADINAH</strong><br>“Assalamualaikum Wr. Wb<br>Mohon maaf pak, Malikha intan madinah hari ini izin tidak masuk sekolah karena sakit gigi, terimakasih 🙏”<div class="message-footer"><span class="avatar avatar-teal">AI</span> Terklasifikasi: <span class="pill teal">Sakit</span><span>· Hari ini</span></div></div></section></div></div>'}
-function rows(list){return list.map(function(s,i){return '<tr><td><div class="student-cell"><span class="avatar avatar-teal">'+s[3]+'</span><strong>'+s[0]+'</strong></div></td><td>'+s[1]+'</td><td>'+s[4]+'</td><td>'+s[5]+'</td><td>'+s[6]+'</td><td><span class="status '+statusClass(s[2])+'">'+s[2]+'</span></td><td>'+(i===8?'<span class="pill coral">100 poin</span>':i===2||i===18?'<span class="pill amber">60 poin</span>':'<span style="color:#a0aab5">—</span>')+'</td><td><button class="panel-action" data-student="'+s[0]+'">Detail →</button></td></tr>'}).join('')}
-function studentsPage(){return '<div class="page">'+head('Data kelas','Daftar siswa','35 siswa · Kelas 11PF1 · Tahun ajaran 2024/2025','<button class="primary-btn" id="addStudent">＋ Tambah siswa</button>')+'<div class="toolbar"><label class="search-box">⌕ <input id="studentSearch" placeholder="Cari nama atau NIS..."></label><button class="filter-btn">Status: Semua　⌄</button><button class="filter-btn">Urutkan　⌄</button></div><section class="panel table-panel"><div class="panel-head"><div><h2>Semua siswa</h2><p>Terakhir diperbarui hari ini, 06.42 WIB</p></div><button class="outline-btn">↓ Export</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>NIS</th><th>Jenis kelamin</th><th>HP siswa</th><th>HP orangtua</th><th>Status absensi</th><th>Poin keterlambatan</th><th></th></tr></thead><tbody id="studentRows">'+rows(students)+'</tbody></table></div></section></div>'}
-function attendance(){var a=students,counts=statusCounts(),absent=(counts.Sakit||0)+(counts.Izin||0)+(counts['Menunggu keterangan']||0),present=Math.round(((counts.Hadir||0)/counts.total)*100);return '<div class="page">'+head('Absensi','Absensi harian','Senin, 14 Oktober 2024 · Absensi dibuka pukul 05.30 WIB','<button class="primary-btn" id="scanQr">▣ Simulasi scan QR</button>')+'<div class="grid-stats">'+stat('Hadir',counts.Hadir||0,present+'% siswa','✓','teal')+stat('Terlambat',counts.Terlambat||0,'Notifikasi terkirim','◷','amber')+stat('Tidak hadir sementara',absent,'Sakit, izin, atau menunggu keterangan','!','coral')+stat('Belum scan',0,'Semua status sudah tercatat','⌁','purple')+'</div><section class="panel table-panel"><div class="panel-head"><div><h2>Status scan hari ini</h2><p>Data status siswa · Pembaruan otomatis</p></div><button class="filter-btn">Semua status　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Waktu scan</th><th>Status</th><th>Notifikasi orang tua</th><th>Aksi</th></tr></thead><tbody>'+a.map(function(s,i){return '<tr><td><div class="student-cell"><span class="avatar avatar-teal">'+s[3]+'</span><strong>'+s[0]+'</strong></div></td><td>'+(s[2]==='Sakit'||s[2]==='Izin'||s[2]==='Menunggu keterangan'?'—':'05:'+(38+i%22))+'</td><td><span class="status '+statusClass(s[2])+'">'+s[2]+'</span></td><td>'+(s[2]==='Terlambat'?'<span class="pill teal">Terkirim</span>':s[2]==='Sakit'||s[2]==='Izin'?'<span class="pill amber">Dicatat</span>':'<span style="color:#a0aab5">—</span>')+'</td><td><button class="panel-action" data-correct="'+s[0]+'">Koreksi</button></td></tr>'}).join('')+'</tbody></table></div></section></div>'}
-function schedule(){return '<div class="page">'+head('Aktivitas kelas','Jadwal & konfirmasi guru','Pantau kesiapan guru mata pelajaran hari ini','<button class="outline-btn">▦ Kelola jadwal</button>')+'<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Senin, 14 Oktober</h2><p>Jadwal kelas 11PF1</p></div><span class="pill teal">4 jadwal</span></div><div class="schedule-list">'+[['07.00—08.30','Bahasa Inggris','Bu Sari Wulandari','Siap mengajar',''],['08.30—10.00','Matematika','Pak Budi Santoso','Belum konfirmasi','pending'],['10.15—11.45','Produktif PF','Pak Arif Nugroho','Sudah sampai kelas',''],['12.30—14.00','Seni Budaya','Bu Rina Kurnia','Jadwal berubah','pending']].map(function(x){return '<div class="schedule-item"><span class="schedule-time">'+x[0]+'</span><i class="schedule-bar"></i><div class="schedule-info"><strong>'+x[1]+'</strong><small>'+x[2]+'</small></div><span class="teacher-status '+x[4]+'">'+x[3]+'</span></div>'}).join('')+'</div></section><section class="ai-card"><div class="eyebrow">AIWalas membantu</div><h2>Pengingat yang tepat waktu.</h2><p>Pengingat kedua untuk Pak Budi akan dikirim 10 menit sebelum kelas dimulai. Jika belum ada respons hingga 10 menit setelah mulai, wali kelas dan admin akan mendapat notifikasi.</p><div class="ai-prompt">⏱ Pengingat berikutnya <strong>07.50 WIB</strong><br><span style="color:#7890a4">Matematika · Pak Budi Santoso</span></div></section></div><section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Tugas pengganti</h2><p>Menunggu persetujuan admin akademik</p></div><span class="pill amber">1 menunggu</span></div><div class="alert-box"><strong>Produktif PF · Pak Arif Nugroho</strong>Materi latihan desain poster — dikumpulkan Rabu, 16 Oktober. Informasi akademik siap diteruskan ke WAG kelas.<br><button class="outline-btn" style="margin-top:10px" id="approveTask">Tinjau & setujui</button></div></section></div>'}
-var teacherContacts={
-'PAI':{name:'Lutfi Faridil Aftros, S.Pd.I',phone:'089637070988'},
-'PPKN':{name:'Ngatman, S.Pd.',phone:'082122685222'},
-'Bahasa Indonesia':{name:'Erna Cahyani, S.Pd.',phone:'087776504538'},
-'Olahraga':{name:'Putu Arya Ranesda, S.Kom.',phone:'081288388842'},
-'Sejarah':{name:'Englena Nastaria Purba, S.Pd.',phone:'081260327672'},
-'Kokurikuler':{name:'Englena Nastaria Purba, S.Pd.',phone:'081260327672'},
-'Muatan Lokal':{name:'Englena Nastaria Purba, S.Pd.',phone:'081260327672'},
-'Matematika':{name:'Robert Henry Hutapea, S.Si., M.Pd.',phone:'081318903235'},
-'Bahasa Inggris':{name:'Ika Inayah, S.Pd.',phone:'085780710084'},
-'Manajemen Produksi':{name:'Sumantoro Kasdhani, S.Kom., M.I.Kom.',phone:'081908952660'},
-'Naskah & Penyutradaraan':{name:'Sumantoro Kasdhani, S.Kom., M.I.Kom.',phone:'081908952660'},
-'Tata Cahaya':{name:'Wahyu Lukman Hakim, S.Kom.',phone:'085784968990'},
-'Tata Kamera':{name:'Putu Arya Ranesda, S.Kom.',phone:'081288388842'},
-'Tata Artistik':{name:'Ruby Eka Prawira, S.Pd.',phone:'081293339968'},
-'PKK':{name:'Nani Aminah, SE.',phone:'081210802912'}
+var students = [
+  ["ABDULLAH SYAFI'IE", "12985", "Hadir", "AS", "L"],
+  ["AKHMAD AKMAL HIDAYATULLOH", "12994", "Hadir", "AH", "L"],
+  ["ALISAH PUTRI RAMADANI", "12997", "Hadir", "AP", "P"],
+  ["AURELIA ASSYIFA", "13012", "Hadir", "AA", "P"],
+  ["BINTANG AL FARISI", "13019", "Hadir", "BA", "L"],
+  ["BRAMANTIO PRATAMA", "13020", "Hadir", "BP", "L"],
+  ["DIN MUNIF HIDAYAT", "13034", "Hadir", "DM", "L"],
+  ["FARDHAN NUR ALAMSYAH", "13041", "Hadir", "FA", "L"],
+  ["HAIKAL MAHENDRA", "13047", "Hadir", "HM", "L"],
+  ["KANAYA SAFA AULIA", "13062", "Hadir", "KS", "P"],
+  ["KAYLA ARDELIA", "13064", "Hadir", "KA", "P"],
+  ["KHAIRA AURELIA PUTRI", "13069", "Hadir", "KA", "P"],
+  ["KHAIRATUNNISA AZMI KIRANA", "13070", "Hadir", "KA", "P"],
+  ["KIRANA ARLEEN DARASATI", "13074", "Hadir", "KA", "P"],
+  ["MALIKHA INTAN MADINAH", "13079", "Hadir", "MI", "P"],
+  ["MOHAMMAD REZA PRATAMA", "13084", "Hadir", "MR", "L"],
+  ["MOHAMMAD RIZKY", "13085", "Hadir", "MR", "L"],
+  ["MOURIN MACHRANI", "13086", "Hadir", "MM", "P"],
+  ["MUHAMAD FURQON PANATAGAMA", "13088", "Hadir", "MF", "L"],
+  ["MUHAMMAD DUDE SATRIYA", "13093", "Hadir", "MD", "L"],
+  ["MUHAMMAD FAQIH IHSAN", "13096", "Hadir", "MF", "L"],
+  ["MUHAMMAD RAYI AL GHIFARI", "13101", "Hadir", "MR", "L"],
+  ["MUHAMMAD RIZKI FAHREZI", "13104", "Hadir", "MR", "L"],
+  ["NAMIRA SYAWAL RAHMA", "13116", "Hadir", "NS", "P"],
+  ["PRITA AMALIA MINANDA", "13130", "Hadir", "PA", "P"],
+  ["PUTRI AISYAH APRILLIA", "13133", "Hadir", "PA", "P"],
+  ["RAFA DIMAR PRAMANA", "13138", "Hadir", "RP", "L"],
+  ["RICKY FAREL RAMADHAN", "13146", "Hadir", "RF", "L"],
+  ["RIZKI FATURRAHMAN", "13151", "Hadir", "RF", "L"],
+  ["SERUNI ALETHA KAMI DJUHAENI", "13160", "Hadir", "SA", "P"],
+  ["SYAFII QOTU AQIILAH QURROTU AINII", "13176", "Hadir", "SQ", "P"],
+  ["THALITA ZAFIRAH ISNAINI", "13183", "Hadir", "TZ", "P"],
+  ["TIMOTHY FRANS WURI", "13186", "Hadir", "TF", "L"],
+  ["WENNY ALISTANTIA WIJAYA", "13190", "Hadir", "WA", "P"],
+  ["ZEVANYA PUTRI RAMADHANI", "13198", "Hadir", "ZP", "P"],
+];
+var studentContacts = {
+  12985: { phone: "081386616665", parentPhone: "08118304400" },
+  12994: { phone: "085173228971", parentPhone: "087880064365" },
+  12997: { phone: "085731728459", parentPhone: "085775456717" },
+  13012: { phone: "088214344747", parentPhone: "081315198637" },
+  13019: { phone: "085777264246", parentPhone: "085781829985" },
+  13020: { phone: "085858592924", parentPhone: "085786993400" },
+  13034: { phone: "081315176937", parentPhone: "087722786042" },
+  13041: { phone: "085774306504", parentPhone: "085717807701" },
+  13047: { phone: "08152554993", parentPhone: "087811054786" },
+  13062: { phone: "085781131682", parentPhone: "085772275506" },
+  13064: { phone: "085775447989", parentPhone: "081959215698" },
+  13069: { phone: "081389208126", parentPhone: "" },
+  13070: { phone: "081298771020", parentPhone: "081288887383" },
+  13074: { phone: "085814422087", parentPhone: "085711063048" },
+  13079: { phone: "081916743732", parentPhone: "0895629198162" },
+  13084: { phone: "085814422216", parentPhone: "087722785449" },
+  13085: { phone: "085816760439", parentPhone: "081384095025" },
+  13086: { phone: "088976098750", parentPhone: "081213049881" },
+  13088: { phone: "085781175525", parentPhone: "081517475605" },
+  13093: { phone: "08812145316", parentPhone: "085776777442" },
+  13096: { phone: "0895605080002", parentPhone: "083870001822" },
+  13101: { phone: "085219228325", parentPhone: "083891918409" },
+  13104: { phone: "089524972747", parentPhone: "0895384796940" },
+  13116: { phone: "085891172231", parentPhone: "085882877189" },
+  13130: { phone: "088213656781", parentPhone: "08817584416" },
+  13133: { phone: "085772005814", parentPhone: "085882921744" },
+  13138: { phone: "085782789194", parentPhone: "085664346246" },
+  13146: { phone: "085693003371", parentPhone: "082113657788" },
+  13151: { phone: "085921560866", parentPhone: "081776709984" },
+  13160: { phone: "082124992529", parentPhone: "088219426255" },
+  13176: { phone: "085711169804", parentPhone: "085716650787" },
+  13183: { phone: "085892434800", parentPhone: "085714063237" },
+  13186: { phone: "081389187292", parentPhone: "085163691572" },
+  13190: { phone: "083805531237", parentPhone: "085765855593" },
+  13198: { phone: "085714519540", parentPhone: "0895352815641" },
 };
-function schedule(){var days=[['Senin',[['06.30—07.30','—','Belum ada mapel'],['07.30—09.00','PKK','2 jam pelajaran'],['09.00—10.45','Sejarah','2 jam pelajaran'],['10.45—13.30','Tata Artistik','3 jam pelajaran'],['13.30—15.00','Bahasa Inggris','2 jam pelajaran']]],['Selasa',[['06.30—09.00','Bahasa Indonesia','3 jam pelajaran'],['09.00—10.45','Tata Cahaya','2 jam pelajaran'],['10.45—12.15','PPKN','2 jam pelajaran'],['12.45—15.00','Manajemen Produksi','3 jam pelajaran']]],['Rabu',[['06.30—09.00','Tata Kamera','3 jam pelajaran'],['09.00—10.45','Olahraga','2 jam pelajaran'],['10.45—12.15','Tata Cahaya','2 jam pelajaran'],['12.45—15.00','Tata Artistik','3 jam pelajaran']]],['Kamis',[['06.30—09.00','PAI','3 jam pelajaran'],['09.00—11.30','Matematika','3 jam pelajaran'],['11.30—13.30','PKK','2 jam pelajaran'],['13.30—15.00','Kokurikuler','2 jam pelajaran']]],['Jumat',[['06.30—08.50','Naskah & Penyutradaraan','3 jam pelajaran'],['08.50—10.10','Bahasa Inggris','2 jam pelajaran'],['10.25—11.45','Muatan Lokal','2 jam pelajaran'],['13.00—15.00','Tata Kamera','3 jam pelajaran']]]];return '<div class="page">'+head('Aktivitas kelas','Jadwal mata pelajaran','Kelas 11PF1 · Jadwal mingguan dari dokumen sekolah','<button class="outline-btn">▦ Kelola jadwal</button>')+'<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Jadwal mingguan 11PF1</h2><p>Jam istirahat mengikuti jadwal sekolah</p></div><span class="pill teal">Senin—Jumat</span></div><div class="schedule-list">'+days.map(function(day){return '<div style="margin-top:8px"><div class="eyebrow" style="margin:0 0 8px">'+day[0]+'</div>'+day[1].map(function(x,i){var teacher=teacherContacts[x[1]];return '<div class="schedule-item"><span class="schedule-time">'+x[0]+'</span><i class="schedule-bar '+(x[1]==='—'?'pending':'')+'"></i><div class="schedule-info"><strong>'+x[1]+'</strong><small>'+x[2]+(teacher?' · '+teacher.name:'')+'</small></div><span class="teacher-status '+(x[1]==='—'?'pending':'')+'">'+(x[1]==='—'?'Kosong':'Terjadwal')+'</span></div>'}).join('')+'</div>'}).join('')+'</div></section><section class="ai-card"><div class="eyebrow">AIWalas membantu</div><h2>Pengingat mengikuti jadwal resmi.</h2><p>AIWalas akan mengingatkan guru 30 menit, 10 menit, dan saat pelajaran dimulai. Kontak guru tersimpan untuk komunikasi lanjutan melalui kanal resmi sekolah.</p><div class="ai-prompt">▦ Total jadwal <strong>20 sesi mapel</strong><br><span style="color:#7890a4">15 penugasan mapel · 11 guru terdaftar</span></div></section></div></div>'}
-function grades(){var g=[['Aditya Pratama','82','78','85'],['Aisyah Putri','92','88','90'],['Aldo Ramadhan','76','74','80'],['Ananda Kirana','88','91','86'],['Bella Safitri','79','81','77'],['Dimas Saputra','68','72','75']];return '<div class="page">'+head('Penilaian','Ledger nilai','Semester ganjil · 3 mata pelajaran · Batas minimum 80','<button class="primary-btn" id="inputGrade">＋ Input nilai</button>')+'<div class="grid-stats">'+stat('Nilai terkumpul','89%','94 dari 105 nilai','▤','teal')+stat('Perlu koreksi','3','Data belum lengkap','!','coral')+stat('Di bawah batas','6 siswa','Perlu arahan guru','⌁','amber')+stat('Status ledger','Draft','Terakhir disimpan 10.32','◷','purple')+'</div><section class="panel table-panel"><div class="panel-head"><div><h2>Ledger kelas 11PF1</h2><p>Sumber nilai dan status verifikasi tercatat otomatis</p></div><button class="filter-btn">Semua mapel　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Bahasa Inggris</th><th>Matematika</th><th>Produktif PF</th><th>Rata-rata</th><th>Status</th></tr></thead><tbody>'+g.map(function(x){var avg=Math.round((+x[1]+ +x[2]+ +x[3])/3);return '<tr><td><div class="student-cell"><span class="avatar avatar-teal">'+initials(x[0])+'</span><strong>'+x[0]+'</strong></div></td><td>'+x[1]+'</td><td>'+x[2]+'</td><td>'+x[3]+'</td><td><strong style="color:'+(avg<80?'var(--coral)':'var(--ink)')+'">'+avg+'</strong></td><td><span class="pill '+(avg<80?'coral':'teal')+'">'+(avg<80?'Perlu arahan':'Tersimpan')+'</span></td></tr>'}).join('')+'</tbody></table></div></section></div>'}
-var reportSubjects=[['Pendidikan Agama dan Budi Pekerti','PAI'],['Pendidikan Pancasila','PPKN'],['Bahasa Indonesia','Bahasa Indonesia'],['Pendidikan Jasmani dan Olahraga Kesehatan','Olahraga'],['Sejarah','Sejarah'],['Muatan Lokal','Muatan Lokal'],['Matematika','Matematika'],['Bahasa Inggris','Bahasa Inggris'],['Manajemen Produksi Film','Manajemen Produksi'],['Penulisan Naskah & Penyutradaraan','Naskah & Penyutradaraan'],['Tata Kamera dan Tata Cahaya','Tata Kamera'],['Tata Artistik','Tata Artistik'],['Kreativitas, Inovasi, dan Kewirausahaan','PKK'],['Animasi 3D',null]];
-function reportMetrics(){return reportSubjects.map(function(item){var rows=item[1]?scoreSheetRows(item[1]):[],values=rows.map(function(row){return Number(row.avg)}).filter(function(value){return !isNaN(value)}),avg=values.length?Math.round(values.reduce(function(a,b){return a+b},0)/values.length):null;return {name:item[0],key:item[1],max:values.length?Math.max.apply(null,values):null,min:values.length?Math.min.apply(null,values):null,avg:avg,sorption:avg,plan:'—',done:'—',target:'—'}})}
-var reportLedgerRows=[{name:'AURELIA ASSYIFA',scores:[92,88,90]},{name:'KANAYA SAFA AULIA',scores:[88,91,86]},{name:'ABDULLAH SYAFI\'IE',scores:[82,78,85]},{name:'AKHMAD AKMAL HIDAYATULLOH',scores:[76,74,80]},{name:'ALISAH PUTRI RAMADANI',scores:[79,81,77]},{name:'MUHAMMAD DUDE SATRIYA',scores:[68,72,75]}];
-function reportLowStudents(){var labels=['Bahasa Inggris','Matematika','Tata Kamera dan Tata Cahaya'],result=[];reportLedgerRows.forEach(function(row){row.scores.forEach(function(value,index){if(value<80){var student=students.find(function(s){return s[0]===row.name}),status=student?student[2]:'Hadir',s=status==='Sakit'?1:0,i=status==='Izin'?1:0,a=status==='Alpha'?1:0,total=s+i+a;result.push({name:row.name,subject:labels[index],value:value,s:s,i:i,a:a,total:total,attitude:total<=5?'B':total<=10?'C':'K'})}})});return result}
-function reportTopStudents(){return reportLedgerRows.map(function(row){var total=row.scores.reduce(function(a,b){return a+b},0),avg=Math.round(total/row.scores.length);return {name:row.name,total:total,avg:avg}}).sort(function(a,b){return b.avg-a.avg||b.total-a.total}).slice(0,3)}
-function reportTableRows(){var low=reportLowStudents();return low.length?low.map(function(row,index){return '<tr><td>'+(index+1)+'</td><td>'+row.name+'</td><td>'+row.subject+'</td><td>'+row.value+'</td><td>'+row.s+'</td><td>'+row.i+'</td><td>'+row.a+'</td><td>'+row.total+'</td><td><span class="pill '+(row.attitude==='B'?'teal':row.attitude==='C'?'amber':'coral')+'">'+row.attitude+'</span></td></tr>'}).join(''):'<tr><td colspan="9" class="empty-state">Tidak ada nilai di bawah 80.</td></tr>'}
-function reports(){var metrics=reportMetrics(),top=reportTopStudents(),date=todayLabel();return '<div class="page">'+head('Pelaporan','Laporan Wali Kelas','Formulir laporan kelas 11PF1 bersumber dari Ledger Nilai dan absensi','<button class="primary-btn" id="downloadReports">↓ Unduh Excel</button>')+'<div class="report-tabs"><button class="carousel-tab active" data-report-tab="daya">Daya Serap</button><button class="carousel-tab" data-report-tab="walas">Laporan Walas</button></div><section class="panel report-sheet" id="reportDaya"><div class="report-letterhead"><h2>REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span></div><div class="report-meta"><span>SEMESTER : Ganjil</span><span>JUMLAH PESERTA DIDIK : 35</span><span>WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span></div><div class="table-wrap"><table class="report-table"><thead><tr><th>No.</th><th>Mata Pelajaran</th><th>Nilai Maks.</th><th>Nilai Min.</th><th>Rata-rata</th><th>Daya Serap</th><th>Elemen/TP Renc</th><th>Elemen/TP Tlks</th><th>Target Kur.</th></tr></thead><tbody>'+metrics.map(function(row,index){return '<tr><td>'+(index+1)+'</td><td>'+row.name+'</td><td>'+((row.max===null)?'—':row.max)+'</td><td>'+((row.min===null)?'—':row.min)+'</td><td>'+((row.avg===null)?'—':row.avg)+'</td><td>'+((row.sorption===null)?'—':row.sorption+'%')+'</td><td>'+row.plan+'</td><td>'+row.done+'</td><td>'+row.target+'</td></tr>'}).join('')+'</tbody></table></div><div class="report-instructions"><strong>Petunjuk Pengisian</strong><br>Nilai Min: nilai terendah. Nilai Maks: nilai tertinggi. Rata-rata: nilai rata-rata kelas. Daya serap: rata-rata kelas × 100%. Elemen/TP dan Target Kurikulum dapat dilengkapi setelah jurnal pembelajaran terisi.</div><div class="report-signatures"><span>Waka Bid. Kurikulum,<br><br><br><strong>Sumiati Sunarsih, S.Pd., M.Ak.</strong><br>NIP. 197904252014122002</span><span>Jakarta, '+date+'<br>Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005</span></div></section><section class="panel report-sheet" id="reportWalas" style="display:none"><div class="report-letterhead"><h2>LAPORAN WALI KELAS 11PF1</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span></div><div class="report-meta"><span>SEMESTER : Ganjil</span><span>JUMLAH PESERTA DIDIK : 35</span><span>WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span></div><h3>A. PESERTA DIDIK YANG BELUM TUNTAS</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>No</th><th>Nama Peserta Didik</th><th>Mata Pelajaran yang Nilainya Kurang</th><th>Nilai</th><th>S</th><th>I</th><th>A</th><th>Jumlah Absensi</th><th>Sikap B/C/K</th></tr></thead><tbody>'+reportTableRows()+'</tbody></table></div><h3 style="margin-top:22px">B. PESERTA DIDIK BERPRESTASI</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>Ranking</th><th>Siswa yang Berprestasi</th><th>Jumlah Nilai</th><th>Rata-rata</th></tr></thead><tbody>'+top.map(function(row,index){return '<tr><td>'+(index+1)+'</td><td>'+row.name+'</td><td>'+row.total+'</td><td>'+row.avg+'</td></tr>'}).join('')+'</tbody></table></div><div class="report-signatures"><span>Waka Bid. Kurikulum,<br><br><br><strong>Sumiati Sunarsih, S.Pd., M.Ak.</strong><br>NIP. 197904252014122002</span><span>Jakarta, '+date+'<br>Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005</span></div></section></div>'}
-function journal(){var date=todayLabel(),entries=[['06.30—09.00','PAI','Lutfi Faridil Aftros, S.Pd.I','Materi pembelajaran dan tujuan pembelajaran belum diisi','Belum diisi','pending'],['09.00—11.30','Matematika','Robert Henry Hutapea, S.Si., M.Pd.','Persamaan dan fungsi kuadrat','Robert Henry Hutapea, S.Si., M.Pd.','done'],['11.30—13.30','PKK','Nani Aminah, SE.','Materi pembelajaran belum diisi','Belum diisi','pending'],['13.30—15.00','Kokurikuler','Englena Nastaria Purba, S.Pd.','Refleksi kegiatan kokurikuler','Englena Nastaria Purba, S.Pd.','done']];return '<div class="page">'+head('Aktivitas kelas','Jurnal Kelas','Catatan materi yang diajarkan guru mata pelajaran pada hari tersebut','<button class="primary-btn" id="newJournal">＋ Input Jurnal</button>')+'<section class="panel table-panel"><div class="panel-head"><div><h2>Jurnal pembelajaran hari ini</h2><p>'+date+' · Guru mengisi setelah jam mengajar selesai</p></div><span class="pill amber">'+entries.filter(function(x){return x[5]==='pending'}).length+' belum diisi</span></div><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mata pelajaran</th><th>Guru</th><th>Materi yang diajarkan</th><th>Diinput oleh</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+entries.map(function(x){return '<tr><td>'+x[0]+'</td><td><strong>'+x[1]+'</strong></td><td>'+x[2]+'</td><td>'+x[3]+'</td><td>'+x[4]+'</td><td><span class="pill '+(x[5]==='done'?'teal':'amber')+'">'+(x[5]==='done'?'Lengkap':'Menunggu jurnal')+'</span></td><td><button class="panel-action" data-journal-edit="'+x[1]+'|'+x[0]+'|'+x[2]+'">'+(x[5]==='done'?'Koreksi':'Input / Koreksi')+'</button></td></tr>'}).join('')+'</tbody></table></div></section><section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Aturan pengisian jurnal</h2><p>Alur pencatatan pembelajaran 11PF1</p></div></div><div class="alert-box"><strong>Guru mata pelajaran</strong> mengisi jurnal setelah jam mengajar selesai, termasuk materi, aktivitas, dan catatan pembelajaran. Jika guru lupa atau belum mengisi, Wali Kelas dan Sekretaris Kelas dapat menggunakan tombol <strong>Koreksi</strong> untuk melengkapi jurnal.</div></section></div>'}
-function communication(){return '<div class="page">'+head('Komunikasi','Pesan orang tua','AIWalas membantu memahami pesan dan mencatat keterangannya','<button class="outline-btn">＋ Pesan baru</button>')+'<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Inbox orang tua</h2><p>8 pesan terkait absensi</p></div><span class="pill coral">8 baru</span></div>'+[['Orangtua Zevanya Putri Ramadhani','Diteruskan: hari ini Zevanya izin tidak masuk sekolah karena sakit batuk dan sesak.','Sakit','Hari ini · WhatsApp'],['Orangtua Khaira Aurelia Putri','Diteruskan: hari ini Khaira izin tidak masuk sekolah karena sakit maag.','Sakit','Hari ini · WhatsApp'],['Orangtua Haikal Mahendra','Diteruskan: Haikal izin tidak masuk karena panas badan.','Sakit','Hari ini · WhatsApp'],['Orangtua Akhmad Akmal Hidayatulloh','Diteruskan: Akmal tidak bisa masuk sekolah karena sakit demam.','Sakit','Hari ini · WhatsApp'],['Orangtua Syafii Qotu Aqiilah Qurrotu Ainii','Diteruskan: Syafii izin tidak mengikuti pelajaran karena demam dan batuk pilek.','Sakit','Baru · WhatsApp'],['Orangtua Mourin Machrani','Assalamualaikun, maaf Pak, hari ini Mourin tidak bisa masuk karena sedang kurang enak badan. Terima kasih 🙏','Sakit','Baru · WhatsApp'],['Ibu Bella Safitri','Bella demam sejak malam, Bu. Hari ini izin tidak masuk dulu...','Sakit','18 menit lalu'],['Bapak Dimas Saputra','Mohon maaf Dimas terlambat, tadi ban motor kami bocor di jalan.','Izin','1 jam lalu'],['Ibu Aldo Ramadhan','Bu, Aldo sudah berangkat. Mohon dipantau kalau terlambat.','Informasi','Kemarin']].map(function(m){return '<div class="chat-message"><span class="avatar avatar-teal">'+initials(m[0].replace('Ibu ','').replace('Bapak ','').replace('Orangtua ',''))+'</span><div><strong style="font-size:11px">'+m[0]+'</strong><p>'+m[1]+'<br><span class="pill '+(m[2]==='Sakit'?'teal':m[2]==='Izin'?'amber':'')+'" style="display:inline-block;margin-top:7px">'+m[2]+'</span></p><small style="color:#a1abb5;font-size:10px">'+m[3]+'</small></div></div>'}).join('')+'</section><section class="panel"><div class="panel-head"><div><h2>Simulasi percakapan AI</h2><p>AI tidak menolak keterangan, hanya mengklasifikasikan</p></div><span class="pill teal">AI aktif</span></div><div class="chat-message"><span class="avatar avatar-teal">AI</span><p>Baik, Bu. Saya catat bahwa Bella tidak masuk hari ini karena kondisi kesehatan. Status absensi akan diperbarui menjadi <strong>Sakit</strong>. Apakah informasi ini sudah benar?</p></div><div class="chat-message me"><p>Ya, sudah benar. Terima kasih.</p></div><div class="chat-input"><input id="chatInput" placeholder="Tulis balasan simulasi..."><button class="primary-btn" id="sendChat">Kirim</button></div></section></div></div>'}
-function remedial(){return '<div class="page">'+head('Tindak lanjut','Remedial & tugas perbaikan','Pastikan setiap siswa mendapat arahan yang jelas','<button class="primary-btn" id="newRemedial">＋ Buat tindak lanjut</button>')+'<section class="panel table-panel"><div class="panel-head"><div><h2>Daftar tindak lanjut</h2><p>6 siswa memiliki nilai di bawah batas minimum</p></div><button class="filter-btn">Semua status　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Mata pelajaran</th><th>Nilai awal</th><th>Tindak lanjut</th><th>Status</th></tr></thead><tbody>'+[['Dimas Saputra','Matematika','68','Latihan Bab 3','Menunggu arahan'],['Bella Safitri','Bahasa Inggris','79','Remedial Bab 2','Ditetapkan'],['Aldo Ramadhan','Matematika','74','—','Menunggu arahan'],['Naufal Akbar','Produktif PF','77','Tugas perbaikan','Menunggu pengumpulan']].map(function(x){return '<tr><td><div class="student-cell"><span class="avatar avatar-teal">'+initials(x[0])+'</span><strong>'+x[0]+'</strong></div></td><td>'+x[1]+'</td><td><strong style="color:var(--coral)">'+x[2]+'</strong></td><td>'+x[3]+'</td><td><span class="pill '+(x[4].indexOf('Menunggu')>=0?'amber':'teal')+'">'+x[4]+'</span></td></tr>'}).join('')+'</tbody></table></div></section></div>'}
-function notifications(){return '<div class="page">'+head('Pusat informasi','Notifikasi','Semua kabar penting untuk kelas 11PF1','<button class="outline-btn" id="markRead">Tandai semua dibaca</button>')+'<section class="panel"><div class="activity-list">'+[['coral-bg','♡','Lima orang tua memberi keterangan','Zevanya, Khaira, Haikal, Akmal, dan Syafii diinformasikan tidak masuk hari ini karena sakit. Status absensi diperbarui: Sakit.','Baru · WhatsApp'],['coral-bg','♡','Orang tua memberi keterangan','Orangtua Mourin Machrani menginformasikan Mourin tidak masuk hari ini karena kurang enak badan. Status diperbarui: Sakit.','Baru · WhatsApp'],['coral-bg','♡','Orang tua memberi keterangan','Ibu Bella Safitri menginformasikan Bella sakit hari ini. Status disarankan: Sakit.','18 menit lalu'],['amber-bg','◷','Konfirmasi guru diperlukan','Pak Budi Santoso belum merespons pengingat jadwal Matematika.','32 menit lalu'],['purple-bg','↗','Tindak lanjut baru dibuat','Dimas Saputra mendapat arahan remedial Matematika.','1 jam lalu'],['teal-bg','✓','Absensi berhasil diperbarui','Scan QR Rania Zahra tercatat sebagai Hadir.','2 jam lalu']].map(function(n){return '<div class="activity" style="padding:13px 0;border-bottom:1px solid var(--line)"><span class="activity-icon '+n[0]+'">'+n[1]+'</span><div class="activity-text"><strong>'+n[2]+'</strong><br>'+n[3]+'<span class="activity-time">'+n[4]+'</span></div><button class="panel-action" style="margin-left:auto">Buka →</button></div>'}).join('')+'</div></section></div>'}
-function toast(msg){var e=document.createElement('div');e.className='toast success';e.textContent=msg;document.getElementById('toastWrap').appendChild(e);setTimeout(function(){e.remove()},3200)}
-function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
-function modal(title,text,form){document.getElementById('modalContent').innerHTML='<button class="modal-close" id="closeModal">×</button><h2>'+title+'</h2><p>'+text+'</p>'+form;document.getElementById('modalBackdrop').classList.add('show');document.getElementById('closeModal').onclick=closeModal;var cancel=document.getElementById('cancelModal'),save=document.getElementById('saveModal');if(cancel)cancel.onclick=closeModal;if(save)save.onclick=function(){closeModal();toast('Perubahan berhasil disimpan')}}
-function simpleModal(title,text){modal(title,text,'<form><label>Catatan<textarea placeholder="Tambahkan keterangan..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan</button></div></form>')}
-function applyRoleAccess(){var access=roleAccess[currentRole]||[];document.querySelectorAll('.nav-item[data-page]').forEach(function(item){item.style.display=access.indexOf(item.dataset.page)>=0?'flex':'none'});var settings=document.querySelector('.sidebar-bottom>.nav-item');if(settings)settings.style.display=currentRole==='walas'?'flex':'none';var user=document.querySelector('.workspace-switch strong'),roleText=document.querySelector('.workspace-switch small');if(user)user.textContent=currentUser?currentUser.name:'';if(roleText)roleText.textContent=currentRole==='walas'?'Wali Kelas · 11PF1':currentRole==='assistant'?'Sekretaris Kelas · 11PF1':currentRole==='guest'?'Akses publik':'Siswa · 11PF1'}
-function addAssistantReminderControls(){if(currentRole!=='assistant'||page!=='schedule')return;document.querySelectorAll('.schedule-item').forEach(function(item){var status=item.querySelector('.teacher-status');if(!status||status.textContent.trim()==='Kosong'||item.querySelector('.assistant-action'))return;var button=document.createElement('button');button.className='assistant-action';button.textContent='Matikan reminder';button.onclick=function(){button.textContent='Reminder dinonaktifkan';button.disabled=true;toast('Reminder guru dinonaktifkan untuk sesi ini')};item.querySelector('.schedule-info').appendChild(button)})}
-function renderStudentAttendance(){if(currentRole!=='student'||page!=='attendance')return;var root=document.getElementById('pageContent');root.innerHTML='<div class="page"><div class="page-heading"><div><div class="eyebrow">Absensi siswa</div><h1>Halo, '+currentUser.name+'</h1><p>NIS '+currentUser.nis+' · Kelas 11PF1</p></div></div><section class="panel" style="max-width:620px;margin:auto;text-align:center"><div class="stat-icon teal-bg" style="margin:0 auto 16px;width:52px;height:52px;font-size:25px">▣</div><h2 style="font-size:18px;margin-bottom:8px">Scan QR untuk mengisi absensi</h2><p style="font-size:12px;color:var(--muted);line-height:1.6">Arahkan kamera HP ke QR Code yang tertempel di dinding kelas. Pastikan Anda berada di kelas 11PF1.</p><button class="primary-btn" id="studentQrButton" style="margin-top:20px;width:100%;max-width:320px">Buka scanner QR</button><div class="alert-box" style="margin-top:18px;text-align:left"><strong>Aturan absensi hari ini</strong>05.30—06.30 Hadir · 06.30—07.00 Terlambat · Setelah 07.00 menunggu verifikasi wali kelas.</div></section></div>';var button=document.getElementById('studentQrButton');button.onclick=function(){button.textContent='✓ Absensi tercatat '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});button.disabled=true;toast('Absensi berhasil dicatat pada mode demo')}}
-function authRequest(path,options){options=options||{};options.credentials='same-origin';options.headers=Object.assign({'Accept':'application/json','Content-Type':'application/json'},options.headers||{});return fetch(path,options).then(function(response){return response.json().catch(function(){return {ok:false,message:'Respons server tidak valid.'}}).then(function(data){if(!response.ok)throw new Error(data.message||'Permintaan tidak dapat diproses.');return data})})}
-function finishLogin(user){currentRole=user.role;currentUser=user;document.getElementById('loginScreen').classList.add('hidden');page=currentRole==='student'||currentRole==='assistant'?'attendance':'dashboard';applyRoleAccess();render()}
-function setupLogin(){var form=document.getElementById('loginForm'),role=document.getElementById('loginRole'),note=document.getElementById('loginNote'),error=document.getElementById('loginError'),submit=form.querySelector('[type="submit"]');role.onchange=function(){note.textContent=role.value==='student'?'Siswa menggunakan NIS sebagai username dan password.':role.value==='guest'?'Gunakan akun Guest untuk melihat informasi publik.':'Username dan password akun ini ditentukan oleh administrator.';error.textContent=''};form.onsubmit=function(e){e.preventDefault();error.textContent='';submit.disabled=true;submit.textContent='Memeriksa akun...';authRequest('api/auth/login',{method:'POST',body:JSON.stringify({role:role.value,username:document.getElementById('loginUsername').value.trim(),password:document.getElementById('loginPassword').value})}).then(function(data){finishLogin(data.user)}).catch(function(reason){error.textContent=reason.message}).finally(function(){submit.disabled=false;submit.textContent='Masuk ke AIWalas'})}}
-function restoreSession(){authRequest('api/auth/session').then(function(data){if(data.authenticated&&data.user)finishLogin(data.user)}).catch(function(){document.getElementById('loginError').textContent='Server autentikasi belum dapat dihubungi.'})}function logout(){authRequest('api/auth/logout',{method:'POST',body:'{}'}).catch(function(){}).finally(function(){currentUser=null;currentRole=null;document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent='';document.getElementById('loginUsername').focus()})}function bind(){document.querySelectorAll('[data-page]').forEach(function(b){b.onclick=function(){page=b.dataset.page;render()}});var search=document.getElementById('studentSearch');if(search)search.oninput=function(){var q=search.value.toLowerCase();document.getElementById('studentRows').innerHTML=rows(students.filter(function(s){return s[0].toLowerCase().indexOf(q)>=0||s[1].indexOf(q)>=0}))};document.querySelectorAll('[data-student]').forEach(function(b){b.onclick=function(){var student=students.find(function(s){return s[0]===b.dataset.student});simpleModal('Profil siswa','<strong>'+student[0]+'</strong><br>NIS: '+student[1]+'<br>Nomor HP siswa: '+(student[5]||'Belum tersedia')+'<br>Nomor HP orangtua: '+(student[6]||'Belum tersedia'))}});var scan=document.getElementById('scanQr');if(scan)scan.onclick=function(){simpleModal('Simulasi scan QR','Pilih siswa untuk mencatat kehadiran. Dalam mode nyata, kamera akan membaca QR code siswa.')};var grade=document.getElementById('inputGrade');if(grade)grade.onclick=function(){simpleModal('Input nilai','Nilai tidak dibuat atau diubah AI. Semua input tercatat sebagai Draft dan dapat dikoreksi.')};['addStudent','newRemedial'].forEach(function(id){var e=document.getElementById(id);if(e)e.onclick=function(){simpleModal(id==='addStudent'?'Tambah siswa':'Buat tindak lanjut','Lengkapi informasi untuk melanjutkan.')}});var send=document.getElementById('sendChat');if(send)send.onclick=function(){var i=document.getElementById('chatInput');if(i.value.trim()){toast('Pesan simulasi terkirim');i.value=''}};var approve=document.getElementById('approveTask');if(approve)approve.onclick=function(){toast('Tugas pengganti disetujui dan siap diteruskan ke WAG kelas')};var mark=document.getElementById('markRead');if(mark)mark.onclick=function(){toast('Semua notifikasi ditandai sudah dibaca')};var logoutBtn=document.getElementById('logoutBtn');if(logoutBtn)logoutBtn.onclick=logout}
-var teacherScoreData={'PAI':[84,88,90,86,78,82,91,89],'PPKN':[88,85,90,92,80,86,84,90],'Bahasa Indonesia':[82,87,89,91,85,88,90,92],'Olahraga':[90,92,88,94,86,90,91,93],'Sejarah':[78,84,86,89,80,83,88,90],'Kokurikuler':[85,88,90,92,87,89,91,93],'Muatan Lokal':[80,83,86,88,82,85,87,90],'Matematika':[76,81,84,86,78,80,85,88],'Bahasa Inggris':[86,89,91,93,84,87,90,92],'Manajemen Produksi':[90,88,92,94,86,89,91,95],'Naskah & Penyutradaraan':[88,91,94,92,90,89,93,95],'Tata Cahaya':[82,86,89,91,80,84,88,90],'Tata Kamera':[85,87,90,93,83,86,89,92],'Tata Artistik':[89,91,88,94,87,90,92,95],'PKK':[84,88,90,92,82,86,89,91]};
-function teachersPage(){var subjects=Object.keys(teacherContacts),rowsHtml=subjects.map(function(subject){var t=teacherContacts[subject],scores=teacherScoreData[subject]||[0,0,0,0,0,0,0,0],avg=Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length);return '<tr><td><div class="student-cell"><span class="avatar avatar-teal">'+initials(t.name)+'</span><strong>'+t.name+'</strong></div></td><td>'+subject+'</td><td>'+t.phone+'</td><td><span class="pill '+(avg>=80?'teal':'coral')+'">Rata-rata '+avg+'</span></td><td><button class="panel-action teacher-score-btn" data-teacher-score="'+subject+'">Lihat nilai →</button></td></tr>'}).join('');return '<div class="page">'+head('Workspace akademik','Guru mata pelajaran','Data kontak guru dan rekap nilai UH serta Tugas semester','<button class="outline-btn" id="teacherContactInfo">▣ Data kontak</button>')+'<div class="grid-stats">'+stat('Guru/mapel',subjects.length,'Data mata pelajaran aktif','♙','teal')+stat('Komponen nilai','8','UH 1–4 dan Tugas 1–4','▤','purple')+stat('Semester','Ganjil','Rekap nilai kelas 11PF1','◷','amber')+stat('Kontak tersimpan','15','Siap untuk komunikasi','✓','teal')+'</div><section class="panel table-panel teacher-directory"><div class="panel-head"><div><h2>Direktori guru mata pelajaran</h2><p>Tekan “Lihat nilai” untuk membuka rekap penilaian guru/mapel</p></div><span class="pill teal">15 mapel</span></div><div class="table-wrap"><table><thead><tr><th>Nama guru</th><th>Mata pelajaran</th><th>Nomor telepon</th><th>Ringkasan</th><th>Aksi</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div></section></div>'}
+students.forEach(function (s) {
+  var contact = studentContacts[s[1]] || {};
+  s[5] = contact.phone || "";
+  s[6] = contact.parentPhone || "";
+});
+students.forEach(function (s) {
+  s[2] = "Hadir";
+});
+students[14][2] = "Hadir";
+students[17][2] = "Sakit";
+students[1][2] = "Sakit";
+students[8][2] = "Sakit";
+students[11][2] = "Sakit";
+students[30][2] = "Sakit";
+students[34][2] = "Sakit";
+students[32][2] = "Hadir";
+var page = "dashboard",
+  names = {
+    dashboard: "Beranda",
+    students: "Daftar Siswa",
+    attendance: "Absensi Harian",
+    schedule: "Jadwal Kelas",
+    journal: "Jurnal Kelas",
+    reports: "Laporan Wali Kelas",
+    teachers: "Guru Mapel",
+    schoolTeachers: "Daftar Guru SMKN 19",
+    grades: "Ledger Nilai",
+    communication: "Komunikasi",
+    remedial: "Remedial & Tugas",
+    notifications: "Notifikasi",
+  };
+var currentUser = null,
+  currentRole = null;
+var roleAccess = {
+  walas: [
+    "dashboard",
+    "students",
+    "attendance",
+    "schedule",
+    "journal",
+    "reports",
+    "teachers",
+    "schoolTeachers",
+    "grades",
+    "communication",
+    "remedial",
+    "notifications",
+  ],
+  assistant: ["dashboard", "attendance", "schedule", "journal"],
+  student: ["dashboard", "attendance"],
+  guest: ["dashboard"],
+};
+function initials(s) {
+  return s
+    .split(" ")
+    .map(function (x) {
+      return x[0];
+    })
+    .slice(0, 2)
+    .join("");
+}
+function studentDetailText(student) {
+  var d = studentDetails && studentDetails[student[1]];
+  if (!d)
+    return (
+      "<strong>" +
+      student[0] +
+      "</strong><br>NIS: " +
+      student[1] +
+      "<br>Detail belum diisi."
+    );
+  var fields = [
+    ["NISN", "NISN"],
+    ["Jenis Kelamin", "Jenis Kelamin"],
+    ["Tempat Lahir", "Tempat Lahir"],
+    ["Tanggal Lahir", "Tanggal Lahir"],
+    ["Agama", "Agama"],
+    ["Alamat", "Alamat Lengkap"],
+    ["Tempat tinggal", "Status tempat tinggal saat ini"],
+    ["Transportasi", "Transportasi utama ke sekolah"],
+    ["Nama ayah", "Nama Ayah"],
+    ["Nama ibu", "Nama Ibu"],
+    ["Nama wali", "Nama wali (jika tinggal bersama wali) "],
+    ["Hubungan wali", "Hubungan wali dengan siswa"],
+    ["Saudara kandung", "Jumlah saudara kandung"],
+    ["Anak ke", "Anak ke "],
+    ["Pekerjaan ayah", "Pekerjaan ayah"],
+    ["Pekerjaan ibu", "Pekerjaan ibu"],
+    ["Bantuan pendidikan", "Apakah siswa menerima bantuan pendidikan?"],
+    ["Penyakit bawaan", "Apakah siswa mengidap penyakit/penyakit bawaan"],
+    [
+      "Catatan penyakit",
+      "Jika jawaban YA, penyakit apa yang harus diketahui Wali Kelas",
+    ],
+    ["Hobi/kegiatan", "Hobi/kegiatan yang sering dilakukan"],
+    ["Prestasi/kelebihan", "Prestasi atau kelebihan yang pernah diraih "],
+  ];
+  return (
+    "<strong>" +
+    student[0] +
+    "</strong><br>NIS: " +
+    student[1] +
+    '<div class="student-detail-grid">' +
+    fields
+      .map(function (field) {
+        var value = String(d[field[1]] || "").trim() || "—";
+        return (
+          "<div><small>" + field[0] + "</small><span>" + value + "</span></div>"
+        );
+      })
+      .join("") +
+    "</div>"
+  );
+}
+function statusClass(s) {
+  return s === "Hadir"
+    ? "present"
+    : s === "Terlambat"
+      ? "late"
+      : s === "Sakit"
+        ? "sick"
+        : s === "Izin"
+          ? "permission"
+          : s === "Menunggu keterangan"
+            ? "waiting"
+            : "absent";
+}
+function stat(label, num, note, icon, color) {
+  return (
+    '<div class="stat-card"><div class="stat-top"><span class="stat-label">' +
+    label +
+    '</span><span class="stat-icon ' +
+    color +
+    '-bg">' +
+    icon +
+    '</span></div><div class="stat-number">' +
+    num +
+    '</div><div class="stat-note">' +
+    note +
+    "</div></div>"
+  );
+}
+function head(k, t, d, a) {
+  return (
+    '<div class="page-heading"><div><div class="eyebrow">' +
+    k +
+    "</div><h1>" +
+    t +
+    "</h1><p>" +
+    d +
+    "</p></div>" +
+    (a || "") +
+    "</div>"
+  );
+}
+function dashboard() {
+  return (
+    '<div class="page">' +
+    head(
+      "Senin, 14 Oktober 2024",
+      'Selamat pagi, Pak Sumantoro <span style="color:var(--amber)">✦</span>',
+      "Pantauan kondisi kelas 11PF1 hari ini. Berikut ringkasan yang perlu Anda perhatikan.",
+      '<button class="date-control">◷  Senin, 14 Okt 2024　⌄</button>',
+    ) +
+    '<div class="grid-stats">' +
+    stat("Total siswa", "35", "Kelas 11PF1", "♙", "teal") +
+    stat("Hadir hari ini", "28", "80% dari total siswa", "✓", "teal") +
+    stat("Terlambat", "3", "Notifikasi orang tua terkirim", "◷", "amber") +
+    stat("Tidak hadir (Sakit/Izin)", "1", "Menunggu keterangan", "!", "coral") +
+    '</div><div class="dashboard-grid"><section class="panel"><div class="panel-head"><div><h2>Rekap absensi minggu ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart">' +
+    [
+      ["Sen", 78, 8, 2],
+      ["Sel", 84, 5, 1],
+      ["Rab", 88, 3, 1],
+      ["Kam", 82, 6, 2],
+      ["Jum", 80, 4, 1],
+    ]
+      .map(function (x) {
+        return (
+          '<div class="bar-group"><div class="bar" style="height:' +
+          x[1] +
+          '%"></div><div class="bar late" style="height:' +
+          x[2] * 3 +
+          '%"></div><div class="bar absent" style="height:' +
+          x[3] * 5 +
+          '%"></div><span class="bar-label">' +
+          x[0] +
+          "</span></div>"
+        );
+      })
+      .join("") +
+    '</div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></section><section class="panel"><div class="panel-head"><div><h2>Aktivitas terbaru</h2><p>Pembaruan real-time kelas</p></div><button class="panel-action" data-page="notifications">Semua →</button></div><div class="activity-list"><div class="activity"><span class="activity-icon teal-bg">✓</span><div class="activity-text"><strong>Kegiatan sekolah</strong> Hari ini awal kembali masuk sekolah dan belajar seperti biasa.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">♡</span><div class="activity-text"><strong>Malikha Intan Madinah</strong> sakit dan tidak masuk sekolah.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Pesan orangtua Malikha</strong> diterima: sakit gigi dan izin tidak masuk sekolah.<span class="activity-time">Hari ini</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Lima pesan orangtua diterima</strong> Zevanya Putri Ramadhani, Khaira Aurelia Putri, Haikal Mahendra, Akhmad Akmal Hidayatulloh, dan Syafii Qotu Aqiilah Qurrotu Ainii dilaporkan sakit dan tidak masuk sekolah.<span class="activity-time">Hari ini · Komunikasi WhatsApp</span></div></div><div class="activity"><span class="activity-icon coral-bg">✉</span><div class="activity-text"><strong>Pesan orangtua Mourin</strong> “Assalamualaikun, maaf Pak, hari ini Mourin tidak bisa masuk karena sedang kurang enak badan. Terima kasih 🙏” <span class="activity-time">Hari ini · Komunikasi WhatsApp</span></div></div><div class="activity"><span class="activity-icon amber-bg">▤</span><div class="activity-text"><strong>Pak Putu Arya Ranesda</strong> belum mengonfirmasi jadwal.<span class="activity-time">Hari ini</span></div></div></div></section></div><div class="lower-grid"><section class="panel"><div class="panel-head"><div><h2>Perlu perhatian</h2><p>Siswa dengan skor pelanggaran yang perlu ditindaklanjuti</p></div><button class="panel-action" data-page="students">Lihat semua →</button></div><div class="risk-list">' +
+    [
+      ["ABDULLAH SYAFI'IE", "3× terlambat", "100 poin", "coral"],
+      ["AKHMAD AKMAL HIDAYATULLOH", "2× terlambat", "60 poin", "amber"],
+      ["ALISAH PUTRI RAMADANI", "1× terlambat", "30 poin", "amber"],
+    ]
+      .map(function (x) {
+        return (
+          '<div class="risk-row"><span class="risk-avatar">' +
+          initials(x[0]) +
+          '</span><div class="risk-info"><strong>' +
+          x[0] +
+          "</strong><small>" +
+          x[1] +
+          '</small></div><span class="pill ' +
+          x[3] +
+          '">' +
+          x[2] +
+          "</span></div>"
+        );
+      })
+      .join("") +
+    '</div></section><section class="panel"><div class="panel-head"><div><h2>Pesan orang tua terbaru</h2><p>AIWalas membantu mengelompokkan pesan</p></div><button class="panel-action" data-page="communication">Buka inbox →</button></div><div class="message-card"><strong>Orangtua MALIKHA INTAN MADINAH</strong><br>“Assalamualaikum Wr. Wb<br>Mohon maaf pak, Malikha intan madinah hari ini izin tidak masuk sekolah karena sakit gigi, terimakasih 🙏”<div class="message-footer"><span class="avatar avatar-teal">AI</span> Terklasifikasi: <span class="pill teal">Sakit</span><span>· Hari ini</span></div></div></section></div></div>'
+  );
+}
+function rows(list) {
+  return list
+    .map(function (s, i) {
+      return (
+        '<tr><td><div class="student-cell"><span class="avatar avatar-teal">' +
+        s[3] +
+        "</span><strong>" +
+        s[0] +
+        "</strong></div></td><td>" +
+        s[1] +
+        "</td><td>" +
+        s[4] +
+        "</td><td>" +
+        s[5] +
+        "</td><td>" +
+        s[6] +
+        '</td><td><span class="status ' +
+        statusClass(s[2]) +
+        '">' +
+        s[2] +
+        "</span></td><td>" +
+        (i === 8
+          ? '<span class="pill coral">100 poin</span>'
+          : i === 2 || i === 18
+            ? '<span class="pill amber">60 poin</span>'
+            : '<span style="color:#a0aab5">—</span>') +
+        '</td><td><button class="panel-action" data-student="' +
+        s[0] +
+        '">Detail →</button></td></tr>'
+      );
+    })
+    .join("");
+}
+function studentsPage() {
+  return (
+    '<div class="page">' +
+    head(
+      "Data kelas",
+      "Daftar siswa",
+      "35 siswa · Kelas 11PF1 · Tahun ajaran 2024/2025",
+      '<button class="primary-btn" id="addStudent">＋ Tambah siswa</button>',
+    ) +
+    '<div class="toolbar"><label class="search-box">⌕ <input id="studentSearch" placeholder="Cari nama atau NIS..."></label><button class="filter-btn">Status: Semua　⌄</button><button class="filter-btn">Urutkan　⌄</button></div><section class="panel table-panel"><div class="panel-head"><div><h2>Semua siswa</h2><p>Terakhir diperbarui hari ini, 06.42 WIB</p></div><button class="outline-btn">↓ Export</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>NIS</th><th>Jenis kelamin</th><th>HP siswa</th><th>HP orangtua</th><th>Status absensi</th><th>Poin keterlambatan</th><th></th></tr></thead><tbody id="studentRows">' +
+    rows(students) +
+    "</tbody></table></div></section></div>"
+  );
+}
+function attendance() {
+  var a = students,
+    counts = statusCounts(),
+    absent =
+      (counts.Sakit || 0) +
+      (counts.Izin || 0) +
+      (counts["Menunggu keterangan"] || 0),
+    present = Math.round(((counts.Hadir || 0) / counts.total) * 100);
+  return (
+    '<div class="page">' +
+    head(
+      "Absensi",
+      "Absensi harian",
+      "Senin, 14 Oktober 2024 · Absensi dibuka pukul 05.30 WIB",
+      '<button class="primary-btn" id="scanQr">▣ Simulasi scan QR</button>',
+    ) +
+    '<div class="grid-stats">' +
+    stat("Hadir", counts.Hadir || 0, present + "% siswa", "✓", "teal") +
+    stat(
+      "Terlambat",
+      counts.Terlambat || 0,
+      "Notifikasi terkirim",
+      "◷",
+      "amber",
+    ) +
+    stat(
+      "Tidak hadir sementara",
+      absent,
+      "Sakit, izin, atau menunggu keterangan",
+      "!",
+      "coral",
+    ) +
+    stat("Belum scan", 0, "Semua status sudah tercatat", "⌁", "purple") +
+    '</div><section class="panel table-panel"><div class="panel-head"><div><h2>Status scan hari ini</h2><p>Data status siswa · Pembaruan otomatis</p></div><button class="filter-btn">Semua status　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Waktu scan</th><th>Status</th><th>Notifikasi orang tua</th><th>Aksi</th></tr></thead><tbody>' +
+    a
+      .map(function (s, i) {
+        return (
+          '<tr><td><div class="student-cell"><span class="avatar avatar-teal">' +
+          s[3] +
+          "</span><strong>" +
+          s[0] +
+          "</strong></div></td><td>" +
+          (s[2] === "Sakit" || s[2] === "Izin" || s[2] === "Menunggu keterangan"
+            ? "—"
+            : "05:" + (38 + (i % 22))) +
+          '</td><td><span class="status ' +
+          statusClass(s[2]) +
+          '">' +
+          s[2] +
+          "</span></td><td>" +
+          (s[2] === "Terlambat"
+            ? '<span class="pill teal">Terkirim</span>'
+            : s[2] === "Sakit" || s[2] === "Izin"
+              ? '<span class="pill amber">Dicatat</span>'
+              : '<span style="color:#a0aab5">—</span>') +
+          '</td><td><button class="panel-action" data-correct="' +
+          s[0] +
+          '">Koreksi</button></td></tr>'
+        );
+      })
+      .join("") +
+    "</tbody></table></div></section></div>"
+  );
+}
+function schedule() {
+  return (
+    '<div class="page">' +
+    head(
+      "Aktivitas kelas",
+      "Jadwal & konfirmasi guru",
+      "Pantau kesiapan guru mata pelajaran hari ini",
+      '<button class="outline-btn">▦ Kelola jadwal</button>',
+    ) +
+    '<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Senin, 14 Oktober</h2><p>Jadwal kelas 11PF1</p></div><span class="pill teal">4 jadwal</span></div><div class="schedule-list">' +
+    [
+      [
+        "07.00—08.30",
+        "Bahasa Inggris",
+        "Bu Sari Wulandari",
+        "Siap mengajar",
+        "",
+      ],
+      [
+        "08.30—10.00",
+        "Matematika",
+        "Pak Budi Santoso",
+        "Belum konfirmasi",
+        "pending",
+      ],
+      [
+        "10.15—11.45",
+        "Produktif PF",
+        "Pak Arif Nugroho",
+        "Sudah sampai kelas",
+        "",
+      ],
+      [
+        "12.30—14.00",
+        "Seni Budaya",
+        "Bu Rina Kurnia",
+        "Jadwal berubah",
+        "pending",
+      ],
+    ]
+      .map(function (x) {
+        return (
+          '<div class="schedule-item"><span class="schedule-time">' +
+          x[0] +
+          '</span><i class="schedule-bar"></i><div class="schedule-info"><strong>' +
+          x[1] +
+          "</strong><small>" +
+          x[2] +
+          '</small></div><span class="teacher-status ' +
+          x[4] +
+          '">' +
+          x[3] +
+          "</span></div>"
+        );
+      })
+      .join("") +
+    '</div></section><section class="ai-card"><div class="eyebrow">AIWalas membantu</div><h2>Pengingat yang tepat waktu.</h2><p>Pengingat kedua untuk Pak Budi akan dikirim 10 menit sebelum kelas dimulai. Jika belum ada respons hingga 10 menit setelah mulai, wali kelas dan admin akan mendapat notifikasi.</p><div class="ai-prompt">⏱ Pengingat berikutnya <strong>07.50 WIB</strong><br><span style="color:#7890a4">Matematika · Pak Budi Santoso</span></div></section></div><section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Tugas pengganti</h2><p>Menunggu persetujuan admin akademik</p></div><span class="pill amber">1 menunggu</span></div><div class="alert-box"><strong>Produktif PF · Pak Arif Nugroho</strong>Materi latihan desain poster — dikumpulkan Rabu, 16 Oktober. Informasi akademik siap diteruskan ke WAG kelas.<br><button class="outline-btn" style="margin-top:10px" id="approveTask">Tinjau & setujui</button></div></section></div>'
+  );
+}
+var teacherContacts = {
+  PAI: { name: "Lutfi Faridil Aftros, S.Pd.I", phone: "089637070988" },
+  PPKN: { name: "Ngatman, S.Pd.", phone: "082122685222" },
+  "Bahasa Indonesia": { name: "Erna Cahyani, S.Pd.", phone: "087776504538" },
+  Olahraga: { name: "Putu Arya Ranesda, S.Kom.", phone: "081288388842" },
+  Sejarah: { name: "Englena Nastaria Purba, S.Pd.", phone: "081260327672" },
+  Kokurikuler: { name: "Englena Nastaria Purba, S.Pd.", phone: "081260327672" },
+  "Muatan Lokal": {
+    name: "Englena Nastaria Purba, S.Pd.",
+    phone: "081260327672",
+  },
+  Matematika: {
+    name: "Robert Henry Hutapea, S.Si., M.Pd.",
+    phone: "081318903235",
+  },
+  "Bahasa Inggris": { name: "Ika Inayah, S.Pd.", phone: "085780710084" },
+  "Manajemen Produksi": {
+    name: "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+    phone: "081908952660",
+  },
+  "Naskah & Penyutradaraan": {
+    name: "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+    phone: "081908952660",
+  },
+  "Tata Cahaya": { name: "Wahyu Lukman Hakim, S.Kom.", phone: "085784968990" },
+  "Tata Kamera": { name: "Putu Arya Ranesda, S.Kom.", phone: "081288388842" },
+  "Tata Artistik": { name: "Ruby Eka Prawira, S.Pd.", phone: "081293339968" },
+  PKK: { name: "Nani Aminah, SE.", phone: "081210802912" },
+};
+function schedule() {
+  var days = [
+    [
+      "Senin",
+      [
+        ["06.30—07.30", "—", "Belum ada mapel"],
+        ["07.30—09.00", "PKK", "2 jam pelajaran"],
+        ["09.00—10.45", "Sejarah", "2 jam pelajaran"],
+        ["10.45—13.30", "Tata Artistik", "3 jam pelajaran"],
+        ["13.30—15.00", "Bahasa Inggris", "2 jam pelajaran"],
+      ],
+    ],
+    [
+      "Selasa",
+      [
+        ["06.30—09.00", "Bahasa Indonesia", "3 jam pelajaran"],
+        ["09.00—10.45", "Tata Cahaya", "2 jam pelajaran"],
+        ["10.45—12.15", "PPKN", "2 jam pelajaran"],
+        ["12.45—15.00", "Manajemen Produksi", "3 jam pelajaran"],
+      ],
+    ],
+    [
+      "Rabu",
+      [
+        ["06.30—09.00", "Tata Kamera", "3 jam pelajaran"],
+        ["09.00—10.45", "Olahraga", "2 jam pelajaran"],
+        ["10.45—12.15", "Tata Cahaya", "2 jam pelajaran"],
+        ["12.45—15.00", "Tata Artistik", "3 jam pelajaran"],
+      ],
+    ],
+    [
+      "Kamis",
+      [
+        ["06.30—09.00", "PAI", "3 jam pelajaran"],
+        ["09.00—11.30", "Matematika", "3 jam pelajaran"],
+        ["11.30—13.30", "PKK", "2 jam pelajaran"],
+        ["13.30—15.00", "Kokurikuler", "2 jam pelajaran"],
+      ],
+    ],
+    [
+      "Jumat",
+      [
+        ["06.30—08.50", "Naskah & Penyutradaraan", "3 jam pelajaran"],
+        ["08.50—10.10", "Bahasa Inggris", "2 jam pelajaran"],
+        ["10.25—11.45", "Muatan Lokal", "2 jam pelajaran"],
+        ["13.00—15.00", "Tata Kamera", "3 jam pelajaran"],
+      ],
+    ],
+  ];
+  return (
+    '<div class="page">' +
+    head(
+      "Aktivitas kelas",
+      "Jadwal mata pelajaran",
+      "Kelas 11PF1 · Jadwal mingguan dari dokumen sekolah",
+      '<button class="outline-btn">▦ Kelola jadwal</button>',
+    ) +
+    '<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Jadwal mingguan 11PF1</h2><p>Jam istirahat mengikuti jadwal sekolah</p></div><span class="pill teal">Senin—Jumat</span></div><div class="schedule-list">' +
+    days
+      .map(function (day) {
+        return (
+          '<div style="margin-top:8px"><div class="eyebrow" style="margin:0 0 8px">' +
+          day[0] +
+          "</div>" +
+          day[1]
+            .map(function (x, i) {
+              var teacher = teacherContacts[x[1]];
+              return (
+                '<div class="schedule-item"><span class="schedule-time">' +
+                x[0] +
+                '</span><i class="schedule-bar ' +
+                (x[1] === "—" ? "pending" : "") +
+                '"></i><div class="schedule-info"><strong>' +
+                x[1] +
+                "</strong><small>" +
+                x[2] +
+                (teacher ? " · " + teacher.name : "") +
+                '</small></div><span class="teacher-status ' +
+                (x[1] === "—" ? "pending" : "") +
+                '">' +
+                (x[1] === "—" ? "Kosong" : "Terjadwal") +
+                "</span></div>"
+              );
+            })
+            .join("") +
+          "</div>"
+        );
+      })
+      .join("") +
+    '</div></section><section class="ai-card"><div class="eyebrow">AIWalas membantu</div><h2>Pengingat mengikuti jadwal resmi.</h2><p>AIWalas akan mengingatkan guru 30 menit, 10 menit, dan saat pelajaran dimulai. Kontak guru tersimpan untuk komunikasi lanjutan melalui kanal resmi sekolah.</p><div class="ai-prompt">▦ Total jadwal <strong>20 sesi mapel</strong><br><span style="color:#7890a4">15 penugasan mapel · 11 guru terdaftar</span></div></section></div></div>'
+  );
+}
+function grades() {
+  var g = [
+    ["Aditya Pratama", "82", "78", "85"],
+    ["Aisyah Putri", "92", "88", "90"],
+    ["Aldo Ramadhan", "76", "74", "80"],
+    ["Ananda Kirana", "88", "91", "86"],
+    ["Bella Safitri", "79", "81", "77"],
+    ["Dimas Saputra", "68", "72", "75"],
+  ];
+  return (
+    '<div class="page">' +
+    head(
+      "Penilaian",
+      "Ledger nilai",
+      "Semester ganjil · 3 mata pelajaran · Batas minimum 80",
+      '<button class="primary-btn" id="inputGrade">＋ Input nilai</button>',
+    ) +
+    '<div class="grid-stats">' +
+    stat("Nilai terkumpul", "89%", "94 dari 105 nilai", "▤", "teal") +
+    stat("Perlu koreksi", "3", "Data belum lengkap", "!", "coral") +
+    stat("Di bawah batas", "6 siswa", "Perlu arahan guru", "⌁", "amber") +
+    stat("Status ledger", "Draft", "Terakhir disimpan 10.32", "◷", "purple") +
+    '</div><section class="panel table-panel"><div class="panel-head"><div><h2>Ledger kelas 11PF1</h2><p>Sumber nilai dan status verifikasi tercatat otomatis</p></div><button class="filter-btn">Semua mapel　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Bahasa Inggris</th><th>Matematika</th><th>Produktif PF</th><th>Rata-rata</th><th>Status</th></tr></thead><tbody>' +
+    g
+      .map(function (x) {
+        var avg = Math.round((+x[1] + +x[2] + +x[3]) / 3);
+        return (
+          '<tr><td><div class="student-cell"><span class="avatar avatar-teal">' +
+          initials(x[0]) +
+          "</span><strong>" +
+          x[0] +
+          "</strong></div></td><td>" +
+          x[1] +
+          "</td><td>" +
+          x[2] +
+          "</td><td>" +
+          x[3] +
+          '</td><td><strong style="color:' +
+          (avg < 80 ? "var(--coral)" : "var(--ink)") +
+          '">' +
+          avg +
+          '</strong></td><td><span class="pill ' +
+          (avg < 80 ? "coral" : "teal") +
+          '">' +
+          (avg < 80 ? "Perlu arahan" : "Tersimpan") +
+          "</span></td></tr>"
+        );
+      })
+      .join("") +
+    "</tbody></table></div></section></div>"
+  );
+}
+var reportSubjects = [
+  ["Pendidikan Agama dan Budi Pekerti", "PAI"],
+  ["Pendidikan Pancasila", "PPKN"],
+  ["Bahasa Indonesia", "Bahasa Indonesia"],
+  ["Pendidikan Jasmani dan Olahraga Kesehatan", "Olahraga"],
+  ["Sejarah", "Sejarah"],
+  ["Muatan Lokal", "Muatan Lokal"],
+  ["Matematika", "Matematika"],
+  ["Bahasa Inggris", "Bahasa Inggris"],
+  ["Manajemen Produksi Film", "Manajemen Produksi"],
+  ["Penulisan Naskah & Penyutradaraan", "Naskah & Penyutradaraan"],
+  ["Tata Kamera dan Tata Cahaya", "Tata Kamera"],
+  ["Tata Artistik", "Tata Artistik"],
+  ["Kreativitas, Inovasi, dan Kewirausahaan", "PKK"],
+  ["Animasi 3D", null],
+];
+function reportMetrics() {
+  return reportSubjects.map(function (item) {
+    var rows = item[1] ? scoreSheetRows(item[1]) : [],
+      values = rows
+        .map(function (row) {
+          return Number(row.avg);
+        })
+        .filter(function (value) {
+          return !isNaN(value);
+        }),
+      avg = values.length
+        ? Math.round(
+            values.reduce(function (a, b) {
+              return a + b;
+            }, 0) / values.length,
+          )
+        : null;
+    return {
+      name: item[0],
+      key: item[1],
+      max: values.length ? Math.max.apply(null, values) : null,
+      min: values.length ? Math.min.apply(null, values) : null,
+      avg: avg,
+      sorption: avg,
+      plan: "—",
+      done: "—",
+      target: "—",
+    };
+  });
+}
+var reportLedgerRows = [
+  { name: "AURELIA ASSYIFA", scores: [92, 88, 90] },
+  { name: "KANAYA SAFA AULIA", scores: [88, 91, 86] },
+  { name: "ABDULLAH SYAFI'IE", scores: [82, 78, 85] },
+  { name: "AKHMAD AKMAL HIDAYATULLOH", scores: [76, 74, 80] },
+  { name: "ALISAH PUTRI RAMADANI", scores: [79, 81, 77] },
+  { name: "MUHAMMAD DUDE SATRIYA", scores: [68, 72, 75] },
+];
+function reportLowStudents() {
+  var labels = ["Bahasa Inggris", "Matematika", "Tata Kamera dan Tata Cahaya"],
+    result = [];
+  reportLedgerRows.forEach(function (row) {
+    row.scores.forEach(function (value, index) {
+      if (value < 80) {
+        var student = students.find(function (s) {
+            return s[0] === row.name;
+          }),
+          status = student ? student[2] : "Hadir",
+          s = status === "Sakit" ? 1 : 0,
+          i = status === "Izin" ? 1 : 0,
+          a = status === "Alpha" ? 1 : 0,
+          total = s + i + a;
+        result.push({
+          name: row.name,
+          subject: labels[index],
+          value: value,
+          s: s,
+          i: i,
+          a: a,
+          total: total,
+          attitude: total <= 5 ? "B" : total <= 10 ? "C" : "K",
+        });
+      }
+    });
+  });
+  return result;
+}
+function reportTopStudents() {
+  return reportLedgerRows
+    .map(function (row) {
+      var total = row.scores.reduce(function (a, b) {
+          return a + b;
+        }, 0),
+        avg = Math.round(total / row.scores.length);
+      return { name: row.name, total: total, avg: avg };
+    })
+    .sort(function (a, b) {
+      return b.avg - a.avg || b.total - a.total;
+    })
+    .slice(0, 3);
+}
+function reportTableRows() {
+  var low = reportLowStudents();
+  return low.length
+    ? low
+        .map(function (row, index) {
+          return (
+            "<tr><td>" +
+            (index + 1) +
+            "</td><td>" +
+            row.name +
+            "</td><td>" +
+            row.subject +
+            "</td><td>" +
+            row.value +
+            "</td><td>" +
+            row.s +
+            "</td><td>" +
+            row.i +
+            "</td><td>" +
+            row.a +
+            "</td><td>" +
+            row.total +
+            '</td><td><span class="pill ' +
+            (row.attitude === "B"
+              ? "teal"
+              : row.attitude === "C"
+                ? "amber"
+                : "coral") +
+            '">' +
+            row.attitude +
+            "</span></td></tr>"
+          );
+        })
+        .join("")
+    : '<tr><td colspan="9" class="empty-state">Tidak ada nilai di bawah 80.</td></tr>';
+}
+function reports() {
+  var metrics = reportMetrics(),
+    top = reportTopStudents(),
+    date = todayLabel();
+  return (
+    '<div class="page">' +
+    head(
+      "Pelaporan",
+      "Laporan Wali Kelas",
+      "Formulir laporan kelas 11PF1 bersumber dari Ledger Nilai dan absensi",
+      '<button class="primary-btn" id="downloadReports">↓ Unduh Excel</button>',
+    ) +
+    '<div class="report-tabs"><button class="carousel-tab active" data-report-tab="daya">Daya Serap</button><button class="carousel-tab" data-report-tab="walas">Laporan Walas</button></div><section class="panel report-sheet" id="reportDaya"><div class="report-letterhead"><h2>REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span></div><div class="report-meta"><span>SEMESTER : Ganjil</span><span>JUMLAH PESERTA DIDIK : 35</span><span>WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span></div><div class="table-wrap"><table class="report-table"><thead><tr><th>No.</th><th>Mata Pelajaran</th><th>Nilai Maks.</th><th>Nilai Min.</th><th>Rata-rata</th><th>Daya Serap</th><th>Elemen/TP Renc</th><th>Elemen/TP Tlks</th><th>Target Kur.</th></tr></thead><tbody>' +
+    metrics
+      .map(function (row, index) {
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td><td>" +
+          row.name +
+          "</td><td>" +
+          (row.max === null ? "—" : row.max) +
+          "</td><td>" +
+          (row.min === null ? "—" : row.min) +
+          "</td><td>" +
+          (row.avg === null ? "—" : row.avg) +
+          "</td><td>" +
+          (row.sorption === null ? "—" : row.sorption + "%") +
+          "</td><td>" +
+          row.plan +
+          "</td><td>" +
+          row.done +
+          "</td><td>" +
+          row.target +
+          "</td></tr>"
+        );
+      })
+      .join("") +
+    '</tbody></table></div><div class="report-instructions"><strong>Petunjuk Pengisian</strong><br>Nilai Min: nilai terendah. Nilai Maks: nilai tertinggi. Rata-rata: nilai rata-rata kelas. Daya serap: rata-rata kelas × 100%. Elemen/TP dan Target Kurikulum dapat dilengkapi setelah jurnal pembelajaran terisi.</div><div class="report-signatures"><span>Waka Bid. Kurikulum,<br><br><br><strong>Sumiati Sunarsih, S.Pd., M.Ak.</strong><br>NIP. 197904252014122002</span><span>Jakarta, ' +
+    date +
+    '<br>Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005</span></div></section><section class="panel report-sheet" id="reportWalas" style="display:none"><div class="report-letterhead"><h2>LAPORAN WALI KELAS 11PF1</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span></div><div class="report-meta"><span>SEMESTER : Ganjil</span><span>JUMLAH PESERTA DIDIK : 35</span><span>WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span></div><h3>A. PESERTA DIDIK YANG BELUM TUNTAS</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>No</th><th>Nama Peserta Didik</th><th>Mata Pelajaran yang Nilainya Kurang</th><th>Nilai</th><th>S</th><th>I</th><th>A</th><th>Jumlah Absensi</th><th>Sikap B/C/K</th></tr></thead><tbody>' +
+    reportTableRows() +
+    '</tbody></table></div><h3 style="margin-top:22px">B. PESERTA DIDIK BERPRESTASI</h3><div class="table-wrap"><table class="report-table"><thead><tr><th>Ranking</th><th>Siswa yang Berprestasi</th><th>Jumlah Nilai</th><th>Rata-rata</th></tr></thead><tbody>' +
+    top
+      .map(function (row, index) {
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td><td>" +
+          row.name +
+          "</td><td>" +
+          row.total +
+          "</td><td>" +
+          row.avg +
+          "</td></tr>"
+        );
+      })
+      .join("") +
+    '</tbody></table></div><div class="report-signatures"><span>Waka Bid. Kurikulum,<br><br><br><strong>Sumiati Sunarsih, S.Pd., M.Ak.</strong><br>NIP. 197904252014122002</span><span>Jakarta, ' +
+    date +
+    "<br>Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005</span></div></section></div>"
+  );
+}
+function journal() {
+  var date = todayLabel(),
+    entries = [
+      [
+        "06.30—09.00",
+        "PAI",
+        "Lutfi Faridil Aftros, S.Pd.I",
+        "Materi pembelajaran dan tujuan pembelajaran belum diisi",
+        "Belum diisi",
+        "pending",
+      ],
+      [
+        "09.00—11.30",
+        "Matematika",
+        "Robert Henry Hutapea, S.Si., M.Pd.",
+        "Persamaan dan fungsi kuadrat",
+        "Robert Henry Hutapea, S.Si., M.Pd.",
+        "done",
+      ],
+      [
+        "11.30—13.30",
+        "PKK",
+        "Nani Aminah, SE.",
+        "Materi pembelajaran belum diisi",
+        "Belum diisi",
+        "pending",
+      ],
+      [
+        "13.30—15.00",
+        "Kokurikuler",
+        "Englena Nastaria Purba, S.Pd.",
+        "Refleksi kegiatan kokurikuler",
+        "Englena Nastaria Purba, S.Pd.",
+        "done",
+      ],
+    ];
+  return (
+    '<div class="page">' +
+    head(
+      "Aktivitas kelas",
+      "Jurnal Kelas",
+      "Catatan materi yang diajarkan guru mata pelajaran pada hari tersebut",
+      '<button class="primary-btn" id="newJournal">＋ Input Jurnal</button>',
+    ) +
+    '<section class="panel table-panel"><div class="panel-head"><div><h2>Jurnal pembelajaran hari ini</h2><p>' +
+    date +
+    ' · Guru mengisi setelah jam mengajar selesai</p></div><span class="pill amber">' +
+    entries.filter(function (x) {
+      return x[5] === "pending";
+    }).length +
+    ' belum diisi</span></div><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mata pelajaran</th><th>Guru</th><th>Materi yang diajarkan</th><th>Diinput oleh</th><th>Status</th><th>Aksi</th></tr></thead><tbody>' +
+    entries
+      .map(function (x) {
+        return (
+          "<tr><td>" +
+          x[0] +
+          "</td><td><strong>" +
+          x[1] +
+          "</strong></td><td>" +
+          x[2] +
+          "</td><td>" +
+          x[3] +
+          "</td><td>" +
+          x[4] +
+          '</td><td><span class="pill ' +
+          (x[5] === "done" ? "teal" : "amber") +
+          '">' +
+          (x[5] === "done" ? "Lengkap" : "Menunggu jurnal") +
+          '</span></td><td><button class="panel-action" data-journal-edit="' +
+          x[1] +
+          "|" +
+          x[0] +
+          "|" +
+          x[2] +
+          '">' +
+          (x[5] === "done" ? "Koreksi" : "Input / Koreksi") +
+          "</button></td></tr>"
+        );
+      })
+      .join("") +
+    '</tbody></table></div></section><section class="panel" style="margin-top:18px"><div class="panel-head"><div><h2>Aturan pengisian jurnal</h2><p>Alur pencatatan pembelajaran 11PF1</p></div></div><div class="alert-box"><strong>Guru mata pelajaran</strong> mengisi jurnal setelah jam mengajar selesai, termasuk materi, aktivitas, dan catatan pembelajaran. Jika guru lupa atau belum mengisi, Wali Kelas dan Sekretaris Kelas dapat menggunakan tombol <strong>Koreksi</strong> untuk melengkapi jurnal.</div></section></div>'
+  );
+}
+function communication() {
+  return (
+    '<div class="page">' +
+    head(
+      "Komunikasi",
+      "Pesan orang tua",
+      "AIWalas membantu memahami pesan dan mencatat keterangannya",
+      '<button class="outline-btn">＋ Pesan baru</button>',
+    ) +
+    '<div class="page-grid"><section class="panel"><div class="panel-head"><div><h2>Inbox orang tua</h2><p>8 pesan terkait absensi</p></div><span class="pill coral">8 baru</span></div>' +
+    [
+      [
+        "Orangtua Zevanya Putri Ramadhani",
+        "Diteruskan: hari ini Zevanya izin tidak masuk sekolah karena sakit batuk dan sesak.",
+        "Sakit",
+        "Hari ini · WhatsApp",
+      ],
+      [
+        "Orangtua Khaira Aurelia Putri",
+        "Diteruskan: hari ini Khaira izin tidak masuk sekolah karena sakit maag.",
+        "Sakit",
+        "Hari ini · WhatsApp",
+      ],
+      [
+        "Orangtua Haikal Mahendra",
+        "Diteruskan: Haikal izin tidak masuk karena panas badan.",
+        "Sakit",
+        "Hari ini · WhatsApp",
+      ],
+      [
+        "Orangtua Akhmad Akmal Hidayatulloh",
+        "Diteruskan: Akmal tidak bisa masuk sekolah karena sakit demam.",
+        "Sakit",
+        "Hari ini · WhatsApp",
+      ],
+      [
+        "Orangtua Syafii Qotu Aqiilah Qurrotu Ainii",
+        "Diteruskan: Syafii izin tidak mengikuti pelajaran karena demam dan batuk pilek.",
+        "Sakit",
+        "Baru · WhatsApp",
+      ],
+      [
+        "Orangtua Mourin Machrani",
+        "Assalamualaikun, maaf Pak, hari ini Mourin tidak bisa masuk karena sedang kurang enak badan. Terima kasih 🙏",
+        "Sakit",
+        "Baru · WhatsApp",
+      ],
+      [
+        "Ibu Bella Safitri",
+        "Bella demam sejak malam, Bu. Hari ini izin tidak masuk dulu...",
+        "Sakit",
+        "18 menit lalu",
+      ],
+      [
+        "Bapak Dimas Saputra",
+        "Mohon maaf Dimas terlambat, tadi ban motor kami bocor di jalan.",
+        "Izin",
+        "1 jam lalu",
+      ],
+      [
+        "Ibu Aldo Ramadhan",
+        "Bu, Aldo sudah berangkat. Mohon dipantau kalau terlambat.",
+        "Informasi",
+        "Kemarin",
+      ],
+    ]
+      .map(function (m) {
+        return (
+          '<div class="chat-message"><span class="avatar avatar-teal">' +
+          initials(
+            m[0]
+              .replace("Ibu ", "")
+              .replace("Bapak ", "")
+              .replace("Orangtua ", ""),
+          ) +
+          '</span><div><strong style="font-size:11px">' +
+          m[0] +
+          "</strong><p>" +
+          m[1] +
+          '<br><span class="pill ' +
+          (m[2] === "Sakit" ? "teal" : m[2] === "Izin" ? "amber" : "") +
+          '" style="display:inline-block;margin-top:7px">' +
+          m[2] +
+          '</span></p><small style="color:#a1abb5;font-size:10px">' +
+          m[3] +
+          "</small></div></div>"
+        );
+      })
+      .join("") +
+    '</section><section class="panel"><div class="panel-head"><div><h2>Simulasi percakapan AI</h2><p>AI tidak menolak keterangan, hanya mengklasifikasikan</p></div><span class="pill teal">AI aktif</span></div><div class="chat-message"><span class="avatar avatar-teal">AI</span><p>Baik, Bu. Saya catat bahwa Bella tidak masuk hari ini karena kondisi kesehatan. Status absensi akan diperbarui menjadi <strong>Sakit</strong>. Apakah informasi ini sudah benar?</p></div><div class="chat-message me"><p>Ya, sudah benar. Terima kasih.</p></div><div class="chat-input"><input id="chatInput" placeholder="Tulis balasan simulasi..."><button class="primary-btn" id="sendChat">Kirim</button></div></section></div></div>'
+  );
+}
+function remedial() {
+  return (
+    '<div class="page">' +
+    head(
+      "Tindak lanjut",
+      "Remedial & tugas perbaikan",
+      "Pastikan setiap siswa mendapat arahan yang jelas",
+      '<button class="primary-btn" id="newRemedial">＋ Buat tindak lanjut</button>',
+    ) +
+    '<section class="panel table-panel"><div class="panel-head"><div><h2>Daftar tindak lanjut</h2><p>6 siswa memiliki nilai di bawah batas minimum</p></div><button class="filter-btn">Semua status　⌄</button></div><div class="table-wrap"><table><thead><tr><th>Siswa</th><th>Mata pelajaran</th><th>Nilai awal</th><th>Tindak lanjut</th><th>Status</th></tr></thead><tbody>' +
+    [
+      ["Dimas Saputra", "Matematika", "68", "Latihan Bab 3", "Menunggu arahan"],
+      ["Bella Safitri", "Bahasa Inggris", "79", "Remedial Bab 2", "Ditetapkan"],
+      ["Aldo Ramadhan", "Matematika", "74", "—", "Menunggu arahan"],
+      [
+        "Naufal Akbar",
+        "Produktif PF",
+        "77",
+        "Tugas perbaikan",
+        "Menunggu pengumpulan",
+      ],
+    ]
+      .map(function (x) {
+        return (
+          '<tr><td><div class="student-cell"><span class="avatar avatar-teal">' +
+          initials(x[0]) +
+          "</span><strong>" +
+          x[0] +
+          "</strong></div></td><td>" +
+          x[1] +
+          '</td><td><strong style="color:var(--coral)">' +
+          x[2] +
+          "</strong></td><td>" +
+          x[3] +
+          '</td><td><span class="pill ' +
+          (x[4].indexOf("Menunggu") >= 0 ? "amber" : "teal") +
+          '">' +
+          x[4] +
+          "</span></td></tr>"
+        );
+      })
+      .join("") +
+    "</tbody></table></div></section></div>"
+  );
+}
+function notifications() {
+  return (
+    '<div class="page">' +
+    head(
+      "Pusat informasi",
+      "Notifikasi",
+      "Semua kabar penting untuk kelas 11PF1",
+      '<button class="outline-btn" id="markRead">Tandai semua dibaca</button>',
+    ) +
+    '<section class="panel"><div class="activity-list">' +
+    [
+      [
+        "coral-bg",
+        "♡",
+        "Lima orang tua memberi keterangan",
+        "Zevanya, Khaira, Haikal, Akmal, dan Syafii diinformasikan tidak masuk hari ini karena sakit. Status absensi diperbarui: Sakit.",
+        "Baru · WhatsApp",
+      ],
+      [
+        "coral-bg",
+        "♡",
+        "Orang tua memberi keterangan",
+        "Orangtua Mourin Machrani menginformasikan Mourin tidak masuk hari ini karena kurang enak badan. Status diperbarui: Sakit.",
+        "Baru · WhatsApp",
+      ],
+      [
+        "coral-bg",
+        "♡",
+        "Orang tua memberi keterangan",
+        "Ibu Bella Safitri menginformasikan Bella sakit hari ini. Status disarankan: Sakit.",
+        "18 menit lalu",
+      ],
+      [
+        "amber-bg",
+        "◷",
+        "Konfirmasi guru diperlukan",
+        "Pak Budi Santoso belum merespons pengingat jadwal Matematika.",
+        "32 menit lalu",
+      ],
+      [
+        "purple-bg",
+        "↗",
+        "Tindak lanjut baru dibuat",
+        "Dimas Saputra mendapat arahan remedial Matematika.",
+        "1 jam lalu",
+      ],
+      [
+        "teal-bg",
+        "✓",
+        "Absensi berhasil diperbarui",
+        "Scan QR Rania Zahra tercatat sebagai Hadir.",
+        "2 jam lalu",
+      ],
+    ]
+      .map(function (n) {
+        return (
+          '<div class="activity" style="padding:13px 0;border-bottom:1px solid var(--line)"><span class="activity-icon ' +
+          n[0] +
+          '">' +
+          n[1] +
+          '</span><div class="activity-text"><strong>' +
+          n[2] +
+          "</strong><br>" +
+          n[3] +
+          '<span class="activity-time">' +
+          n[4] +
+          '</span></div><button class="panel-action" style="margin-left:auto">Buka →</button></div>'
+        );
+      })
+      .join("") +
+    "</div></section></div>"
+  );
+}
+function toast(msg) {
+  var e = document.createElement("div");
+  e.className = "toast success";
+  e.textContent = msg;
+  document.getElementById("toastWrap").appendChild(e);
+  setTimeout(function () {
+    e.remove();
+  }, 3200);
+}
+function closeModal() {
+  document.getElementById("modalBackdrop").classList.remove("show");
+}
+function modal(title, text, form) {
+  document.getElementById("modalContent").innerHTML =
+    '<button class="modal-close" id="closeModal">×</button><h2>' +
+    title +
+    "</h2><p>" +
+    text +
+    "</p>" +
+    form;
+  document.getElementById("modalBackdrop").classList.add("show");
+  document.getElementById("closeModal").onclick = closeModal;
+  var cancel = document.getElementById("cancelModal"),
+    save = document.getElementById("saveModal");
+  if (cancel) cancel.onclick = closeModal;
+  if (save)
+    save.onclick = function () {
+      closeModal();
+      toast("Perubahan berhasil disimpan");
+    };
+}
+function simpleModal(title, text) {
+  modal(
+    title,
+    text,
+    '<form><label>Catatan<textarea placeholder="Tambahkan keterangan..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan</button></div></form>',
+  );
+}
+function applyRoleAccess() {
+  var access = roleAccess[currentRole] || [];
+  document.querySelectorAll(".nav-item[data-page]").forEach(function (item) {
+    item.style.display =
+      access.indexOf(item.dataset.page) >= 0 ? "flex" : "none";
+  });
+  var settings = document.querySelector(".sidebar-bottom>.nav-item");
+  if (settings)
+    settings.style.display = currentRole === "walas" ? "flex" : "none";
+  var user = document.querySelector(".workspace-switch strong"),
+    roleText = document.querySelector(".workspace-switch small");
+  if (user) user.textContent = currentUser ? currentUser.name : "";
+  if (roleText)
+    roleText.textContent =
+      currentRole === "walas"
+        ? "Wali Kelas · 11PF1"
+        : currentRole === "assistant"
+          ? "Sekretaris Kelas · 11PF1"
+          : currentRole === "guest"
+            ? "Akses publik"
+            : "Siswa · 11PF1";
+}
+function addAssistantReminderControls() {
+  if (currentRole !== "assistant" || page !== "schedule") return;
+  document.querySelectorAll(".schedule-item").forEach(function (item) {
+    var status = item.querySelector(".teacher-status");
+    if (
+      !status ||
+      status.textContent.trim() === "Kosong" ||
+      item.querySelector(".assistant-action")
+    )
+      return;
+    var button = document.createElement("button");
+    button.className = "assistant-action";
+    button.textContent = "Matikan reminder";
+    button.onclick = function () {
+      button.textContent = "Reminder dinonaktifkan";
+      button.disabled = true;
+      toast("Reminder guru dinonaktifkan untuk sesi ini");
+    };
+    item.querySelector(".schedule-info").appendChild(button);
+  });
+}
+function renderStudentAttendance() {
+  if (currentRole !== "student" || page !== "attendance") return;
+  var root = document.getElementById("pageContent");
+  root.innerHTML =
+    '<div class="page"><div class="page-heading"><div><div class="eyebrow">Absensi siswa</div><h1>Halo, ' +
+    currentUser.name +
+    "</h1><p>NIS " +
+    currentUser.nis +
+    ' · Kelas 11PF1</p></div></div><section class="panel" style="max-width:620px;margin:auto;text-align:center"><div class="stat-icon teal-bg" style="margin:0 auto 16px;width:52px;height:52px;font-size:25px">▣</div><h2 style="font-size:18px;margin-bottom:8px">Scan QR untuk mengisi absensi</h2><p style="font-size:12px;color:var(--muted);line-height:1.6">Arahkan kamera HP ke QR Code yang tertempel di dinding kelas. Pastikan Anda berada di kelas 11PF1.</p><button class="primary-btn" id="studentQrButton" style="margin-top:20px;width:100%;max-width:320px">Buka scanner QR</button><div class="alert-box" style="margin-top:18px;text-align:left"><strong>Aturan absensi hari ini</strong>05.30—06.30 Hadir · 06.30—07.00 Terlambat · Setelah 07.00 menunggu verifikasi wali kelas.</div></section></div>';
+  var button = document.getElementById("studentQrButton");
+  button.onclick = function () {
+    button.textContent =
+      "✓ Absensi tercatat " +
+      new Date().toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    button.disabled = true;
+    toast("Absensi berhasil dicatat pada mode demo");
+  };
+}
+function authRequest(path, options) {
+  options = options || {};
+  options.credentials = "same-origin";
+  options.headers = Object.assign(
+    { Accept: "application/json", "Content-Type": "application/json" },
+    options.headers || {},
+  );
+  return fetch(path, options).then(function (response) {
+    return response
+      .json()
+      .catch(function () {
+        return { ok: false, message: "Respons server tidak valid." };
+      })
+      .then(function (data) {
+        if (!response.ok)
+          throw new Error(data.message || "Permintaan tidak dapat diproses.");
+        return data;
+      });
+  });
+}
+function finishLogin(user) {
+  currentRole = user.role;
+  currentUser = user;
+  document.getElementById("loginScreen").classList.add("hidden");
+  page =
+    currentRole === "student" || currentRole === "assistant"
+      ? "attendance"
+      : "dashboard";
+  applyRoleAccess();
+  render();
+}
+function setupLogin() {
+  var form = document.getElementById("loginForm"),
+    role = document.getElementById("loginRole"),
+    note = document.getElementById("loginNote"),
+    error = document.getElementById("loginError"),
+    submit = form.querySelector('[type="submit"]');
+  role.onchange = function () {
+    note.textContent =
+      role.value === "student"
+        ? "Siswa menggunakan NIS sebagai username dan password."
+        : role.value === "guest"
+          ? "Gunakan akun Guest untuk melihat informasi publik."
+          : "Username dan password akun ini ditentukan oleh administrator.";
+    error.textContent = "";
+  };
+  form.onsubmit = function (e) {
+    e.preventDefault();
+    error.textContent = "";
+    submit.disabled = true;
+    submit.textContent = "Memeriksa akun...";
+    authRequest("api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        role: role.value,
+        username: document.getElementById("loginUsername").value.trim(),
+        password: document.getElementById("loginPassword").value,
+      }),
+    })
+      .then(function (data) {
+        finishLogin(data.user);
+      })
+      .catch(function (reason) {
+        error.textContent = reason.message;
+      })
+      .finally(function () {
+        submit.disabled = false;
+        submit.textContent = "Masuk ke AIWalas";
+      });
+  };
+}
+function restoreSession() {
+  authRequest("api/auth/session")
+    .then(function (data) {
+      if (data.authenticated && data.user) finishLogin(data.user);
+    })
+    .catch(function () {
+      document.getElementById("loginError").textContent =
+        "Server autentikasi belum dapat dihubungi.";
+    });
+}
+function logout() {
+  authRequest("api/auth/logout", { method: "POST", body: "{}" })
+    .catch(function () {})
+    .finally(function () {
+      currentUser = null;
+      currentRole = null;
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("loginPassword").value = "";
+      document.getElementById("loginError").textContent = "";
+      document.getElementById("loginUsername").focus();
+    });
+}
+function bind() {
+  document.querySelectorAll("[data-page]").forEach(function (b) {
+    b.onclick = function () {
+      page = b.dataset.page;
+      render();
+    };
+  });
+  var search = document.getElementById("studentSearch");
+  if (search)
+    search.oninput = function () {
+      var q = search.value.toLowerCase();
+      document.getElementById("studentRows").innerHTML = rows(
+        students.filter(function (s) {
+          return s[0].toLowerCase().indexOf(q) >= 0 || s[1].indexOf(q) >= 0;
+        }),
+      );
+    };
+  document.querySelectorAll("[data-student]").forEach(function (b) {
+    b.onclick = function () {
+      var student = students.find(function (s) {
+        return s[0] === b.dataset.student;
+      });
+      simpleModal(
+        "Profil siswa",
+        "<strong>" +
+          student[0] +
+          "</strong><br>NIS: " +
+          student[1] +
+          "<br>Nomor HP siswa: " +
+          (student[5] || "Belum tersedia") +
+          "<br>Nomor HP orangtua: " +
+          (student[6] || "Belum tersedia"),
+      );
+    };
+  });
+  var scan = document.getElementById("scanQr");
+  if (scan)
+    scan.onclick = function () {
+      simpleModal(
+        "Simulasi scan QR",
+        "Pilih siswa untuk mencatat kehadiran. Dalam mode nyata, kamera akan membaca QR code siswa.",
+      );
+    };
+  var grade = document.getElementById("inputGrade");
+  if (grade)
+    grade.onclick = function () {
+      simpleModal(
+        "Input nilai",
+        "Nilai tidak dibuat atau diubah AI. Semua input tercatat sebagai Draft dan dapat dikoreksi.",
+      );
+    };
+  ["addStudent", "newRemedial"].forEach(function (id) {
+    var e = document.getElementById(id);
+    if (e)
+      e.onclick = function () {
+        simpleModal(
+          id === "addStudent" ? "Tambah siswa" : "Buat tindak lanjut",
+          "Lengkapi informasi untuk melanjutkan.",
+        );
+      };
+  });
+  var send = document.getElementById("sendChat");
+  if (send)
+    send.onclick = function () {
+      var i = document.getElementById("chatInput");
+      if (i.value.trim()) {
+        toast("Pesan simulasi terkirim");
+        i.value = "";
+      }
+    };
+  var approve = document.getElementById("approveTask");
+  if (approve)
+    approve.onclick = function () {
+      toast("Tugas pengganti disetujui dan siap diteruskan ke WAG kelas");
+    };
+  var mark = document.getElementById("markRead");
+  if (mark)
+    mark.onclick = function () {
+      toast("Semua notifikasi ditandai sudah dibaca");
+    };
+  var logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) logoutBtn.onclick = logout;
+}
+var teacherScoreData = {
+  PAI: [84, 88, 90, 86, 78, 82, 91, 89],
+  PPKN: [88, 85, 90, 92, 80, 86, 84, 90],
+  "Bahasa Indonesia": [82, 87, 89, 91, 85, 88, 90, 92],
+  Olahraga: [90, 92, 88, 94, 86, 90, 91, 93],
+  Sejarah: [78, 84, 86, 89, 80, 83, 88, 90],
+  Kokurikuler: [85, 88, 90, 92, 87, 89, 91, 93],
+  "Muatan Lokal": [80, 83, 86, 88, 82, 85, 87, 90],
+  Matematika: [76, 81, 84, 86, 78, 80, 85, 88],
+  "Bahasa Inggris": [86, 89, 91, 93, 84, 87, 90, 92],
+  "Manajemen Produksi": [90, 88, 92, 94, 86, 89, 91, 95],
+  "Naskah & Penyutradaraan": [88, 91, 94, 92, 90, 89, 93, 95],
+  "Tata Cahaya": [82, 86, 89, 91, 80, 84, 88, 90],
+  "Tata Kamera": [85, 87, 90, 93, 83, 86, 89, 92],
+  "Tata Artistik": [89, 91, 88, 94, 87, 90, 92, 95],
+  PKK: [84, 88, 90, 92, 82, 86, 89, 91],
+};
+function teachersPage() {
+  var subjects = Object.keys(teacherContacts),
+    rowsHtml = subjects
+      .map(function (subject) {
+        var t = teacherContacts[subject],
+          scores = teacherScoreData[subject] || [0, 0, 0, 0, 0, 0, 0, 0],
+          avg = Math.round(
+            scores.reduce(function (a, b) {
+              return a + b;
+            }, 0) / scores.length,
+          );
+        return (
+          '<tr><td><div class="student-cell"><span class="avatar avatar-teal">' +
+          initials(t.name) +
+          "</span><strong>" +
+          t.name +
+          "</strong></div></td><td>" +
+          subject +
+          "</td><td>" +
+          t.phone +
+          '</td><td><span class="pill ' +
+          (avg >= 80 ? "teal" : "coral") +
+          '">Rata-rata ' +
+          avg +
+          '</span></td><td><button class="panel-action teacher-score-btn" data-teacher-score="' +
+          subject +
+          '">Lihat nilai →</button></td></tr>'
+        );
+      })
+      .join("");
+  return (
+    '<div class="page">' +
+    head(
+      "Workspace akademik",
+      "Guru mata pelajaran",
+      "Data kontak guru dan rekap nilai UH serta Tugas semester",
+      '<button class="outline-btn" id="teacherContactInfo">▣ Data kontak</button>',
+    ) +
+    '<div class="grid-stats">' +
+    stat(
+      "Guru/mapel",
+      subjects.length,
+      "Data mata pelajaran aktif",
+      "♙",
+      "teal",
+    ) +
+    stat("Komponen nilai", "8", "UH 1–4 dan Tugas 1–4", "▤", "purple") +
+    stat("Semester", "Ganjil", "Rekap nilai kelas 11PF1", "◷", "amber") +
+    stat("Kontak tersimpan", "15", "Siap untuk komunikasi", "✓", "teal") +
+    '</div><section class="panel table-panel teacher-directory"><div class="panel-head"><div><h2>Direktori guru mata pelajaran</h2><p>Tekan “Lihat nilai” untuk membuka rekap penilaian guru/mapel</p></div><span class="pill teal">15 mapel</span></div><div class="table-wrap"><table><thead><tr><th>Nama guru</th><th>Mata pelajaran</th><th>Nomor telepon</th><th>Ringkasan</th><th>Aksi</th></tr></thead><tbody>' +
+    rowsHtml +
+    "</tbody></table></div></section></div>"
+  );
+}
 var carouselTimer;
-function dashboardCarousel(){var panel=document.querySelector('.dashboard-grid .panel');if(!panel)return;clearInterval(carouselTimer);panel.innerHTML='<div class="panel-head"><div><h2>Ringkasan kelas</h2><p>Informasi bergantian secara otomatis</p></div><span class="pill teal">Live</span></div><div class="dashboard-carousel"><div class="carousel-tabs"><button class="carousel-tab active" data-slide="0">Rekap absen</button><button class="carousel-tab" data-slide="1">Jadwal mapel</button></div><div class="carousel-view active"><div class="panel-head"><div><h2>Rekap Absen Minggu Ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart"><div class="bar-group"><div class="bar" style="height:78%"></div><div class="bar late" style="height:24%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Sen</span></div><div class="bar-group"><div class="bar" style="height:84%"></div><div class="bar late" style="height:15%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Sel</span></div><div class="bar-group"><div class="bar" style="height:88%"></div><div class="bar late" style="height:9%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Rab</span></div><div class="bar-group"><div class="bar" style="height:82%"></div><div class="bar late" style="height:18%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Kam</span></div><div class="bar-group"><div class="bar" style="height:80%"></div><div class="bar late" style="height:12%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Jum</span></div></div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></div><div class="carousel-view"><div class="panel-head"><div><h2>Jadwal Mapel Hari Ini</h2><p>Senin, 14 Oktober 2024 · Kelas 11PF1</p></div><button class="panel-action" id="showSchedule">Lihat jadwal →</button></div><div class="today-schedule"><div class="schedule-item"><span class="schedule-time">07.30—09.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>PKK</strong><small>Nani Aminah, SE.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">09.00—10.45</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Sejarah</strong><small>Englena Nastaria Purba, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">10.45—13.30</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Tata Artistik</strong><small>Ruby Eka Prawira, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">13.30—15.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Bahasa Inggris</strong><small>Ika Inayah, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div></div></div><div class="carousel-controls"><button class="carousel-dot active" data-slide="0"></button><button class="carousel-dot" data-slide="1"></button></div></div>';var views=panel.querySelectorAll('.carousel-view'),tabs=panel.querySelectorAll('[data-slide]');function show(i){views.forEach(function(v,n){v.classList.toggle('active',n===i)});tabs.forEach(function(t){t.classList.toggle('active',t.dataset.slide==i)});var detail=panel.querySelector('[data-page="attendance"]');if(detail)detail.onclick=function(){page='attendance';render()};var full=panel.querySelector('#showSchedule');if(full)full.onclick=function(){page='schedule';render()}}tabs.forEach(function(t){t.onclick=function(){show(Number(t.dataset.slide));reset()}});function reset(){clearInterval(carouselTimer);carouselTimer=setInterval(function(){var active=panel.querySelector('.carousel-view.active'),next=active===views[0]?1:0;show(next)},6500)}reset()}
-var originalDashboardCarousel=dashboardCarousel;
-function extendCarouselDuration(){var panel=document.querySelector('.dashboard-grid .panel');if(!panel)return;var views=panel.querySelectorAll('.carousel-view'),tabs=panel.querySelectorAll('[data-slide]');function rotate(){var active=panel.querySelector('.carousel-view.active'),next=active===views[0]?1:0;views.forEach(function(v,i){v.classList.toggle('active',i===next)});tabs.forEach(function(t){t.classList.toggle('active',Number(t.dataset.slide)===next)})}function reset(){clearInterval(carouselTimer);carouselTimer=setInterval(rotate,12000)}tabs.forEach(function(t){t.addEventListener('click',reset)});reset()}
-var realtimeWeeklySchedule={
-Senin:[['06.30—07.30','Upacara','Aktivitas sekolah'],['07.30—09.00','PKK','Nani Aminah, SE.'],['09.00—10.45','Sejarah','Englena Nastaria Purba, S.Pd.'],['10.45—13.30','Tata Artistik','Ruby Eka Prawira, S.Pd.'],['13.30—15.00','Bahasa Inggris','Ika Inayah, S.Pd.']],
-Selasa:[['06.30—09.00','Bahasa Indonesia','Erna Cahyani, S.Pd.'],['09.00—10.45','Tata Cahaya','Wahyu Lukman Hakim, S.Kom.'],['10.45—12.15','PPKN','Ngatman, S.Pd.'],['12.45—15.00','Manajemen Produksi','Sumantoro Kasdhani, S.Kom., M.I.Kom.']],
-Rabu:[['06.30—09.00','Tata Kamera','Putu Arya Ranesda, S.Kom.'],['09.00—10.45','Olahraga','Putu Arya Ranesda, S.Kom.'],['10.45—12.15','Tata Cahaya','Wahyu Lukman Hakim, S.Kom.'],['12.45—15.00','Tata Artistik','Ruby Eka Prawira, S.Pd.']],
-Kamis:[['06.30—09.00','PAI','Lutfi Faridil Aftros, S.Pd.I'],['09.00—11.30','Matematika','Robert Henry Hutapea, S.Si., M.Pd.'],['11.30—13.30','PKK','Nani Aminah, SE.'],['13.30—15.00','Kokurikuler','Englena Nastaria Purba, S.Pd.']],
-Jumat:[['06.30—07.30','Jumat Pembiasaan','Aktivitas sekolah'],['07.30—08.50','Naskah & Penyutradaraan','Sumantoro Kasdhani, S.Kom., M.I.Kom.'],['08.50—10.10','Bahasa Inggris','Ika Inayah, S.Pd.'],['10.25—11.45','Muatan Lokal','Englena Nastaria Purba, S.Pd.'],['13.00—15.00','Tata Kamera','Putu Arya Ranesda, S.Kom.']]};
-function realtimeDashboardSchedule(){var dayNames=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],day=dayNames[new Date().getDay()],items=realtimeWeeklySchedule[day]||[],now=new Date(),minutes=now.getHours()*60+now.getMinutes();function state(time){var parts=time.split('—'),start=parts[0].split('.'),end=parts[1].split('.'),a=Number(start[0])*60+Number(start[1]),b=Number(end[0])*60+Number(end[1]);return minutes>=a&&minutes<b?'Berlangsung':minutes>=b?'Selesai':'Terjadwal'}var views=document.querySelectorAll('.dashboard-grid .panel .carousel-view'),view=views[1];if(!view)return;var title=view.querySelector('h2'),subtitle=view.querySelector('.panel-head p'),list=view.querySelector('.today-schedule');if(title)title.textContent='Jadwal Mapel Hari Ini';if(subtitle)subtitle.textContent=day+', '+todayLabel().replace(/^[^,]+, /,'')+' · Kelas 11PF1';if(list)list.innerHTML=items.map(function(x){return '<div class="schedule-item"><span class="schedule-time">'+x[0]+'</span><i class="schedule-bar"></i><div class="schedule-info"><strong>'+x[1]+'</strong><small>'+x[2]+'</small></div><span class="teacher-status">'+state(x[0])+'</span></div>'}).join('')||'<div class="stat-note">Tidak ada jadwal pada hari ini.</div>'}
-dashboardCarousel=function(){originalDashboardCarousel();extendCarouselDuration();realtimeDashboardSchedule()};
-function render(){var f={dashboard:dashboard,students:studentsPage,attendance:attendance,schedule:schedule,journal:journal,reports:reports,grades:grades,communication:communication,remedial:remedial,notifications:notifications};document.getElementById('pageContent').innerHTML=f[page]();document.getElementById('breadcrumbCurrent').textContent=names[page];document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.page===page)});bind();if(page==='dashboard')dashboardCarousel()}
-function todayLabel(){return new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())}
-function replaceTextNodes(root,replacements){var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;while(node=walker.nextNode()){replacements.forEach(function(pair){node.nodeValue=node.nodeValue.split(pair[0]).join(pair[1])})}}
-function statusCounts(){return students.reduce(function(acc,s){acc.total++;acc[s[2]]=(acc[s[2]]||0)+1;return acc},{total:0})}
-function hydrateDashboardStats(){var cards=document.querySelectorAll('.grid-stats .stat-card'),counts=statusCounts();if(cards.length<4)return;cards[0].querySelector('.stat-number').textContent=counts.total;cards[1].querySelector('.stat-number').textContent=counts.Hadir||0;cards[1].querySelector('.stat-note').textContent=Math.round(((counts.Hadir||0)/counts.total)*100)+'% dari total siswa';var late=students.filter(function(s){return s[2]==='Terlambat'}),lateCard=cards[2];lateCard.classList.add('late-summary-card');lateCard.innerHTML='<div class="stat-top"><span class="stat-label">Terlambat</span><span class="stat-icon amber-bg">◷</span></div><div class="stat-number">'+late.length+'</div><div class="stat-note">Notifikasi orang tua terkirim</div><div class="late-summary-list">'+(late.map(function(s){return '<strong>'+s[0]+'</strong>'}).join('')||'<span class="stat-note">Tidak ada siswa terlambat</span>')+'</div>'}
-function hydrateAttentionList(){var list=document.querySelector('.lower-grid .risk-list');if(!list)return;var points=[30,60,100],late=students.filter(function(s){return s[2]==='Terlambat'});list.innerHTML=late.map(function(s,i){var point=points[Math.min(i,points.length-1)],kind=point>=100?'coral':'amber';return '<div class="risk-row"><span class="risk-avatar">'+s[3]+'</span><div class="risk-info"><strong>'+s[0]+'</strong><small>'+((i+1)+'× terlambat')+'</small></div><span class="pill '+kind+'">'+point+' poin</span></div>'}).join('')||'<div class="stat-note">Tidak ada siswa dengan keterlambatan</div>'}
-function hydrateAbsenceSummary(){var card=document.querySelector('.grid-stats .stat-card:last-child');if(!card)return;var counts=statusCounts(),groups=[['Sakit','sick'],['Izin','permission'],['Menunggu keterangan','waiting']],html='',total=(counts.Sakit||0)+(counts.Izin||0)+(counts['Menunggu keterangan']||0);groups.forEach(function(group){students.filter(function(s){return s[2]===group[0]}).forEach(function(s){html+='<div class="absence-summary-row"><span class="absence-summary-label '+group[1]+'">'+(group[0]==='Menunggu keterangan'?'Menunggu':group[0])+'</span><strong>'+s[0]+'</strong></div>'})});card.classList.add('absence-summary-card');card.innerHTML='<div class="stat-top"><span class="stat-label">Tidak hadir (Sakit/Izin)</span><span class="stat-icon coral-bg">!</span></div><div class="stat-number">'+total+'</div><div class="stat-note">Sakit, izin, atau menunggu keterangan</div><div class="absence-summary-list">'+(html||'<div class="stat-note">Tidak ada data</div>')+'</div>'}
-var baseRender=render;
-render=function(){baseRender();var root=document.getElementById('pageContent');if(!root)return;if(currentRole==='student'&&page==='attendance')renderStudentAttendance();var now=todayLabel();replaceTextNodes(root,[['Ibu Bella Safitri','Orangtua ALISAH PUTRI RAMADANI'],['Bapak Dimas Saputra','Orangtua MUHAMMAD DUDE SATRIYA'],['Ibu Aldo Ramadhan','Orangtua AKHMAD AKMAL HIDAYATULLOH'],['Senin, 14 Oktober 2024',now],['Senin, 14 Okt 2024',now],['Dimas Saputra','MUHAMMAD DUDE SATRIYA'],['Dimas','MUHAMMAD DUDE SATRIYA'],['Bella Safitri','ALISAH PUTRI RAMADANI'],['Bella','ALISAH'],['Aldo Ramadhan','AKHMAD AKMAL HIDAYATULLOH'],['Aldo','AKHMAD'],['Kevin Aditya','BINTANG AL FARISI'],['Naufal Akbar','MUHAMMAD RIZKY'],['Rania Zahra','ZEVANYA PUTRI RAMADHANI'],['Aditya Pratama','ABDULLAH SYAFI\'IE'],['Aisyah Putri','AURELIA ASSYIFA'],['Ananda Kirana','KANAYA SAFA AULIA']]);if(page==='dashboard'){hydrateDashboardStats();hydrateAbsenceSummary();hydrateAttentionList()}addAssistantReminderControls()}
-var renderWithSpecialActivities=render;
-render=function(){renderWithSpecialActivities();if(page!=='schedule')return;var groups=document.querySelectorAll('.schedule-list > div'),activities=[['06.30—07.30','Upacara'],['06.30—07.30','Jumat Pembiasaan']];[0,4].forEach(function(index,n){var item=groups[index]&&groups[index].querySelector('.schedule-item');if(!item)return;item.querySelector('.schedule-time').textContent=activities[n][0];item.querySelector('.schedule-info strong').textContent=activities[n][1];item.querySelector('.schedule-info small').textContent='Aktivitas sekolah';item.querySelector('.schedule-bar').classList.remove('pending');item.querySelector('.teacher-status').className='teacher-status';item.querySelector('.teacher-status').textContent='Aktivitas'})}
-document.getElementById('globalSearch').onclick=function(){page='students';render();setTimeout(function(){var e=document.getElementById('studentSearch');if(e)e.focus()},40)}
-document.getElementById('mobileMenu').onclick=function(){document.getElementById('sidebar').classList.toggle('open')}
-document.getElementById('modalBackdrop').onclick=function(e){if(e.target.id==='modalBackdrop')closeModal()}
-function restrictDashboardActions(){document.querySelectorAll('#pageContent [data-page]').forEach(function(button){var target=button.dataset.page;if((roleAccess[currentRole]||[]).indexOf(target)<0){button.disabled=true;button.style.opacity='.55';button.title='Menu ini tidak tersedia untuk peran Anda'}})}
-var renderWithTeacherDirectory=render;
-render=function(){if(page==='teachers'){document.getElementById('pageContent').innerHTML=teachersPage();document.getElementById('breadcrumbCurrent').textContent=names[page];document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.page===page)});bind();return}renderWithTeacherDirectory();restrictDashboardActions()}
-var bindWithTeacherScores=bind;
-bind=function(){bindWithTeacherScores();document.querySelectorAll('[data-teacher-score]').forEach(function(button){button.onclick=function(){var subject=button.dataset.teacherScore,scores=teacherScoreData[subject],t=teacherContacts[subject],labels=['UH 1','UH 2','UH 3','UH 4','Tugas 1','Tugas 2','Tugas 3','Tugas 4'],summary=labels.map(function(label,i){return '<strong>'+label+'</strong>: '+scores[i]}).join(' &nbsp; · &nbsp; ');modal('Rekap nilai '+subject,t.name+' · '+t.phone,summary+'<br><br><small>Nilai dapat diperbarui setiap kali ulangan harian atau tugas selesai dinilai.</small>','')};});var contact=document.getElementById('teacherContactInfo');if(contact)contact.onclick=function(){simpleModal('Data kontak guru','Nomor telepon tersimpan untuk komunikasi akademik melalui kanal resmi sekolah.')};if(currentRole==='assistant'&&page==='attendance'){var heading=document.querySelector('.page-heading');if(heading&&!document.getElementById('manualAttendance')){var manual=document.createElement('button');manual.id='manualAttendance';manual.className='primary-btn';manual.textContent='＋ Input absen manual';manual.onclick=function(){var options=students.map(function(s){return '<option>'+s[0]+'</option>'}).join('');modal('Input absen manual','Catat kehadiran siswa secara manual.','<form><label>Nama siswa<select>'+options+'</select></label><label>Status<select><option>Hadir</option><option>Terlambat</option><option>Sakit</option><option>Izin</option><option>Menunggu keterangan</option></select></label><label>Waktu<input type="time" value="06:45"></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan absen</button></div></form>')};heading.appendChild(manual)}}}
-function scoreSheetRows(subject){var base=teacherScoreData[subject]||[80,82,84,86,81,83,85,87],subjectIndex=Object.keys(teacherContacts).indexOf(subject);return students.map(function(s,index){var values=base.map(function(value,component){return Math.max(0,Math.min(100,value+((index*7+subjectIndex*3+component*2)%13)-6))}),avg=Math.round(values.reduce(function(a,b){return a+b},0)/values.length);return {nis:s[1],name:s[0],values:values,avg:avg}})}
-function downloadScoreCsv(subject,rows){var header=['NIS','Nama Siswa','UH 1','UH 2','UH 3','UH 4','Tugas 1','Tugas 2','Tugas 3','Tugas 4','Rata-rata'],lines=[header].concat(rows.map(function(row){return [row.nis,row.name].concat(row.values).concat(row.avg)})).map(function(row){return row.map(function(value){return '"'+String(value).replace(/"/g,'""')+'"'}).join(',')});var blob=new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='Rekap_Nilai_'+subject.replace(/[^a-z0-9]+/gi,'_')+'.csv';link.click();URL.revokeObjectURL(url);toast('Rekap nilai berhasil disiapkan untuk Excel')}
-function showTeacherScoreSheet(subject){var t=teacherContacts[subject],rows=scoreSheetRows(subject),body=rows.map(function(row,index){return '<tr><td>'+ (index+1)+'</td><td>'+row.nis+'</td><td class="score-name">'+row.name+'</td>'+row.values.map(function(value){return '<td>'+value+'</td>'}).join('')+'<td><strong>'+row.avg+'</strong></td></tr>'}).join('');modal('Spreadsheet nilai · '+subject,t.name+' · '+t.phone,'<div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>'+body+'</tbody></table></div><div class="modal-actions score-sheet-actions"><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div>');document.getElementById('modalContent').classList.add('score-sheet-modal');document.getElementById('downloadScoreCsv').onclick=function(){downloadScoreCsv(subject,rows)}}
-var importedScoreSheets={};
-var generatedScoreSheetRows=scoreSheetRows;
-scoreSheetRows=function(subject){return importedScoreSheets[subject]||generatedScoreSheetRows(subject)};
-function parseDelimitedLine(line){var result=[],current='',quoted=false;for(var i=0;i<line.length;i++){var char=line[i],next=line[i+1];if(char==='"'&&quoted&&next==='"'){current+='"';i++;continue}if(char==='"'){quoted=!quoted;continue}if((char===','||char==='\t')&&!quoted){result.push(current.trim());current='';continue}current+=char}result.push(current.trim());return result}
-function importScoreFile(subject,file){var reader=new FileReader();reader.onload=function(event){var lines=event.target.result.replace(/^\uFEFF/,'').trim().split(/\r?\n/).filter(Boolean),rows=lines.map(parseDelimitedLine),header=rows.shift().map(function(value){return value.toLowerCase().replace(/\s+/g,'')});var find=function(names){return header.findIndex(function(value){return names.indexOf(value)>=0})},nisIndex=find(['nis','nomorinduk','nomorinduksiswa']),nameIndex=find(['namasiswa','nama']);if(nisIndex<0||nameIndex<0){toast('Format file belum sesuai. Gunakan kolom NIS dan Nama Siswa.');return}var scoreIndexes=['uh1','uh2','uh3','uh4','tugas1','tugas2','tugas3','tugas4'].map(function(label){return find([label,label.replace('tugas','tugas '),label.replace('uh','uh ')])});importedScoreSheets[subject]=rows.map(function(row){var values=scoreIndexes.map(function(index){var raw=index>=0?row[index]:'';return raw===''?'':Number(raw)}),valid=values.filter(function(value){return typeof value==='number'&&!isNaN(value)}),avg=valid.length?Math.round(valid.reduce(function(a,b){return a+b},0)/valid.length):'—';return {nis:row[nisIndex]||'',name:row[nameIndex]||'',values:values,avg:avg}});showTeacherScoreSheet(subject);toast('Data nilai baru berhasil diimpor ke '+subject)};reader.readAsText(file,'UTF-8')}
-showTeacherScoreSheet=function(subject){var t=teacherContacts[subject],rows=scoreSheetRows(subject),body=rows.map(function(row,index){return '<tr><td>'+(index+1)+'</td><td>'+row.nis+'</td><td class="score-name">'+row.name+'</td>'+row.values.map(function(value){return '<td>'+(value===''?'—':value)+'</td>'}).join('')+'<td><strong>'+row.avg+'</strong></td></tr>'}).join('');modal('Spreadsheet nilai · '+subject,t.name+' · '+t.phone,'<div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>'+body+'</tbody></table></div><div class="modal-actions score-sheet-actions"><div><button type="button" class="filter-btn" id="importScoreData">Import data nilai baru</button><input id="scoreFileInput" class="score-import-input" type="file" accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values"></div><div><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div></div>');document.getElementById('modalContent').classList.add('score-sheet-modal');document.getElementById('downloadScoreCsv').onclick=function(){downloadScoreCsv(subject,rows)};document.getElementById('importScoreData').onclick=function(){document.getElementById('scoreFileInput').click()};document.getElementById('scoreFileInput').onchange=function(){if(this.files[0])importScoreFile(subject,this.files[0])}}
-function applyImportedScoreRows(subject,rows){if(!rows||!rows.length){toast('File Excel tidak berisi data nilai.');return}var header=rows.shift().map(function(value){return String(value||'').toLowerCase().replace(/\s+/g,'')}),find=function(names){return header.findIndex(function(value){return names.indexOf(value)>=0})},nisIndex=find(['nis','nomorinduk','nomorinduksiswa']),nameIndex=find(['namasiswa','nama']);if(nisIndex<0||nameIndex<0){toast('Format file belum sesuai. Gunakan kolom NIS dan Nama Siswa.');return}var scoreIndexes=['uh1','uh2','uh3','uh4','tugas1','tugas2','tugas3','tugas4'].map(function(label){return find([label,label.replace('tugas','tugas '),label.replace('uh','uh ')])});importedScoreSheets[subject]=rows.filter(function(row){return row[nisIndex]||row[nameIndex]}).map(function(row){var values=scoreIndexes.map(function(index){var raw=index>=0?row[index]:'';return raw===''||raw===null?'':Number(raw)}),valid=values.filter(function(value){return typeof value==='number'&&!isNaN(value)}),avg=valid.length?Math.round(valid.reduce(function(a,b){return a+b},0)/valid.length):'—';return {nis:String(row[nisIndex]||''),name:String(row[nameIndex]||''),values:values,avg:avg}});showTeacherScoreSheet(subject);toast('Data nilai baru berhasil diimpor ke '+subject)}
-importScoreFile=function(subject,file){var extension=file.name.toLowerCase();if(extension.endsWith('.xlsx')||extension.endsWith('.xls')){if(!window.XLSX){toast('Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.');return}file.arrayBuffer().then(function(buffer){var workbook=XLSX.read(buffer,{type:'array'}),sheet=workbook.Sheets[workbook.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});applyImportedScoreRows(subject,rows)}).catch(function(){toast('File Excel tidak dapat dibaca.')});return}var reader=new FileReader();reader.onload=function(event){var rows=event.target.result.replace(/^\uFEFF/,'').trim().split(/\r?\n/).filter(Boolean).map(parseDelimitedLine);applyImportedScoreRows(subject,rows)};reader.readAsText(file,'UTF-8')}
-var bindSpreadsheetScores=bind;
-bind=function(){bindSpreadsheetScores();document.querySelectorAll('[data-teacher-score]').forEach(function(button){button.onclick=function(){showTeacherScoreSheet(button.dataset.teacherScore)}})}
-function calculateScoreAverage(values){var valid=values.filter(function(value){return typeof value==='number'&&!isNaN(value)});return valid.length?Math.round(valid.reduce(function(a,b){return a+b},0)/valid.length):'—'}
-function applySingleColumnScoreRows(subject,rows,columnIndex){if(!rows||!rows.length){toast('File tidak berisi data nilai.');return}var header=rows.shift().map(function(value){return String(value||'').toLowerCase().replace(/\s+/g,'')}),find=function(names){return header.findIndex(function(value){return names.indexOf(value)>=0})},nisIndex=find(['nis','nomorinduk','nomorinduksiswa']),nameIndex=find(['namasiswa','nama']),valueIndex=find(['nilai','score','nilai'+columnIndex]);if(nisIndex<0){toast('File minimal harus memiliki kolom NIS.');return}if(valueIndex<0){valueIndex=header.findIndex(function(value,index){return index!==nisIndex&&index!==nameIndex})}if(valueIndex<0){toast('Kolom nilai tidak ditemukan.');return}var existing=scoreSheetRows(subject),byNis={};existing.forEach(function(row){byNis[String(row.nis)]=row});rows.filter(function(row){return row[nisIndex]!==undefined&&row[nisIndex]!==''}).forEach(function(row){var nis=String(row[nisIndex]),target=byNis[nis];if(!target){target={nis:nis,name:nameIndex>=0?String(row[nameIndex]||''):'',values:['','','','','','','',''],avg:'—'};existing.push(target);byNis[nis]=target}var value=row[valueIndex];if(value!==''&&value!==null&&!isNaN(Number(value)))target.values[columnIndex]=Number(value);target.avg=calculateScoreAverage(target.values)});importedScoreSheets[subject]=existing;showTeacherScoreSheet(subject);toast('Lajur '+['UH 1','UH 2','UH 3','UH 4','Tugas 1','Tugas 2','Tugas 3','Tugas 4'][columnIndex]+' berhasil diperbarui. Lajur lain tetap.')}
-var applySingleColumnScoreRowsOriginal=applySingleColumnScoreRows;
-applySingleColumnScoreRows=function(subject,rows,columnIndex){var target=['uh1','uh2','uh3','uh4','tugas1','tugas2','tugas3','tugas4'][columnIndex],header=rows[0].map(function(value){return String(value||'').toLowerCase().replace(/\s+/g,'')}),targetIndex=header.indexOf(target);if(targetIndex>=0){var nisIndex=header.findIndex(function(value){return ['nis','nomorinduk','nomorinduksiswa'].indexOf(value)>=0}),nameIndex=header.findIndex(function(value){return ['namasiswa','nama'].indexOf(value)>=0});rows=[['NIS','Nama Siswa','Nilai']].concat(rows.slice(1).map(function(row){return [nisIndex>=0?row[nisIndex]:'',nameIndex>=0?row[nameIndex]:'',row[targetIndex]]}))}applySingleColumnScoreRowsOriginal(subject,rows,columnIndex)}
-importScoreFile=function(subject,file,columnIndex){var extension=file.name.toLowerCase();if(extension.endsWith('.xlsx')||extension.endsWith('.xls')){if(!window.XLSX){toast('Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.');return}file.arrayBuffer().then(function(buffer){var workbook=XLSX.read(buffer,{type:'array'}),sheet=workbook.Sheets[workbook.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});applySingleColumnScoreRows(subject,rows,columnIndex)}).catch(function(){toast('File Excel tidak dapat dibaca.')});return}var reader=new FileReader();reader.onload=function(event){var rows=event.target.result.replace(/^\uFEFF/,'').trim().split(/\r?\n/).filter(Boolean).map(parseDelimitedLine);applySingleColumnScoreRows(subject,rows,columnIndex)};reader.readAsText(file,'UTF-8')}
-showTeacherScoreSheet=function(subject){var t=teacherContacts[subject],rows=scoreSheetRows(subject),body=rows.map(function(row,index){return '<tr><td>'+(index+1)+'</td><td>'+row.nis+'</td><td class="score-name">'+row.name+'</td>'+row.values.map(function(value){return '<td>'+(value===''?'—':value)+'</td>'}).join('')+'<td><strong>'+row.avg+'</strong></td></tr>'}).join('');modal('Spreadsheet nilai · '+subject,t.name+' · '+t.phone,'<div class="score-sheet-note">Pilih lajur sebelum import. Hanya lajur terpilih yang akan diperbarui.</div><div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>'+body+'</tbody></table></div><div class="modal-actions score-sheet-actions"><div><select id="importScoreColumn" class="filter-btn"><option value="0">UH 1</option><option value="1">UH 2</option><option value="2">UH 3</option><option value="3">UH 4</option><option value="4">Tugas 1</option><option value="5">Tugas 2</option><option value="6">Tugas 3</option><option value="7">Tugas 4</option></select><button type="button" class="filter-btn" id="importScoreData">Import lajur terpilih</button><input id="scoreFileInput" class="score-import-input" type="file" accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values"></div><div><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div></div>');document.getElementById('modalContent').classList.add('score-sheet-modal');document.getElementById('downloadScoreCsv').onclick=function(){downloadScoreCsv(subject,rows)};document.getElementById('importScoreData').onclick=function(){document.getElementById('scoreFileInput').click()};document.getElementById('scoreFileInput').onchange=function(){if(this.files[0])importScoreFile(subject,this.files[0],Number(document.getElementById('importScoreColumn').value))}}
-function openTeacherWhatsapp(subject){var teacher=teacherContacts[subject],phone=teacher.phone.replace(/\D/g,'');if(phone.charAt(0)==='0')phone='62'+phone.slice(1);var message='Halo '+teacher.name+', saya Sumantoro dari AIWalas kelas 11PF1. Saya ingin berkomunikasi terkait mata pelajaran '+subject+'.';window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener');}
-var bindWhatsappTeachers=bind;
-bind=function(){bindWhatsappTeachers();document.querySelectorAll('[data-teacher-score]').forEach(function(button){if(button.dataset.whatsappBound)return;button.dataset.whatsappBound='true';var wa=document.createElement('button');wa.type='button';wa.className='panel-action whatsapp-action';wa.textContent='WhatsApp';wa.onclick=function(){openTeacherWhatsapp(button.dataset.teacherScore)};button.parentNode.appendChild(wa)})}
-var bindWhatsappLogo=bind;
-bind=function(){bindWhatsappLogo();document.querySelectorAll('.whatsapp-action').forEach(function(button){button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.6 4.2 1.7 6L.2 24l6.4-1.7a11.8 11.8 0 0 0 5.5 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.3ZM12.2 21.6h-.1c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.7 9.7 0 1 1 8.5 4.7Zm5.3-7.3c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-1.6-.8-2.6-1.4-3.6-3.1-.3-.5.3-.5.8-1.6.1-.2.1-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.1 1.4 3.3c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.6.8 3.1.8.5 0 1.7-.7 1.9-1.3.2-.6.2-1.2.1-1.3-.1-.1-.3-.2-.7-.4Z"/></svg>';button.setAttribute('aria-label','Hubungi via WhatsApp');button.title='Hubungi via WhatsApp'})}
-var renderWithoutTaskReminder=render;
-render=function(){renderWithoutTaskReminder();if(page==='dashboard'){document.querySelectorAll('.activity').forEach(function(item){if(item.textContent.indexOf('Tugas Tata Artistik')>=0){var text=item.querySelector('.activity-text');if(text)text.innerHTML='<strong>Kelompok shooting</strong> yang akan shooting hari ini diizinkan.<span class="activity-time">Hari ini</span>'}})}}
-var bindWithStudentDetails=bind;
-bind=function(){bindWithStudentDetails();document.querySelectorAll('[data-student]').forEach(function(button){button.onclick=function(){var student=students.find(function(s){return s[0]===button.dataset.student});if(student){simpleModal('Detail siswa',studentDetailText(student));document.getElementById('modalContent').classList.add('student-detail-modal')}}})}
-studentDetailText=function(student){var d=studentDetails&&studentDetails[student[1]];if(!d)return '<strong>'+student[0]+'</strong><br>NIS: '+student[1]+'<br>Detail belum diisi.';var fields=[['Nama siswa',d['Nama Siswa']],['NIS',student[1]],['NISN',d['NISN']],['Jenis kelamin',d['Jenis Kelamin']],['Tempat lahir',d['Tempat Lahir']],['Tanggal lahir',d['Tanggal Lahir']],['Agama',d['Agama']],['Alamat lengkap',d['Alamat Lengkap']],['Status tempat tinggal',d['Status tempat tinggal saat ini']],['Transportasi ke sekolah',d['Transportasi utama ke sekolah']],['Nama ayah',d['Nama Ayah']],['Nama ibu',d['Nama Ibu']],['Nama wali',d['Nama wali (jika tinggal bersama wali) ']],['Hubungan wali',d['Hubungan wali dengan siswa']],['Jumlah saudara kandung',d['Jumlah saudara kandung']],['Anak ke',d['Anak ke ']],['Pekerjaan ayah',d['Pekerjaan ayah']],['Pekerjaan ibu',d['Pekerjaan ibu']],['Bantuan pendidikan',d['Apakah siswa menerima bantuan pendidikan?']],['Penyakit bawaan',d['Apakah siswa mengidap penyakit/penyakit bawaan']],['Catatan penyakit',d['Jika jawaban YA, penyakit apa yang harus diketahui Wali Kelas']],['Hobi/kegiatan',d['Hobi/kegiatan yang sering dilakukan']],['Prestasi/kelebihan',d['Prestasi atau kelebihan yang pernah diraih ']]];return '<div class="student-detail-table-wrap"><table class="student-detail-table"><thead><tr><th>Informasi</th><th>Data siswa</th></tr></thead><tbody>'+fields.map(function(field){var value=String(field[1]||'').trim().replace(/\n/g,'<br>')||'—';return '<tr><th>'+field[0]+'</th><td>'+value+'</td></tr>'}).join('')+'</tbody></table></div>'}
-function showStudentDetail(student){var content=document.getElementById('modalContent');content.className='modal student-detail-modal';content.innerHTML='<button class="modal-close" id="closeModal">×</button><h2>Detail siswa</h2><div class="student-detail-body">'+studentDetailText(student)+'</div><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Tutup</button></div>';document.getElementById('modalBackdrop').classList.add('show');document.getElementById('closeModal').onclick=closeModal;document.getElementById('cancelModal').onclick=closeModal}
-var bindWithStudentDetailView=bind;
-bind=function(){bindWithStudentDetailView();document.querySelectorAll('[data-student]').forEach(function(button){button.onclick=function(){var student=students.find(function(s){return s[0]===button.dataset.student});if(student)showStudentDetail(student)}})}
-var renderWithMalikhaCorrection=render;
-render=function(){renderWithMalikhaCorrection();if(page==='dashboard'){document.querySelectorAll('.activity-text').forEach(function(item){if(item.textContent.indexOf('Malikha Intan Madinah')>=0&&item.textContent.indexOf('sakit dan tidak masuk')>=0){item.innerHTML='<strong>Malikha Intan Madinah</strong> hadir hari ini.<span class="activity-time">Hari ini</span>'}if(item.textContent.indexOf('Pesan orangtua Malikha')>=0){item.innerHTML='<strong>Konfirmasi kehadiran Malikha</strong> Malikha masuk sekolah hari ini.<span class="activity-time">Hari ini</span>'}});var message=document.querySelector('.message-card');if(message&&message.textContent.indexOf('Orangtua MALIKHA INTAN MADINAH')>=0){message.innerHTML='<strong>Konfirmasi kehadiran Malikha</strong><br>Malikha Intan Madinah hadir dan mengikuti kegiatan belajar hari ini.<div class="message-footer"><span class="avatar avatar-teal">AI</span> Status absensi: <span class="pill teal">Hadir</span><span>· Hari ini</span></div>'}}};
-function downloadReports(){if(!window.XLSX){toast('Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.');return}var date=todayLabel(),metrics=reportMetrics(),low=reportLowStudents(),top=reportTopStudents(),daya=[['REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1'],['SMK NEGERI 19 JAKARTA'],['TAHUN PELAJARAN 2026/2027'],[],['SEMESTER','Ganjil'],['JUMLAH PESERTA DIDIK',35],['WALI KELAS','Sumantoro Kasdhani, S.Kom., M.I.Kom.'],[],['No.','Mata Pelajaran','Nilai Maks.','Nilai Min.','Rata-rata','Daya Serap','Elemen/TP Renc','Elemen/TP Tlks','Target Kur.']].concat(metrics.map(function(row,index){return [index+1,row.name,row.max===null?'—':row.max,row.min===null?'—':row.min,row.avg===null?'—':row.avg,row.sorption===null?'—':row.sorption+'%',row.plan,row.done,row.target]})).concat([[],['Waka Bid. Kurikulum,','','','', 'Jakarta, '+date],['Sumiati Sunarsih, S.Pd., M.Ak.','','','', 'Wali Kelas,'],['NIP. 197904252014122002','','','', 'Sumantoro Kasdhani, S.Kom., M.I.Kom.']]),walas=[['LAPORAN WALI KELAS 11PF1'],['SMK NEGERI 19 JAKARTA'],['TAHUN PELAJARAN 2026/2027'],[],['SEMESTER','Ganjil'],['JUMLAH PESERTA DIDIK',35],['WALI KELAS','Sumantoro Kasdhani, S.Kom., M.I.Kom.'],[],['A. PESERTA DIDIK YANG BELUM TUNTAS'],['No','Nama Peserta Didik','Mata Pelajaran yang Nilainya Kurang','Nilai','S','I','A','Jumlah Absensi','Sikap']].concat(low.map(function(row,index){return [index+1,row.name,row.subject,row.value,row.s,row.i,row.a,row.total,row.attitude]})).concat([[],['B. PESERTA DIDIK BERPRESTASI'],['Ranking','Siswa yang Berprestasi','Jumlah Nilai','Rata-rata']]).concat(top.map(function(row,index){return [index+1,row.name,row.total,row.avg]})).concat([[],['Waka Bid. Kurikulum','','','Jakarta, '+date],['Sumiati Sunarsih, S.Pd., M.Ak.','','','Wali Kelas,'],['NIP. 197904252014122002','','','Sumantoro Kasdhani, S.Kom., M.I.Kom.']]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(daya),'DAYA SERAP');XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(walas),'LAPORAN WALAS');XLSX.writeFile(wb,'Laporan_Wali_Kelas_11PF1.xlsx');toast('Laporan Wali Kelas berhasil diunduh')}
-function enhanceReportTables(){var countLabel='JUMLAH PESERTA DIDIK : 35 (L:18, P:17)';document.querySelectorAll('.report-meta span').forEach(function(span){if(span.textContent.indexOf('JUMLAH PESERTA DIDIK')>=0)span.textContent=countLabel});var daya=document.querySelector('#reportDaya table');if(daya){daya.querySelector('thead').innerHTML='<tr><th rowspan="2">No.</th><th rowspan="2">Mata Pelajaran</th><th colspan="3">Nilai</th><th rowspan="2">Daya Serap</th><th colspan="2">Elemen/TP</th><th rowspan="2">Target Kurikulum</th></tr><tr><th>Maksimum</th><th>Minimum</th><th>Rata-rata</th><th>Rencana</th><th>Terlaksana</th></tr>'}var walas=document.querySelector('#reportWalas table');if(walas){walas.querySelector('thead').innerHTML='<tr><th rowspan="2">No.</th><th rowspan="2">Nama Peserta Didik</th><th rowspan="2">Mata Pelajaran yang Nilainya Kurang</th><th rowspan="2">Nilai</th><th colspan="4">Absensi</th><th rowspan="2">Sikap B/C/K</th></tr><tr><th>Sakit</th><th>Izin</th><th>Alpha</th><th>Jumlah</th></tr>'}var download=document.getElementById('downloadReports');if(download&&!document.getElementById('downloadReportsPdf')){var pdf=document.createElement('button');pdf.id='downloadReportsPdf';pdf.className='outline-btn';pdf.textContent='▣ Cetak / Simpan PDF';pdf.onclick=function(){window.print()};download.parentNode.appendChild(pdf)}}
-function enhanceReportPresentation(){var pageRoot=document.querySelector('#reportDaya')&&document.querySelector('#reportDaya').closest('.page');if(pageRoot)pageRoot.classList.add('report-page');document.querySelectorAll('.report-page .page-heading .eyebrow,.report-page .page-heading p').forEach(function(item){item.remove()});document.querySelectorAll('.report-letterhead').forEach(function(letterhead){letterhead.innerHTML='<img class="report-logo report-logo-school" src="logo-pandawa.png" alt="Logo SMK Negeri 19 Jakarta"><h2>Laporan Wali Kelas</h2><img class="report-logo report-logo-pf" src="logo-pf.png" alt="Logo Program Keahlian Perfilman">'});document.querySelectorAll('.report-meta').forEach(function(meta){meta.innerHTML='<span class="report-count">Jumlah Peserta Didik: 35 (L:18, P:17)</span><span class="report-walas">Wali Kelas: Sumantoro Kasdhani, S.Kom., M.I.Kom.</span><span class="report-date">Tanggal Diterbitkan: '+todayLabel()+'</span>'});var download=document.getElementById('downloadReports');if(download)download.textContent='↓ Unduh Excel'}
-function appendHeadmasterSignature(){document.querySelectorAll('.report-signatures').forEach(function(container){if(container.querySelector('.headmaster-signature'))return;var signature=document.createElement('span');signature.className='headmaster-signature';signature.innerHTML='Kepala SMKN 19 Jakarta,<br><br><br><strong>Sri Muljani, S.Pd.</strong><br>NIP. 197106291997032002';container.appendChild(signature)})}
-function stackReportActions(){var excel=document.getElementById('downloadReports'),pdf=document.getElementById('downloadReportsPdf');if(excel&&pdf&&!excel.parentNode.classList.contains('report-actions')){var actions=document.createElement('div');actions.className='report-actions';excel.parentNode.insertBefore(actions,excel);actions.appendChild(excel);actions.appendChild(pdf)}}
-function bindReportActions(){appendHeadmasterSignature();enhanceReportTables();enhanceReportPresentation();stackReportActions();var download=document.getElementById('downloadReports');if(download)download.onclick=downloadReports;document.querySelectorAll('[data-report-tab]').forEach(function(tab){tab.onclick=function(){var daya=document.getElementById('reportDaya'),walas=document.getElementById('reportWalas'),isDaya=tab.dataset.reportTab==='daya';daya.style.display=isDaya?'block':'none';walas.style.display=isDaya?'none':'block';document.querySelectorAll('[data-report-tab]').forEach(function(other){other.classList.toggle('active',other===tab)});appendHeadmasterSignature();enhanceReportTables();enhanceReportPresentation();stackReportActions()}})}
-enhanceReportPresentation=function(){var pageRoot=document.querySelector('#reportDaya')&&document.querySelector('#reportDaya').closest('.page');if(pageRoot){pageRoot.classList.add('report-page');var heading=pageRoot.querySelector('.page-heading h1');if(heading)heading.textContent='Laporan Wali Kelas 11PF1'}pageRoot&&pageRoot.querySelectorAll('.page-heading .eyebrow,.page-heading p').forEach(function(item){item.remove()});document.querySelectorAll('.report-letterhead').forEach(function(letterhead,index){var title=index===0?'REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1':'LAPORAN WALI KELAS 11PF1';letterhead.innerHTML='<img class="report-logo report-logo-school" src="logo-pandawa.png" alt="Logo SMK Negeri 19 Jakarta"><h2>'+title+'</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span><img class="report-logo report-logo-pf" src="logo-pf.png" alt="Logo Program Keahlian Perfilman">'});document.querySelectorAll('.report-meta').forEach(function(meta){meta.innerHTML='<span>SEMESTER : Ganjil</span><span class="report-count">JUMLAH PESERTA DIDIK : 35 (L:18, P:17)</span><span class="report-walas">WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span><span class="report-date">TANGGAL DITERBITKAN : '+todayLabel()+'</span>'});var download=document.getElementById('downloadReports');if(download)download.textContent='↓ Unduh Excel'};
-function bindJournalActions(){var add=document.getElementById('newJournal');if(add)add.onclick=function(){modal('Input jurnal kelas','Lengkapi catatan pembelajaran setelah jam mengajar selesai.','<form><label>Mata pelajaran<select><option>PAI</option><option>Matematika</option><option>PKK</option><option>Kokurikuler</option></select></label><label>Materi yang diajarkan<textarea placeholder="Tuliskan materi, aktivitas, dan catatan pembelajaran..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan jurnal</button></div></form>')};document.querySelectorAll('[data-journal-edit]').forEach(function(button){button.onclick=function(){var parts=button.dataset.journalEdit.split('|');modal('Koreksi jurnal · '+parts[0],parts[1]+' · '+parts[2],'<form><label>Materi yang diajarkan<textarea placeholder="Tuliskan materi yang benar..."></textarea></label><label>Catatan koreksi<textarea placeholder="Alasan atau keterangan koreksi..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan koreksi</button></div></form>')}})}
-var renderWithJournal=render;
-render=function(){renderWithJournal();if(page==='journal')bindJournalActions()}
-var renderWithReports=render;
-render=function(){renderWithReports();if(page==='reports')bindReportActions()}
-var enhanceReportPresentationOriginal=enhanceReportPresentation;enhanceReportPresentation=function(){enhanceReportPresentationOriginal();var dayaMeta=document.querySelector('#reportDaya .report-meta');if(dayaMeta)dayaMeta.classList.add('daya-meta');var dayaSignatures=document.querySelector('#reportDaya .report-signatures');if(dayaSignatures){var wali=dayaSignatures.querySelector('span:nth-child(2)');if(wali)wali.innerHTML='Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005'}};
-setupLogin();restoreSession();
+function dashboardCarousel() {
+  var panel = document.querySelector(".dashboard-grid .panel");
+  if (!panel) return;
+  clearInterval(carouselTimer);
+  panel.innerHTML =
+    '<div class="panel-head"><div><h2>Ringkasan kelas</h2><p>Informasi bergantian secara otomatis</p></div><span class="pill teal">Live</span></div><div class="dashboard-carousel"><div class="carousel-tabs"><button class="carousel-tab active" data-slide="0">Rekap absen</button><button class="carousel-tab" data-slide="1">Jadwal mapel</button></div><div class="carousel-view active"><div class="panel-head"><div><h2>Rekap Absen Minggu Ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart"><div class="bar-group"><div class="bar" style="height:78%"></div><div class="bar late" style="height:24%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Sen</span></div><div class="bar-group"><div class="bar" style="height:84%"></div><div class="bar late" style="height:15%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Sel</span></div><div class="bar-group"><div class="bar" style="height:88%"></div><div class="bar late" style="height:9%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Rab</span></div><div class="bar-group"><div class="bar" style="height:82%"></div><div class="bar late" style="height:18%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Kam</span></div><div class="bar-group"><div class="bar" style="height:80%"></div><div class="bar late" style="height:12%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Jum</span></div></div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></div><div class="carousel-view"><div class="panel-head"><div><h2>Jadwal Mapel Hari Ini</h2><p>Senin, 14 Oktober 2024 · Kelas 11PF1</p></div><button class="panel-action" id="showSchedule">Lihat jadwal →</button></div><div class="today-schedule"><div class="schedule-item"><span class="schedule-time">07.30—09.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>PKK</strong><small>Nani Aminah, SE.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">09.00—10.45</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Sejarah</strong><small>Englena Nastaria Purba, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">10.45—13.30</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Tata Artistik</strong><small>Ruby Eka Prawira, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">13.30—15.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Bahasa Inggris</strong><small>Ika Inayah, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div></div></div><div class="carousel-controls"><button class="carousel-dot active" data-slide="0"></button><button class="carousel-dot" data-slide="1"></button></div></div>';
+  var views = panel.querySelectorAll(".carousel-view"),
+    tabs = panel.querySelectorAll("[data-slide]");
+  function show(i) {
+    views.forEach(function (v, n) {
+      v.classList.toggle("active", n === i);
+    });
+    tabs.forEach(function (t) {
+      t.classList.toggle("active", t.dataset.slide == i);
+    });
+    var detail = panel.querySelector('[data-page="attendance"]');
+    if (detail)
+      detail.onclick = function () {
+        page = "attendance";
+        render();
+      };
+    var full = panel.querySelector("#showSchedule");
+    if (full)
+      full.onclick = function () {
+        page = "schedule";
+        render();
+      };
+  }
+  tabs.forEach(function (t) {
+    t.onclick = function () {
+      show(Number(t.dataset.slide));
+      reset();
+    };
+  });
+  function reset() {
+    clearInterval(carouselTimer);
+    carouselTimer = setInterval(function () {
+      var active = panel.querySelector(".carousel-view.active"),
+        next = active === views[0] ? 1 : 0;
+      show(next);
+    }, 6500);
+  }
+  reset();
+}
+var originalDashboardCarousel = dashboardCarousel;
+function extendCarouselDuration() {
+  var panel = document.querySelector(".dashboard-grid .panel");
+  if (!panel) return;
+  var views = panel.querySelectorAll(".carousel-view"),
+    tabs = panel.querySelectorAll("[data-slide]");
+  function rotate() {
+    var active = panel.querySelector(".carousel-view.active"),
+      next = active === views[0] ? 1 : 0;
+    views.forEach(function (v, i) {
+      v.classList.toggle("active", i === next);
+    });
+    tabs.forEach(function (t) {
+      t.classList.toggle("active", Number(t.dataset.slide) === next);
+    });
+  }
+  function reset() {
+    clearInterval(carouselTimer);
+    carouselTimer = setInterval(rotate, 12000);
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", reset);
+  });
+  reset();
+}
+var realtimeWeeklySchedule = {
+  Senin: [
+    ["06.30—07.30", "Upacara", "Aktivitas sekolah"],
+    ["07.30—09.00", "PKK", "Nani Aminah, SE."],
+    ["09.00—10.45", "Sejarah", "Englena Nastaria Purba, S.Pd."],
+    ["10.45—13.30", "Tata Artistik", "Ruby Eka Prawira, S.Pd."],
+    ["13.30—15.00", "Bahasa Inggris", "Ika Inayah, S.Pd."],
+  ],
+  Selasa: [
+    ["06.30—09.00", "Bahasa Indonesia", "Erna Cahyani, S.Pd."],
+    ["09.00—10.45", "Tata Cahaya", "Wahyu Lukman Hakim, S.Kom."],
+    ["10.45—12.15", "PPKN", "Ngatman, S.Pd."],
+    [
+      "12.45—15.00",
+      "Manajemen Produksi",
+      "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+    ],
+  ],
+  Rabu: [
+    ["06.30—09.00", "Tata Kamera", "Putu Arya Ranesda, S.Kom."],
+    ["09.00—10.45", "Olahraga", "Putu Arya Ranesda, S.Kom."],
+    ["10.45—12.15", "Tata Cahaya", "Wahyu Lukman Hakim, S.Kom."],
+    ["12.45—15.00", "Tata Artistik", "Ruby Eka Prawira, S.Pd."],
+  ],
+  Kamis: [
+    ["06.30—09.00", "PAI", "Lutfi Faridil Aftros, S.Pd.I"],
+    ["09.00—11.30", "Matematika", "Robert Henry Hutapea, S.Si., M.Pd."],
+    ["11.30—13.30", "PKK", "Nani Aminah, SE."],
+    ["13.30—15.00", "Kokurikuler", "Englena Nastaria Purba, S.Pd."],
+  ],
+  Jumat: [
+    ["06.30—07.30", "Jumat Pembiasaan", "Aktivitas sekolah"],
+    [
+      "07.30—08.50",
+      "Naskah & Penyutradaraan",
+      "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+    ],
+    ["08.50—10.10", "Bahasa Inggris", "Ika Inayah, S.Pd."],
+    ["10.25—11.45", "Muatan Lokal", "Englena Nastaria Purba, S.Pd."],
+    ["13.00—15.00", "Tata Kamera", "Putu Arya Ranesda, S.Kom."],
+  ],
+};
+function realtimeDashboardSchedule() {
+  var dayNames = [
+      "Minggu",
+      "Senin",
+      "Selasa",
+      "Rabu",
+      "Kamis",
+      "Jumat",
+      "Sabtu",
+    ],
+    day = dayNames[new Date().getDay()],
+    items = realtimeWeeklySchedule[day] || [],
+    now = new Date(),
+    minutes = now.getHours() * 60 + now.getMinutes();
+  function state(time) {
+    var parts = time.split("—"),
+      start = parts[0].split("."),
+      end = parts[1].split("."),
+      a = Number(start[0]) * 60 + Number(start[1]),
+      b = Number(end[0]) * 60 + Number(end[1]);
+    return minutes >= a && minutes < b
+      ? "Berlangsung"
+      : minutes >= b
+        ? "Selesai"
+        : "Terjadwal";
+  }
+  var views = document.querySelectorAll(
+      ".dashboard-grid .panel .carousel-view",
+    ),
+    view = views[1];
+  if (!view) return;
+  var title = view.querySelector("h2"),
+    subtitle = view.querySelector(".panel-head p"),
+    list = view.querySelector(".today-schedule");
+  if (title) title.textContent = "Jadwal Mapel Hari Ini";
+  if (subtitle)
+    subtitle.textContent =
+      day + ", " + todayLabel().replace(/^[^,]+, /, "") + " · Kelas 11PF1";
+  if (list)
+    list.innerHTML =
+      items
+        .map(function (x) {
+          return (
+            '<div class="schedule-item"><span class="schedule-time">' +
+            x[0] +
+            '</span><i class="schedule-bar"></i><div class="schedule-info"><strong>' +
+            x[1] +
+            "</strong><small>" +
+            x[2] +
+            '</small></div><span class="teacher-status">' +
+            state(x[0]) +
+            "</span></div>"
+          );
+        })
+        .join("") ||
+      '<div class="stat-note">Tidak ada jadwal pada hari ini.</div>';
+}
+dashboardCarousel = function () {
+  originalDashboardCarousel();
+  extendCarouselDuration();
+  realtimeDashboardSchedule();
+};
+function render() {
+  var f = {
+    dashboard: dashboard,
+    students: studentsPage,
+    attendance: attendance,
+    schedule: schedule,
+    journal: journal,
+    reports: reports,
+    grades: grades,
+    communication: communication,
+    remedial: remedial,
+    notifications: notifications,
+  };
+  document.getElementById("pageContent").innerHTML = f[page]();
+  document.getElementById("breadcrumbCurrent").textContent = names[page];
+  document.querySelectorAll(".nav-item").forEach(function (n) {
+    n.classList.toggle("active", n.dataset.page === page);
+  });
+  bind();
+  if (page === "dashboard") dashboardCarousel();
+}
+function todayLabel() {
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+function replaceTextNodes(root, replacements) {
+  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT),
+    node;
+  while ((node = walker.nextNode())) {
+    replacements.forEach(function (pair) {
+      node.nodeValue = node.nodeValue.split(pair[0]).join(pair[1]);
+    });
+  }
+}
+function statusCounts() {
+  return students.reduce(
+    function (acc, s) {
+      acc.total++;
+      acc[s[2]] = (acc[s[2]] || 0) + 1;
+      return acc;
+    },
+    { total: 0 },
+  );
+}
+function hydrateDashboardStats() {
+  var cards = document.querySelectorAll(".grid-stats .stat-card"),
+    counts = statusCounts();
+  if (cards.length < 4) return;
+  cards[0].querySelector(".stat-number").textContent = counts.total;
+  cards[1].querySelector(".stat-number").textContent = counts.Hadir || 0;
+  cards[1].querySelector(".stat-note").textContent =
+    Math.round(((counts.Hadir || 0) / counts.total) * 100) +
+    "% dari total siswa";
+  var late = students.filter(function (s) {
+      return s[2] === "Terlambat";
+    }),
+    lateCard = cards[2];
+  lateCard.classList.add("late-summary-card");
+  lateCard.innerHTML =
+    '<div class="stat-top"><span class="stat-label">Terlambat</span><span class="stat-icon amber-bg">◷</span></div><div class="stat-number">' +
+    late.length +
+    '</div><div class="stat-note">Notifikasi orang tua terkirim</div><div class="late-summary-list">' +
+    (late
+      .map(function (s) {
+        return "<strong>" + s[0] + "</strong>";
+      })
+      .join("") || '<span class="stat-note">Tidak ada siswa terlambat</span>') +
+    "</div>";
+}
+function hydrateAttentionList() {
+  var list = document.querySelector(".lower-grid .risk-list");
+  if (!list) return;
+  var points = [30, 60, 100],
+    late = students.filter(function (s) {
+      return s[2] === "Terlambat";
+    });
+  list.innerHTML =
+    late
+      .map(function (s, i) {
+        var point = points[Math.min(i, points.length - 1)],
+          kind = point >= 100 ? "coral" : "amber";
+        return (
+          '<div class="risk-row"><span class="risk-avatar">' +
+          s[3] +
+          '</span><div class="risk-info"><strong>' +
+          s[0] +
+          "</strong><small>" +
+          (i + 1 + "× terlambat") +
+          '</small></div><span class="pill ' +
+          kind +
+          '">' +
+          point +
+          " poin</span></div>"
+        );
+      })
+      .join("") ||
+    '<div class="stat-note">Tidak ada siswa dengan keterlambatan</div>';
+}
+function hydrateAbsenceSummary() {
+  var card = document.querySelector(".grid-stats .stat-card:last-child");
+  if (!card) return;
+  var counts = statusCounts(),
+    groups = [
+      ["Sakit", "sick"],
+      ["Izin", "permission"],
+      ["Menunggu keterangan", "waiting"],
+    ],
+    html = "",
+    total =
+      (counts.Sakit || 0) +
+      (counts.Izin || 0) +
+      (counts["Menunggu keterangan"] || 0);
+  groups.forEach(function (group) {
+    students
+      .filter(function (s) {
+        return s[2] === group[0];
+      })
+      .forEach(function (s) {
+        html +=
+          '<div class="absence-summary-row"><span class="absence-summary-label ' +
+          group[1] +
+          '">' +
+          (group[0] === "Menunggu keterangan" ? "Menunggu" : group[0]) +
+          "</span><strong>" +
+          s[0] +
+          "</strong></div>";
+      });
+  });
+  card.classList.add("absence-summary-card");
+  card.innerHTML =
+    '<div class="stat-top"><span class="stat-label">Tidak hadir (Sakit/Izin)</span><span class="stat-icon coral-bg">!</span></div><div class="stat-number">' +
+    total +
+    '</div><div class="stat-note">Sakit, izin, atau menunggu keterangan</div><div class="absence-summary-list">' +
+    (html || '<div class="stat-note">Tidak ada data</div>') +
+    "</div>";
+}
+var baseRender = render;
+render = function () {
+  baseRender();
+  var root = document.getElementById("pageContent");
+  if (!root) return;
+  if (currentRole === "student" && page === "attendance")
+    renderStudentAttendance();
+  var now = todayLabel();
+  replaceTextNodes(root, [
+    ["Ibu Bella Safitri", "Orangtua ALISAH PUTRI RAMADANI"],
+    ["Bapak Dimas Saputra", "Orangtua MUHAMMAD DUDE SATRIYA"],
+    ["Ibu Aldo Ramadhan", "Orangtua AKHMAD AKMAL HIDAYATULLOH"],
+    ["Senin, 14 Oktober 2024", now],
+    ["Senin, 14 Okt 2024", now],
+    ["Dimas Saputra", "MUHAMMAD DUDE SATRIYA"],
+    ["Dimas", "MUHAMMAD DUDE SATRIYA"],
+    ["Bella Safitri", "ALISAH PUTRI RAMADANI"],
+    ["Bella", "ALISAH"],
+    ["Aldo Ramadhan", "AKHMAD AKMAL HIDAYATULLOH"],
+    ["Aldo", "AKHMAD"],
+    ["Kevin Aditya", "BINTANG AL FARISI"],
+    ["Naufal Akbar", "MUHAMMAD RIZKY"],
+    ["Rania Zahra", "ZEVANYA PUTRI RAMADHANI"],
+    ["Aditya Pratama", "ABDULLAH SYAFI'IE"],
+    ["Aisyah Putri", "AURELIA ASSYIFA"],
+    ["Ananda Kirana", "KANAYA SAFA AULIA"],
+  ]);
+  if (page === "dashboard") {
+    hydrateDashboardStats();
+    hydrateAbsenceSummary();
+    hydrateAttentionList();
+  }
+  addAssistantReminderControls();
+};
+var renderWithSpecialActivities = render;
+render = function () {
+  renderWithSpecialActivities();
+  if (page !== "schedule") return;
+  var groups = document.querySelectorAll(".schedule-list > div"),
+    activities = [
+      ["06.30—07.30", "Upacara"],
+      ["06.30—07.30", "Jumat Pembiasaan"],
+    ];
+  [0, 4].forEach(function (index, n) {
+    var item = groups[index] && groups[index].querySelector(".schedule-item");
+    if (!item) return;
+    item.querySelector(".schedule-time").textContent = activities[n][0];
+    item.querySelector(".schedule-info strong").textContent = activities[n][1];
+    item.querySelector(".schedule-info small").textContent =
+      "Aktivitas sekolah";
+    item.querySelector(".schedule-bar").classList.remove("pending");
+    item.querySelector(".teacher-status").className = "teacher-status";
+    item.querySelector(".teacher-status").textContent = "Aktivitas";
+  });
+};
+document.getElementById("globalSearch").onclick = function () {
+  page = "students";
+  render();
+  setTimeout(function () {
+    var e = document.getElementById("studentSearch");
+    if (e) e.focus();
+  }, 40);
+};
+document.getElementById("mobileMenu").onclick = function () {
+  document.getElementById("sidebar").classList.toggle("open");
+};
+document.getElementById("modalBackdrop").onclick = function (e) {
+  if (e.target.id === "modalBackdrop") closeModal();
+};
+function restrictDashboardActions() {
+  document
+    .querySelectorAll("#pageContent [data-page]")
+    .forEach(function (button) {
+      var target = button.dataset.page;
+      if ((roleAccess[currentRole] || []).indexOf(target) < 0) {
+        button.disabled = true;
+        button.style.opacity = ".55";
+        button.title = "Menu ini tidak tersedia untuk peran Anda";
+      }
+    });
+}
+var renderWithTeacherDirectory = render;
+render = function () {
+  if (page === "teachers") {
+    document.getElementById("pageContent").innerHTML = teachersPage();
+    document.getElementById("breadcrumbCurrent").textContent = names[page];
+    document.querySelectorAll(".nav-item").forEach(function (n) {
+      n.classList.toggle("active", n.dataset.page === page);
+    });
+    bind();
+    return;
+  }
+  renderWithTeacherDirectory();
+  restrictDashboardActions();
+};
+var bindWithTeacherScores = bind;
+bind = function () {
+  bindWithTeacherScores();
+  document.querySelectorAll("[data-teacher-score]").forEach(function (button) {
+    button.onclick = function () {
+      var subject = button.dataset.teacherScore,
+        scores = teacherScoreData[subject],
+        t = teacherContacts[subject],
+        labels = [
+          "UH 1",
+          "UH 2",
+          "UH 3",
+          "UH 4",
+          "Tugas 1",
+          "Tugas 2",
+          "Tugas 3",
+          "Tugas 4",
+        ],
+        summary = labels
+          .map(function (label, i) {
+            return "<strong>" + label + "</strong>: " + scores[i];
+          })
+          .join(" &nbsp; · &nbsp; ");
+      modal(
+        "Rekap nilai " + subject,
+        t.name + " · " + t.phone,
+        summary +
+          "<br><br><small>Nilai dapat diperbarui setiap kali ulangan harian atau tugas selesai dinilai.</small>",
+        "",
+      );
+    };
+  });
+  var contact = document.getElementById("teacherContactInfo");
+  if (contact)
+    contact.onclick = function () {
+      simpleModal(
+        "Data kontak guru",
+        "Nomor telepon tersimpan untuk komunikasi akademik melalui kanal resmi sekolah.",
+      );
+    };
+  if (currentRole === "assistant" && page === "attendance") {
+    var heading = document.querySelector(".page-heading");
+    if (heading && !document.getElementById("manualAttendance")) {
+      var manual = document.createElement("button");
+      manual.id = "manualAttendance";
+      manual.className = "primary-btn";
+      manual.textContent = "＋ Input absen manual";
+      manual.onclick = function () {
+        var options = students
+          .map(function (s) {
+            return "<option>" + s[0] + "</option>";
+          })
+          .join("");
+        modal(
+          "Input absen manual",
+          "Catat kehadiran siswa secara manual.",
+          "<form><label>Nama siswa<select>" +
+            options +
+            '</select></label><label>Status<select><option>Hadir</option><option>Terlambat</option><option>Sakit</option><option>Izin</option><option>Menunggu keterangan</option></select></label><label>Waktu<input type="time" value="06:45"></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan absen</button></div></form>',
+        );
+      };
+      heading.appendChild(manual);
+    }
+  }
+};
+function scoreSheetRows(subject) {
+  var base = teacherScoreData[subject] || [80, 82, 84, 86, 81, 83, 85, 87],
+    subjectIndex = Object.keys(teacherContacts).indexOf(subject);
+  return students.map(function (s, index) {
+    var values = base.map(function (value, component) {
+        return Math.max(
+          0,
+          Math.min(
+            100,
+            value + ((index * 7 + subjectIndex * 3 + component * 2) % 13) - 6,
+          ),
+        );
+      }),
+      avg = Math.round(
+        values.reduce(function (a, b) {
+          return a + b;
+        }, 0) / values.length,
+      );
+    return { nis: s[1], name: s[0], values: values, avg: avg };
+  });
+}
+function downloadScoreCsv(subject, rows) {
+  var header = [
+      "NIS",
+      "Nama Siswa",
+      "UH 1",
+      "UH 2",
+      "UH 3",
+      "UH 4",
+      "Tugas 1",
+      "Tugas 2",
+      "Tugas 3",
+      "Tugas 4",
+      "Rata-rata",
+    ],
+    lines = [header]
+      .concat(
+        rows.map(function (row) {
+          return [row.nis, row.name].concat(row.values).concat(row.avg);
+        }),
+      )
+      .map(function (row) {
+        return row
+          .map(function (value) {
+            return '"' + String(value).replace(/"/g, '""') + '"';
+          })
+          .join(",");
+      });
+  var blob = new Blob([lines.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    }),
+    url = URL.createObjectURL(blob),
+    link = document.createElement("a");
+  link.href = url;
+  link.download =
+    "Rekap_Nilai_" + subject.replace(/[^a-z0-9]+/gi, "_") + ".csv";
+  link.click();
+  URL.revokeObjectURL(url);
+  toast("Rekap nilai berhasil disiapkan untuk Excel");
+}
+function showTeacherScoreSheet(subject) {
+  var t = teacherContacts[subject],
+    rows = scoreSheetRows(subject),
+    body = rows
+      .map(function (row, index) {
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td><td>" +
+          row.nis +
+          '</td><td class="score-name">' +
+          row.name +
+          "</td>" +
+          row.values
+            .map(function (value) {
+              return "<td>" + value + "</td>";
+            })
+            .join("") +
+          "<td><strong>" +
+          row.avg +
+          "</strong></td></tr>"
+        );
+      })
+      .join("");
+  modal(
+    "Spreadsheet nilai · " + subject,
+    t.name + " · " + t.phone,
+    '<div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>' +
+      body +
+      '</tbody></table></div><div class="modal-actions score-sheet-actions"><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div>',
+  );
+  document.getElementById("modalContent").classList.add("score-sheet-modal");
+  document.getElementById("downloadScoreCsv").onclick = function () {
+    downloadScoreCsv(subject, rows);
+  };
+}
+var importedScoreSheets = {};
+var generatedScoreSheetRows = scoreSheetRows;
+scoreSheetRows = function (subject) {
+  return importedScoreSheets[subject] || generatedScoreSheetRows(subject);
+};
+function parseDelimitedLine(line) {
+  var result = [],
+    current = "",
+    quoted = false;
+  for (var i = 0; i < line.length; i++) {
+    var char = line[i],
+      next = line[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      current += '"';
+      i++;
+      continue;
+    }
+    if (char === '"') {
+      quoted = !quoted;
+      continue;
+    }
+    if ((char === "," || char === "\t") && !quoted) {
+      result.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  result.push(current.trim());
+  return result;
+}
+function importScoreFile(subject, file) {
+  var reader = new FileReader();
+  reader.onload = function (event) {
+    var lines = event.target.result
+        .replace(/^\uFEFF/, "")
+        .trim()
+        .split(/\r?\n/)
+        .filter(Boolean),
+      rows = lines.map(parseDelimitedLine),
+      header = rows.shift().map(function (value) {
+        return value.toLowerCase().replace(/\s+/g, "");
+      });
+    var find = function (names) {
+        return header.findIndex(function (value) {
+          return names.indexOf(value) >= 0;
+        });
+      },
+      nisIndex = find(["nis", "nomorinduk", "nomorinduksiswa"]),
+      nameIndex = find(["namasiswa", "nama"]);
+    if (nisIndex < 0 || nameIndex < 0) {
+      toast("Format file belum sesuai. Gunakan kolom NIS dan Nama Siswa.");
+      return;
+    }
+    var scoreIndexes = [
+      "uh1",
+      "uh2",
+      "uh3",
+      "uh4",
+      "tugas1",
+      "tugas2",
+      "tugas3",
+      "tugas4",
+    ].map(function (label) {
+      return find([
+        label,
+        label.replace("tugas", "tugas "),
+        label.replace("uh", "uh "),
+      ]);
+    });
+    importedScoreSheets[subject] = rows.map(function (row) {
+      var values = scoreIndexes.map(function (index) {
+          var raw = index >= 0 ? row[index] : "";
+          return raw === "" ? "" : Number(raw);
+        }),
+        valid = values.filter(function (value) {
+          return typeof value === "number" && !isNaN(value);
+        }),
+        avg = valid.length
+          ? Math.round(
+              valid.reduce(function (a, b) {
+                return a + b;
+              }, 0) / valid.length,
+            )
+          : "—";
+      return {
+        nis: row[nisIndex] || "",
+        name: row[nameIndex] || "",
+        values: values,
+        avg: avg,
+      };
+    });
+    showTeacherScoreSheet(subject);
+    toast("Data nilai baru berhasil diimpor ke " + subject);
+  };
+  reader.readAsText(file, "UTF-8");
+}
+showTeacherScoreSheet = function (subject) {
+  var t = teacherContacts[subject],
+    rows = scoreSheetRows(subject),
+    body = rows
+      .map(function (row, index) {
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td><td>" +
+          row.nis +
+          '</td><td class="score-name">' +
+          row.name +
+          "</td>" +
+          row.values
+            .map(function (value) {
+              return "<td>" + (value === "" ? "—" : value) + "</td>";
+            })
+            .join("") +
+          "<td><strong>" +
+          row.avg +
+          "</strong></td></tr>"
+        );
+      })
+      .join("");
+  modal(
+    "Spreadsheet nilai · " + subject,
+    t.name + " · " + t.phone,
+    '<div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>' +
+      body +
+      '</tbody></table></div><div class="modal-actions score-sheet-actions"><div><button type="button" class="filter-btn" id="importScoreData">Import data nilai baru</button><input id="scoreFileInput" class="score-import-input" type="file" accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values"></div><div><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div></div>',
+  );
+  document.getElementById("modalContent").classList.add("score-sheet-modal");
+  document.getElementById("downloadScoreCsv").onclick = function () {
+    downloadScoreCsv(subject, rows);
+  };
+  document.getElementById("importScoreData").onclick = function () {
+    document.getElementById("scoreFileInput").click();
+  };
+  document.getElementById("scoreFileInput").onchange = function () {
+    if (this.files[0]) importScoreFile(subject, this.files[0]);
+  };
+};
+function applyImportedScoreRows(subject, rows) {
+  if (!rows || !rows.length) {
+    toast("File Excel tidak berisi data nilai.");
+    return;
+  }
+  var header = rows.shift().map(function (value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, "");
+    }),
+    find = function (names) {
+      return header.findIndex(function (value) {
+        return names.indexOf(value) >= 0;
+      });
+    },
+    nisIndex = find(["nis", "nomorinduk", "nomorinduksiswa"]),
+    nameIndex = find(["namasiswa", "nama"]);
+  if (nisIndex < 0 || nameIndex < 0) {
+    toast("Format file belum sesuai. Gunakan kolom NIS dan Nama Siswa.");
+    return;
+  }
+  var scoreIndexes = [
+    "uh1",
+    "uh2",
+    "uh3",
+    "uh4",
+    "tugas1",
+    "tugas2",
+    "tugas3",
+    "tugas4",
+  ].map(function (label) {
+    return find([
+      label,
+      label.replace("tugas", "tugas "),
+      label.replace("uh", "uh "),
+    ]);
+  });
+  importedScoreSheets[subject] = rows
+    .filter(function (row) {
+      return row[nisIndex] || row[nameIndex];
+    })
+    .map(function (row) {
+      var values = scoreIndexes.map(function (index) {
+          var raw = index >= 0 ? row[index] : "";
+          return raw === "" || raw === null ? "" : Number(raw);
+        }),
+        valid = values.filter(function (value) {
+          return typeof value === "number" && !isNaN(value);
+        }),
+        avg = valid.length
+          ? Math.round(
+              valid.reduce(function (a, b) {
+                return a + b;
+              }, 0) / valid.length,
+            )
+          : "—";
+      return {
+        nis: String(row[nisIndex] || ""),
+        name: String(row[nameIndex] || ""),
+        values: values,
+        avg: avg,
+      };
+    });
+  showTeacherScoreSheet(subject);
+  toast("Data nilai baru berhasil diimpor ke " + subject);
+}
+importScoreFile = function (subject, file) {
+  var extension = file.name.toLowerCase();
+  if (extension.endsWith(".xlsx") || extension.endsWith(".xls")) {
+    if (!window.XLSX) {
+      toast(
+        "Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.",
+      );
+      return;
+    }
+    file
+      .arrayBuffer()
+      .then(function (buffer) {
+        var workbook = XLSX.read(buffer, { type: "array" }),
+          sheet = workbook.Sheets[workbook.SheetNames[0]],
+          rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        applyImportedScoreRows(subject, rows);
+      })
+      .catch(function () {
+        toast("File Excel tidak dapat dibaca.");
+      });
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function (event) {
+    var rows = event.target.result
+      .replace(/^\uFEFF/, "")
+      .trim()
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map(parseDelimitedLine);
+    applyImportedScoreRows(subject, rows);
+  };
+  reader.readAsText(file, "UTF-8");
+};
+var bindSpreadsheetScores = bind;
+bind = function () {
+  bindSpreadsheetScores();
+  document.querySelectorAll("[data-teacher-score]").forEach(function (button) {
+    button.onclick = function () {
+      showTeacherScoreSheet(button.dataset.teacherScore);
+    };
+  });
+};
+function calculateScoreAverage(values) {
+  var valid = values.filter(function (value) {
+    return typeof value === "number" && !isNaN(value);
+  });
+  return valid.length
+    ? Math.round(
+        valid.reduce(function (a, b) {
+          return a + b;
+        }, 0) / valid.length,
+      )
+    : "—";
+}
+function applySingleColumnScoreRows(subject, rows, columnIndex) {
+  if (!rows || !rows.length) {
+    toast("File tidak berisi data nilai.");
+    return;
+  }
+  var header = rows.shift().map(function (value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, "");
+    }),
+    find = function (names) {
+      return header.findIndex(function (value) {
+        return names.indexOf(value) >= 0;
+      });
+    },
+    nisIndex = find(["nis", "nomorinduk", "nomorinduksiswa"]),
+    nameIndex = find(["namasiswa", "nama"]),
+    valueIndex = find(["nilai", "score", "nilai" + columnIndex]);
+  if (nisIndex < 0) {
+    toast("File minimal harus memiliki kolom NIS.");
+    return;
+  }
+  if (valueIndex < 0) {
+    valueIndex = header.findIndex(function (value, index) {
+      return index !== nisIndex && index !== nameIndex;
+    });
+  }
+  if (valueIndex < 0) {
+    toast("Kolom nilai tidak ditemukan.");
+    return;
+  }
+  var existing = scoreSheetRows(subject),
+    byNis = {};
+  existing.forEach(function (row) {
+    byNis[String(row.nis)] = row;
+  });
+  rows
+    .filter(function (row) {
+      return row[nisIndex] !== undefined && row[nisIndex] !== "";
+    })
+    .forEach(function (row) {
+      var nis = String(row[nisIndex]),
+        target = byNis[nis];
+      if (!target) {
+        target = {
+          nis: nis,
+          name: nameIndex >= 0 ? String(row[nameIndex] || "") : "",
+          values: ["", "", "", "", "", "", "", ""],
+          avg: "—",
+        };
+        existing.push(target);
+        byNis[nis] = target;
+      }
+      var value = row[valueIndex];
+      if (value !== "" && value !== null && !isNaN(Number(value)))
+        target.values[columnIndex] = Number(value);
+      target.avg = calculateScoreAverage(target.values);
+    });
+  importedScoreSheets[subject] = existing;
+  showTeacherScoreSheet(subject);
+  toast(
+    "Lajur " +
+      [
+        "UH 1",
+        "UH 2",
+        "UH 3",
+        "UH 4",
+        "Tugas 1",
+        "Tugas 2",
+        "Tugas 3",
+        "Tugas 4",
+      ][columnIndex] +
+      " berhasil diperbarui. Lajur lain tetap.",
+  );
+}
+var applySingleColumnScoreRowsOriginal = applySingleColumnScoreRows;
+applySingleColumnScoreRows = function (subject, rows, columnIndex) {
+  var target = [
+      "uh1",
+      "uh2",
+      "uh3",
+      "uh4",
+      "tugas1",
+      "tugas2",
+      "tugas3",
+      "tugas4",
+    ][columnIndex],
+    header = rows[0].map(function (value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, "");
+    }),
+    targetIndex = header.indexOf(target);
+  if (targetIndex >= 0) {
+    var nisIndex = header.findIndex(function (value) {
+        return ["nis", "nomorinduk", "nomorinduksiswa"].indexOf(value) >= 0;
+      }),
+      nameIndex = header.findIndex(function (value) {
+        return ["namasiswa", "nama"].indexOf(value) >= 0;
+      });
+    rows = [["NIS", "Nama Siswa", "Nilai"]].concat(
+      rows.slice(1).map(function (row) {
+        return [
+          nisIndex >= 0 ? row[nisIndex] : "",
+          nameIndex >= 0 ? row[nameIndex] : "",
+          row[targetIndex],
+        ];
+      }),
+    );
+  }
+  applySingleColumnScoreRowsOriginal(subject, rows, columnIndex);
+};
+importScoreFile = function (subject, file, columnIndex) {
+  var extension = file.name.toLowerCase();
+  if (extension.endsWith(".xlsx") || extension.endsWith(".xls")) {
+    if (!window.XLSX) {
+      toast(
+        "Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.",
+      );
+      return;
+    }
+    file
+      .arrayBuffer()
+      .then(function (buffer) {
+        var workbook = XLSX.read(buffer, { type: "array" }),
+          sheet = workbook.Sheets[workbook.SheetNames[0]],
+          rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        applySingleColumnScoreRows(subject, rows, columnIndex);
+      })
+      .catch(function () {
+        toast("File Excel tidak dapat dibaca.");
+      });
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function (event) {
+    var rows = event.target.result
+      .replace(/^\uFEFF/, "")
+      .trim()
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map(parseDelimitedLine);
+    applySingleColumnScoreRows(subject, rows, columnIndex);
+  };
+  reader.readAsText(file, "UTF-8");
+};
+showTeacherScoreSheet = function (subject) {
+  var t = teacherContacts[subject],
+    rows = scoreSheetRows(subject),
+    body = rows
+      .map(function (row, index) {
+        return (
+          "<tr><td>" +
+          (index + 1) +
+          "</td><td>" +
+          row.nis +
+          '</td><td class="score-name">' +
+          row.name +
+          "</td>" +
+          row.values
+            .map(function (value) {
+              return "<td>" + (value === "" ? "—" : value) + "</td>";
+            })
+            .join("") +
+          "<td><strong>" +
+          row.avg +
+          "</strong></td></tr>"
+        );
+      })
+      .join("");
+  modal(
+    "Spreadsheet nilai · " + subject,
+    t.name + " · " + t.phone,
+    '<div class="score-sheet-note">Pilih lajur sebelum import. Hanya lajur terpilih yang akan diperbarui.</div><div class="score-sheet-wrap"><table class="score-sheet"><thead><tr><th>No</th><th>NIS</th><th>Nama siswa</th><th>UH 1</th><th>UH 2</th><th>UH 3</th><th>UH 4</th><th>Tugas 1</th><th>Tugas 2</th><th>Tugas 3</th><th>Tugas 4</th><th>Rata-rata</th></tr></thead><tbody>' +
+      body +
+      '</tbody></table></div><div class="modal-actions score-sheet-actions"><div><select id="importScoreColumn" class="filter-btn"><option value="0">UH 1</option><option value="1">UH 2</option><option value="2">UH 3</option><option value="3">UH 4</option><option value="4">Tugas 1</option><option value="5">Tugas 2</option><option value="6">Tugas 3</option><option value="7">Tugas 4</option></select><button type="button" class="filter-btn" id="importScoreData">Import lajur terpilih</button><input id="scoreFileInput" class="score-import-input" type="file" accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values"></div><div><button type="button" class="filter-btn" id="cancelModal">Tutup</button><button type="button" class="primary-btn" id="downloadScoreCsv">Unduh CSV untuk Excel</button></div></div>',
+  );
+  document.getElementById("modalContent").classList.add("score-sheet-modal");
+  document.getElementById("downloadScoreCsv").onclick = function () {
+    downloadScoreCsv(subject, rows);
+  };
+  document.getElementById("importScoreData").onclick = function () {
+    document.getElementById("scoreFileInput").click();
+  };
+  document.getElementById("scoreFileInput").onchange = function () {
+    if (this.files[0])
+      importScoreFile(
+        subject,
+        this.files[0],
+        Number(document.getElementById("importScoreColumn").value),
+      );
+  };
+};
+function openTeacherWhatsapp(subject) {
+  var teacher = teacherContacts[subject],
+    phone = teacher.phone.replace(/\D/g, "");
+  if (phone.charAt(0) === "0") phone = "62" + phone.slice(1);
+  var message =
+    "Halo " +
+    teacher.name +
+    ", saya Sumantoro dari AIWalas kelas 11PF1. Saya ingin berkomunikasi terkait mata pelajaran " +
+    subject +
+    ".";
+  window.open(
+    "https://wa.me/" + phone + "?text=" + encodeURIComponent(message),
+    "_blank",
+    "noopener",
+  );
+}
+var bindWhatsappTeachers = bind;
+bind = function () {
+  bindWhatsappTeachers();
+  document.querySelectorAll("[data-teacher-score]").forEach(function (button) {
+    if (button.dataset.whatsappBound) return;
+    button.dataset.whatsappBound = "true";
+    var wa = document.createElement("button");
+    wa.type = "button";
+    wa.className = "panel-action whatsapp-action";
+    wa.textContent = "WhatsApp";
+    wa.onclick = function () {
+      openTeacherWhatsapp(button.dataset.teacherScore);
+    };
+    button.parentNode.appendChild(wa);
+  });
+};
+var bindWhatsappLogo = bind;
+bind = function () {
+  bindWhatsappLogo();
+  document.querySelectorAll(".whatsapp-action").forEach(function (button) {
+    button.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.6 4.2 1.7 6L.2 24l6.4-1.7a11.8 11.8 0 0 0 5.5 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.1-1.2-6-3.5-8.3ZM12.2 21.6h-.1c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.7 9.7 0 1 1 8.5 4.7Zm5.3-7.3c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-1.6-.8-2.6-1.4-3.6-3.1-.3-.5.3-.5.8-1.6.1-.2.1-.4 0-.6-.1-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.1 1.4 3.3c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.6.8 3.1.8.5 0 1.7-.7 1.9-1.3.2-.6.2-1.2.1-1.3-.1-.1-.3-.2-.7-.4Z"/></svg>';
+    button.setAttribute("aria-label", "Hubungi via WhatsApp");
+    button.title = "Hubungi via WhatsApp";
+  });
+};
+var renderWithoutTaskReminder = render;
+render = function () {
+  renderWithoutTaskReminder();
+  if (page === "dashboard") {
+    document.querySelectorAll(".activity").forEach(function (item) {
+      if (item.textContent.indexOf("Tugas Tata Artistik") >= 0) {
+        var text = item.querySelector(".activity-text");
+        if (text)
+          text.innerHTML =
+            '<strong>Kelompok shooting</strong> yang akan shooting hari ini diizinkan.<span class="activity-time">Hari ini</span>';
+      }
+    });
+  }
+};
+var bindWithStudentDetails = bind;
+bind = function () {
+  bindWithStudentDetails();
+  document.querySelectorAll("[data-student]").forEach(function (button) {
+    button.onclick = function () {
+      var student = students.find(function (s) {
+        return s[0] === button.dataset.student;
+      });
+      if (student) {
+        simpleModal("Detail siswa", studentDetailText(student));
+        document
+          .getElementById("modalContent")
+          .classList.add("student-detail-modal");
+      }
+    };
+  });
+};
+studentDetailText = function (student) {
+  var d = studentDetails && studentDetails[student[1]];
+  if (!d)
+    return (
+      "<strong>" +
+      student[0] +
+      "</strong><br>NIS: " +
+      student[1] +
+      "<br>Detail belum diisi."
+    );
+  var fields = [
+    ["Nama siswa", d["Nama Siswa"]],
+    ["NIS", student[1]],
+    ["NISN", d["NISN"]],
+    ["Jenis kelamin", d["Jenis Kelamin"]],
+    ["Tempat lahir", d["Tempat Lahir"]],
+    ["Tanggal lahir", d["Tanggal Lahir"]],
+    ["Agama", d["Agama"]],
+    ["Alamat lengkap", d["Alamat Lengkap"]],
+    ["Status tempat tinggal", d["Status tempat tinggal saat ini"]],
+    ["Transportasi ke sekolah", d["Transportasi utama ke sekolah"]],
+    ["Nama ayah", d["Nama Ayah"]],
+    ["Nama ibu", d["Nama Ibu"]],
+    ["Nama wali", d["Nama wali (jika tinggal bersama wali) "]],
+    ["Hubungan wali", d["Hubungan wali dengan siswa"]],
+    ["Jumlah saudara kandung", d["Jumlah saudara kandung"]],
+    ["Anak ke", d["Anak ke "]],
+    ["Pekerjaan ayah", d["Pekerjaan ayah"]],
+    ["Pekerjaan ibu", d["Pekerjaan ibu"]],
+    ["Bantuan pendidikan", d["Apakah siswa menerima bantuan pendidikan?"]],
+    ["Penyakit bawaan", d["Apakah siswa mengidap penyakit/penyakit bawaan"]],
+    [
+      "Catatan penyakit",
+      d["Jika jawaban YA, penyakit apa yang harus diketahui Wali Kelas"],
+    ],
+    ["Hobi/kegiatan", d["Hobi/kegiatan yang sering dilakukan"]],
+    ["Prestasi/kelebihan", d["Prestasi atau kelebihan yang pernah diraih "]],
+  ];
+  return (
+    '<div class="student-detail-table-wrap"><table class="student-detail-table"><thead><tr><th>Informasi</th><th>Data siswa</th></tr></thead><tbody>' +
+    fields
+      .map(function (field) {
+        var value =
+          String(field[1] || "")
+            .trim()
+            .replace(/\n/g, "<br>") || "—";
+        return "<tr><th>" + field[0] + "</th><td>" + value + "</td></tr>";
+      })
+      .join("") +
+    "</tbody></table></div>"
+  );
+};
+function showStudentDetail(student) {
+  var content = document.getElementById("modalContent");
+  content.className = "modal student-detail-modal";
+  content.innerHTML =
+    '<button class="modal-close" id="closeModal">×</button><h2>Detail siswa</h2><div class="student-detail-body">' +
+    studentDetailText(student) +
+    '</div><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Tutup</button></div>';
+  document.getElementById("modalBackdrop").classList.add("show");
+  document.getElementById("closeModal").onclick = closeModal;
+  document.getElementById("cancelModal").onclick = closeModal;
+}
+var bindWithStudentDetailView = bind;
+bind = function () {
+  bindWithStudentDetailView();
+  document.querySelectorAll("[data-student]").forEach(function (button) {
+    button.onclick = function () {
+      var student = students.find(function (s) {
+        return s[0] === button.dataset.student;
+      });
+      if (student) showStudentDetail(student);
+    };
+  });
+};
+var renderWithMalikhaCorrection = render;
+render = function () {
+  renderWithMalikhaCorrection();
+  if (page === "dashboard") {
+    document.querySelectorAll(".activity-text").forEach(function (item) {
+      if (
+        item.textContent.indexOf("Malikha Intan Madinah") >= 0 &&
+        item.textContent.indexOf("sakit dan tidak masuk") >= 0
+      ) {
+        item.innerHTML =
+          '<strong>Malikha Intan Madinah</strong> hadir hari ini.<span class="activity-time">Hari ini</span>';
+      }
+      if (item.textContent.indexOf("Pesan orangtua Malikha") >= 0) {
+        item.innerHTML =
+          '<strong>Konfirmasi kehadiran Malikha</strong> Malikha masuk sekolah hari ini.<span class="activity-time">Hari ini</span>';
+      }
+    });
+    var message = document.querySelector(".message-card");
+    if (
+      message &&
+      message.textContent.indexOf("Orangtua MALIKHA INTAN MADINAH") >= 0
+    ) {
+      message.innerHTML =
+        '<strong>Konfirmasi kehadiran Malikha</strong><br>Malikha Intan Madinah hadir dan mengikuti kegiatan belajar hari ini.<div class="message-footer"><span class="avatar avatar-teal">AI</span> Status absensi: <span class="pill teal">Hadir</span><span>· Hari ini</span></div>';
+    }
+  }
+};
+function downloadReports() {
+  if (!window.XLSX) {
+    toast(
+      "Pembaca Excel belum tersedia. Periksa koneksi internet lalu coba lagi.",
+    );
+    return;
+  }
+  var date = todayLabel(),
+    metrics = reportMetrics(),
+    low = reportLowStudents(),
+    top = reportTopStudents(),
+    daya = [
+      ["REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1"],
+      ["SMK NEGERI 19 JAKARTA"],
+      ["TAHUN PELAJARAN 2026/2027"],
+      [],
+      ["SEMESTER", "Ganjil"],
+      ["JUMLAH PESERTA DIDIK", 35],
+      ["WALI KELAS", "Sumantoro Kasdhani, S.Kom., M.I.Kom."],
+      [],
+      [
+        "No.",
+        "Mata Pelajaran",
+        "Nilai Maks.",
+        "Nilai Min.",
+        "Rata-rata",
+        "Daya Serap",
+        "Elemen/TP Renc",
+        "Elemen/TP Tlks",
+        "Target Kur.",
+      ],
+    ]
+      .concat(
+        metrics.map(function (row, index) {
+          return [
+            index + 1,
+            row.name,
+            row.max === null ? "—" : row.max,
+            row.min === null ? "—" : row.min,
+            row.avg === null ? "—" : row.avg,
+            row.sorption === null ? "—" : row.sorption + "%",
+            row.plan,
+            row.done,
+            row.target,
+          ];
+        }),
+      )
+      .concat([
+        [],
+        ["Waka Bid. Kurikulum,", "", "", "", "Jakarta, " + date],
+        ["Sumiati Sunarsih, S.Pd., M.Ak.", "", "", "", "Wali Kelas,"],
+        [
+          "NIP. 197904252014122002",
+          "",
+          "",
+          "",
+          "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+        ],
+      ]),
+    walas = [
+      ["LAPORAN WALI KELAS 11PF1"],
+      ["SMK NEGERI 19 JAKARTA"],
+      ["TAHUN PELAJARAN 2026/2027"],
+      [],
+      ["SEMESTER", "Ganjil"],
+      ["JUMLAH PESERTA DIDIK", 35],
+      ["WALI KELAS", "Sumantoro Kasdhani, S.Kom., M.I.Kom."],
+      [],
+      ["A. PESERTA DIDIK YANG BELUM TUNTAS"],
+      [
+        "No",
+        "Nama Peserta Didik",
+        "Mata Pelajaran yang Nilainya Kurang",
+        "Nilai",
+        "S",
+        "I",
+        "A",
+        "Jumlah Absensi",
+        "Sikap",
+      ],
+    ]
+      .concat(
+        low.map(function (row, index) {
+          return [
+            index + 1,
+            row.name,
+            row.subject,
+            row.value,
+            row.s,
+            row.i,
+            row.a,
+            row.total,
+            row.attitude,
+          ];
+        }),
+      )
+      .concat([
+        [],
+        ["B. PESERTA DIDIK BERPRESTASI"],
+        ["Ranking", "Siswa yang Berprestasi", "Jumlah Nilai", "Rata-rata"],
+      ])
+      .concat(
+        top.map(function (row, index) {
+          return [index + 1, row.name, row.total, row.avg];
+        }),
+      )
+      .concat([
+        [],
+        ["Waka Bid. Kurikulum", "", "", "Jakarta, " + date],
+        ["Sumiati Sunarsih, S.Pd., M.Ak.", "", "", "Wali Kelas,"],
+        [
+          "NIP. 197904252014122002",
+          "",
+          "",
+          "Sumantoro Kasdhani, S.Kom., M.I.Kom.",
+        ],
+      ]),
+    wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(daya), "DAYA SERAP");
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.aoa_to_sheet(walas),
+    "LAPORAN WALAS",
+  );
+  XLSX.writeFile(wb, "Laporan_Wali_Kelas_11PF1.xlsx");
+  toast("Laporan Wali Kelas berhasil diunduh");
+}
+function enhanceReportTables() {
+  var countLabel = "JUMLAH PESERTA DIDIK : 35 (L:18, P:17)";
+  document.querySelectorAll(".report-meta span").forEach(function (span) {
+    if (span.textContent.indexOf("JUMLAH PESERTA DIDIK") >= 0)
+      span.textContent = countLabel;
+  });
+  var daya = document.querySelector("#reportDaya table");
+  if (daya) {
+    daya.querySelector("thead").innerHTML =
+      '<tr><th rowspan="2">No.</th><th rowspan="2">Mata Pelajaran</th><th colspan="3">Nilai</th><th rowspan="2">Daya Serap</th><th colspan="2">Elemen/TP</th><th rowspan="2">Target Kurikulum</th></tr><tr><th>Maksimum</th><th>Minimum</th><th>Rata-rata</th><th>Rencana</th><th>Terlaksana</th></tr>';
+  }
+  var walas = document.querySelector("#reportWalas table");
+  if (walas) {
+    walas.querySelector("thead").innerHTML =
+      '<tr><th rowspan="2">No.</th><th rowspan="2">Nama Peserta Didik</th><th rowspan="2">Mata Pelajaran yang Nilainya Kurang</th><th rowspan="2">Nilai</th><th colspan="4">Absensi</th><th rowspan="2">Sikap B/C/K</th></tr><tr><th>Sakit</th><th>Izin</th><th>Alpha</th><th>Jumlah</th></tr>';
+  }
+  var download = document.getElementById("downloadReports");
+  if (download && !document.getElementById("downloadReportsPdf")) {
+    var pdf = document.createElement("button");
+    pdf.id = "downloadReportsPdf";
+    pdf.className = "outline-btn";
+    pdf.textContent = "▣ Cetak / Simpan PDF";
+    pdf.onclick = function () {
+      window.print();
+    };
+    download.parentNode.appendChild(pdf);
+  }
+}
+function enhanceReportPresentation() {
+  var pageRoot =
+    document.querySelector("#reportDaya") &&
+    document.querySelector("#reportDaya").closest(".page");
+  if (pageRoot) pageRoot.classList.add("report-page");
+  document
+    .querySelectorAll(
+      ".report-page .page-heading .eyebrow,.report-page .page-heading p",
+    )
+    .forEach(function (item) {
+      item.remove();
+    });
+  document
+    .querySelectorAll(".report-letterhead")
+    .forEach(function (letterhead) {
+      letterhead.innerHTML =
+        '<img class="report-logo report-logo-school" src="logo-pandawa.png" alt="Logo SMK Negeri 19 Jakarta"><h2>Laporan Wali Kelas</h2><img class="report-logo report-logo-pf" src="logo-pf.png" alt="Logo Program Keahlian Perfilman">';
+    });
+  document.querySelectorAll(".report-meta").forEach(function (meta) {
+    meta.innerHTML =
+      '<span class="report-count">Jumlah Peserta Didik: 35 (L:18, P:17)</span><span class="report-walas">Wali Kelas: Sumantoro Kasdhani, S.Kom., M.I.Kom.</span><span class="report-date">Tanggal Diterbitkan: ' +
+      todayLabel() +
+      "</span>";
+  });
+  var download = document.getElementById("downloadReports");
+  if (download) download.textContent = "↓ Unduh Excel";
+}
+function appendHeadmasterSignature() {
+  document.querySelectorAll(".report-signatures").forEach(function (container) {
+    if (container.querySelector(".headmaster-signature")) return;
+    var signature = document.createElement("span");
+    signature.className = "headmaster-signature";
+    signature.innerHTML =
+      "Kepala SMKN 19 Jakarta,<br><br><br><strong>Sri Muljani, S.Pd.</strong><br>NIP. 197106291997032002";
+    container.appendChild(signature);
+  });
+}
+function stackReportActions() {
+  var excel = document.getElementById("downloadReports"),
+    pdf = document.getElementById("downloadReportsPdf");
+  if (excel && pdf && !excel.parentNode.classList.contains("report-actions")) {
+    var actions = document.createElement("div");
+    actions.className = "report-actions";
+    excel.parentNode.insertBefore(actions, excel);
+    actions.appendChild(excel);
+    actions.appendChild(pdf);
+  }
+}
+function bindReportActions() {
+  appendHeadmasterSignature();
+  enhanceReportTables();
+  enhanceReportPresentation();
+  stackReportActions();
+  var download = document.getElementById("downloadReports");
+  if (download) download.onclick = downloadReports;
+  document.querySelectorAll("[data-report-tab]").forEach(function (tab) {
+    tab.onclick = function () {
+      var daya = document.getElementById("reportDaya"),
+        walas = document.getElementById("reportWalas"),
+        isDaya = tab.dataset.reportTab === "daya";
+      daya.style.display = isDaya ? "block" : "none";
+      walas.style.display = isDaya ? "none" : "block";
+      document.querySelectorAll("[data-report-tab]").forEach(function (other) {
+        other.classList.toggle("active", other === tab);
+      });
+      appendHeadmasterSignature();
+      enhanceReportTables();
+      enhanceReportPresentation();
+      stackReportActions();
+    };
+  });
+}
+enhanceReportPresentation = function () {
+  var pageRoot =
+    document.querySelector("#reportDaya") &&
+    document.querySelector("#reportDaya").closest(".page");
+  if (pageRoot) {
+    pageRoot.classList.add("report-page");
+    var heading = pageRoot.querySelector(".page-heading h1");
+    if (heading) heading.textContent = "Laporan Wali Kelas 11PF1";
+  }
+  pageRoot &&
+    pageRoot
+      .querySelectorAll(".page-heading .eyebrow,.page-heading p")
+      .forEach(function (item) {
+        item.remove();
+      });
+  document
+    .querySelectorAll(".report-letterhead")
+    .forEach(function (letterhead, index) {
+      var title =
+        index === 0
+          ? "REKAPITULASI DAYA SERAP DAN PENCAPAIAN TARGET KURIKULUM KELAS 11PF1"
+          : "LAPORAN WALI KELAS 11PF1";
+      letterhead.innerHTML =
+        '<img class="report-logo report-logo-school" src="logo-pandawa.png" alt="Logo SMK Negeri 19 Jakarta"><h2>' +
+        title +
+        '</h2><strong>SMK NEGERI 19 JAKARTA</strong><span>TAHUN PELAJARAN 2026/2027</span><img class="report-logo report-logo-pf" src="logo-pf.png" alt="Logo Program Keahlian Perfilman">';
+    });
+  document.querySelectorAll(".report-meta").forEach(function (meta) {
+    meta.innerHTML =
+      '<span>SEMESTER : Ganjil</span><span class="report-count">JUMLAH PESERTA DIDIK : 35 (L:18, P:17)</span><span class="report-walas">WALI KELAS : Sumantoro Kasdhani, S.Kom., M.I.Kom.</span><span class="report-date">TANGGAL DITERBITKAN : ' +
+      todayLabel() +
+      "</span>";
+  });
+  var download = document.getElementById("downloadReports");
+  if (download) download.textContent = "↓ Unduh Excel";
+};
+function bindJournalActions() {
+  var add = document.getElementById("newJournal");
+  if (add)
+    add.onclick = function () {
+      modal(
+        "Input jurnal kelas",
+        "Lengkapi catatan pembelajaran setelah jam mengajar selesai.",
+        '<form><label>Mata pelajaran<select><option>PAI</option><option>Matematika</option><option>PKK</option><option>Kokurikuler</option></select></label><label>Materi yang diajarkan<textarea placeholder="Tuliskan materi, aktivitas, dan catatan pembelajaran..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan jurnal</button></div></form>',
+      );
+    };
+  document.querySelectorAll("[data-journal-edit]").forEach(function (button) {
+    button.onclick = function () {
+      var parts = button.dataset.journalEdit.split("|");
+      modal(
+        "Koreksi jurnal · " + parts[0],
+        parts[1] + " · " + parts[2],
+        '<form><label>Materi yang diajarkan<textarea placeholder="Tuliskan materi yang benar..."></textarea></label><label>Catatan koreksi<textarea placeholder="Alasan atau keterangan koreksi..."></textarea></label><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="saveModal">Simpan koreksi</button></div></form>',
+      );
+    };
+  });
+}
+var renderWithJournal = render;
+render = function () {
+  renderWithJournal();
+  if (page === "journal") bindJournalActions();
+};
+var renderWithReports = render;
+render = function () {
+  renderWithReports();
+  if (page === "reports") bindReportActions();
+};
+var enhanceReportPresentationOriginal = enhanceReportPresentation;
+enhanceReportPresentation = function () {
+  enhanceReportPresentationOriginal();
+  var dayaMeta = document.querySelector("#reportDaya .report-meta");
+  if (dayaMeta) dayaMeta.classList.add("daya-meta");
+  var dayaSignatures = document.querySelector("#reportDaya .report-signatures");
+  if (dayaSignatures) {
+    var wali = dayaSignatures.querySelector("span:nth-child(2)");
+    if (wali)
+      wali.innerHTML =
+        "Wali Kelas,<br><br><br><strong>Sumantoro Kasdhani, S.Kom., M.I.Kom.</strong><br>NIP. 197201102022211005";
+  }
+};
+setupLogin();
+restoreSession();

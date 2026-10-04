@@ -56,7 +56,7 @@
         ? currentClassLabel()
         : "Kelas 11PF1"
       ).toUpperCase() +
-      '</span><h2>Ringkasan Kelas orang baru</h2><p>Pantauan status kelas berdasarkan data terbaru</p></div><span class="summary-live">LIVE</span></div><div class="summary-tabs"><button class="summary-tab active" data-summary-tab="attendance">Rekap Absen</button><button class="summary-tab" data-summary-tab="schedule">Jadwal Mapel</button><button class="summary-tab" data-summary-tab="waiting">Tidak Hadir/Menunggu Konfirmasi Orangtua</button></div><div class="summary-content"><section class="summary-view active" data-summary-view="attendance"><div class="attendance-chart"></div></section><section class="summary-view" data-summary-view="schedule"><div class="summary-list-head"><strong>Jadwal Mapel Hari Ini</strong><span>' +
+      '</span><h2>Ringkasan Kelas</h2><p>Pantauan status kelas berdasarkan data terbaru</p></div><span class="summary-live">LIVE</span></div><div class="summary-tabs"><button class="summary-tab active" data-summary-tab="attendance">Rekap Absen</button><button class="summary-tab" data-summary-tab="schedule">Jadwal Mapel</button><button class="summary-tab" data-summary-tab="waiting">Tidak Hadir/Menunggu Konfirmasi Orangtua</button></div><div class="summary-content"><section class="summary-view active" data-summary-view="attendance"><div class="attendance-chart"></div></section><section class="summary-view" data-summary-view="schedule"><div class="summary-list-head"><strong>Jadwal Mapel Hari Ini</strong><span>' +
       esc(schedule.length) +
       ' sesi</span></div><div class="summary-schedule">' +
       (schedule.length

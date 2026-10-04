@@ -135,26 +135,15 @@
       return { draft: draft, count: count };
     });
   }
-<<<<<<< HEAD
-  function readImportAll(file) { return Promise.all(components.map(function (component) { return readImport(file, component).catch(function () { return { draft: {}, count: 0 }; }); })).then(function (results) { var merged = {}, count = 0; results.forEach(function (result, index) { Object.keys(result.draft || {}).forEach(function (nis) { if (!merged[nis]) merged[nis] = {}; merged[nis][components[index]] = result.draft[nis]; count++; }); }); return { draft: merged, count: count }; }); }
-=======
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
   function openInputModal() {
     ['assessmentFileInput','assessmentExcelFile','importAssessment','importAssessmentExcel'].forEach(function (id) { var old = document.getElementById(id); if (old) old.remove(); });
     var values = readValues();
     var draft = {};
     var selected = 'UH1';
-<<<<<<< HEAD
-    var html = '<form><label>Komponen Nilai<select id="assessmentComponent"><option value="__all__">Semua Komponen</option>' +
-      components.map(function (component) { return '<option value="' + component + '">' + component + '</option>'; }).join('') +
-      '</select></label><div class="assessment-import-toolbar"><button type="button" class="outline-btn" id="chooseAssessmentFile">Choose File</button>' +
-      '<span id="assessmentFileName" class="stat-note">Belum ada file dipilih</span><input id="assessmentFile" style="display:none!important" type="file" accept=".xlsx,.xls" hidden></div>' +
-=======
     var html = '<form><label>Komponen Nilai<select id="assessmentComponent">' +
       components.map(function (component) { return '<option value="' + component + '">' + component + '</option>'; }).join('') +
       '</select></label><div class="assessment-import-toolbar"><button type="button" class="outline-btn" id="chooseAssessmentFile">Choose File</button>' +
       '<span id="assessmentFileName" class="stat-note">Belum ada file dipilih</span><input id="assessmentFile" type="file" accept=".xlsx,.xls" hidden></div>' +
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
       '<div class="score-sheet-wrap"><table class="score-sheet assessment-input-table"><thead><tr><th>Nama Siswa</th><th id="assessmentInputHeader">UH1</th></tr></thead><tbody>' +
       studentsList().map(function (student) {
         return '<tr><td class="score-name"><strong>' + esc(student[0]) + '</strong><small>NIS: ' + esc(student[1]) + '</small></td>' +
@@ -180,11 +169,7 @@
       fileInput.value = '';
       fileName.textContent = 'Belum ada file dipilih';
       errorBox.textContent = '';
-<<<<<<< HEAD
-      fillInputs(selected === '__all__' ? 'UH1' : selected);
-=======
       fillInputs(selected);
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
     };
     document.getElementById('chooseAssessmentFile').onclick = function () { fileInput.click(); };
     fileInput.onchange = function () {
@@ -192,17 +177,10 @@
       if (!file) return;
       fileName.textContent = file.name;
       errorBox.textContent = '';
-<<<<<<< HEAD
-      (selected === '__all__' ? readImportAll(file) : readImport(file, selected)).then(function (result) {
-        draft = result.draft;
-        fillInputs(selected === '__all__' ? 'UH1' : selected);
-        toast(result.count + ' nilai siap disimpan.');
-=======
       readImport(file, selected).then(function (result) {
         draft = result.draft;
         fillInputs(selected);
         toast(result.count + ' nilai ' + selected + ' siap disimpan.');
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
       }).catch(function (error) {
         draft = {};
         errorBox.textContent = error.message;
@@ -211,15 +189,6 @@
     };
     document.getElementById('saveAssessmentValues').onclick = function () {
       var saved = 0;
-<<<<<<< HEAD
-      if (selected === '__all__') {
-        Object.keys(draft).forEach(function (nis) { if (!values[nis]) values[nis] = {}; components.forEach(function (component) { if (draft[nis][component] != null) { values[nis][component] = draft[nis][component]; saved++; } }); });
-        if (!saved) { errorBox.textContent = 'Tidak ada nilai yang dapat disimpan.'; return; }
-        saveValues(values); closeModal(); renderAssessment(); toast(saved + ' nilai berhasil disimpan.'); return;
-      }
-
-=======
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
       document.querySelectorAll('.assessment-score').forEach(function (input) {
         var nis = normalize(input.dataset.nis);
         var value = score(input.value);
@@ -235,11 +204,7 @@
       if (!document.querySelector('#pageContent .assessment-table') && activeComponents(values).length) { setTimeout(renderAssessment, 0); }
       toast(saved + ' nilai ' + selected + ' berhasil disimpan.');
     };
-<<<<<<< HEAD
-    fillInputs(selected === '__all__' ? 'UH1' : selected);
-=======
     fillInputs(selected);
->>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
   }
   function renderAssessment() {
     var subjectSelect = document.getElementById('teacherSubjectSelect');

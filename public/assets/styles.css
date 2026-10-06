@@ -446,3 +446,8 @@
   .top-actions .icon-btn,.top-actions .top-avatar{display:none!important;}
   .logout-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:58px;min-height:36px;padding:8px 10px;position:relative;z-index:22;pointer-events:auto;touch-action:manipulation;}
 }
+
+@media(max-width:650px){
+  .topbar .logout-btn{position:fixed!important;top:12px;right:10px;z-index:10000!important;display:inline-flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important;background:#fff!important;}
+  .topbar{padding-right:78px!important;}
+}

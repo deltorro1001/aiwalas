@@ -164,3 +164,14 @@ render=function(){renderWithDiscipline();if(page!=='discipline')return;renderDis
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindMobileSidebar);else bindMobileSidebar();
   setTimeout(bindMobileSidebar,500);
 })();
+
+/* Guaranteed logout handler for mobile topbar. */
+(function(){
+  function bind(){
+    var button=document.getElementById('logoutBtn');
+    if(button&&!button.dataset.globalLogout){button.dataset.globalLogout='1';button.addEventListener('click',function(event){event.preventDefault();event.stopPropagation();if(typeof logout==='function')logout();},true);}
+  }
+  document.addEventListener('click',function(event){var button=event.target&&event.target.closest?event.target.closest('#logoutBtn'):null;if(button&&typeof logout==='function'){event.preventDefault();event.stopImmediatePropagation();logout();}},true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
+  setInterval(bind,500);
+})();

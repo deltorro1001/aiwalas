@@ -113,6 +113,7 @@
 </script><script src='<?= base_url('assets/assessment-redesign.js?v=20260930-nr-final') ?>'></script>
 >>>>>>> 88c7299625b67774e3f12f5ba5aed63dcb85e163
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
+<script src='<?= base_url('assets/attendance-realtime.js?v=20261006-realtime') ?>'></script>
 </body>
 </html>
 

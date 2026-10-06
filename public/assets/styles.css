@@ -436,3 +436,13 @@
 .dashboard-grid>.dashboard-right-stack>*{width:100%;min-width:0;grid-column:auto!important;grid-row:auto!important;}
 .dashboard-grid>.dashboard-right-stack .dashboard-absence-card{min-height:305px;}
 @media(max-width:900px){.dashboard-grid{grid-template-columns:minmax(0,1fr);}.dashboard-grid>.summary-panel,.dashboard-grid>.dashboard-right-stack{grid-column:1;grid-row:auto;}.dashboard-grid>.dashboard-right-stack{gap:12px;}}
+
+/* Mobile topbar: keep the logout control visible and touchable. */
+@media(max-width:650px){
+  .topbar{position:sticky;top:0;z-index:20;min-width:0;overflow:visible;}
+  .breadcrumb{min-width:0;flex:1;overflow:hidden;}
+  .breadcrumb strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .top-actions{flex:0 0 auto;gap:8px;min-width:0;position:relative;z-index:21;}
+  .top-actions .icon-btn,.top-actions .top-avatar{display:none!important;}
+  .logout-btn{display:inline-flex!important;align-items:center;justify-content:center;min-width:58px;min-height:36px;padding:8px 10px;position:relative;z-index:22;pointer-events:auto;touch-action:manipulation;}
+}

@@ -20,7 +20,7 @@ class AbsensiController extends BaseApiController
     return $this->respond(['ok'=>false,'message'=>'QR absensi tidak berlaku untuk kelas atau tanggal ini.'],422);
    $own=db_connect()->table('siswa')->where(['nis'=>$u['nis'],'aktif'=>1])->get()->getRowArray();
    if(!$own||((int)$own['kelas_id']!==(int)$p['kelas_id']))return $this->respond(['ok'=>false,'message'=>'Data siswa tidak sesuai dengan kelas.'],422);
-   $p['siswa_id']=(int)$own['id']; $p['tanggal']=date('Y-m-d'); $p['status']=$p['status']??'Hadir'; $p['keterangan']='Scan QR siswa';
+   $p['siswa_id']=(int)$own['id']; $p['tanggal']=date('Y-m-d'); $p['waktu_scan']=date('H:i:s'); $p['status']=date('H:i')>'06:30'?'Terlambat':'Hadir'; $p['keterangan']='Scan QR siswa';
   }
   $errors=$this->validatePayload($p,['siswa_id'=>'required|is_natural_no_zero','kelas_id'=>'required|is_natural_no_zero','tanggal'=>'required|valid_date[Y-m-d]','waktu_scan'=>'permit_empty|valid_date[H:i:s]','status'=>'required|in_list[Hadir,Terlambat,Sakit,Izin,Alpha,Menunggu keterangan]','keterangan'=>'permit_empty|max_length[2000]']);
   if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);

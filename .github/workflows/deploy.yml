@@ -21,3 +21,4 @@ jobs:
             cd /var/www/html/aiwalas
             git fetch origin
             git reset --hard origin/main
+            php spark migrate --all

@@ -21,7 +21,7 @@
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20260930-ledger-takamca-full') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
-<script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-iphone-layout2') ?>'></script>
+<script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20260925-absence-note1') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>

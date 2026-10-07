@@ -49,7 +49,7 @@ class AbsensiController extends BaseApiController
   if(!$student)return $this->respond(['ok'=>false,'message'=>'Siswa tidak terdaftar pada kelas tersebut.'],422);
   $data=['siswa_id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id'],'tanggal'=>$p['tanggal'],'waktu_scan'=>empty($p['waktu_scan'])?null:$p['waktu_scan'],'status'=>$p['status'],'keterangan'=>trim((string)($p['keterangan']??''))?:null,'dicatat_oleh'=>$u['id']];
   $model=new AbsensiModel();$existing=$model->where(['siswa_id'=>$data['siswa_id'],'kelas_id'=>$data['kelas_id'],'tanggal'=>$data['tanggal']])->first();
-  if($existing){$model->update($existing->id,$data);$id=$existing->id;}else{$id=$model->insert($data,true);}
+  if($existing){$model->where(["siswa_id"=>$data["siswa_id"],"kelas_id"=>$data["kelas_id"],"tanggal"=>$data["tanggal"]])->set($data)->update();$id=$existing->id;}else{$id=$model->insert($data,true);}
   return $this->respond(['ok'=>true,'data'=>$model->find($id)],$existing?200:201);
  }
 }

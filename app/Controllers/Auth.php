@@ -79,6 +79,22 @@ class Auth extends BaseController
             }
         }
 
+        // Allow a student who also has a secretary account (for example Kanaya) to use student login.
+        if ($pengguna === null && $payload['role'] === 'student') {
+            $student = db_connect()->table('siswa')->where('aktif', 1)->groupStart()
+                ->where('nis', trim((string) $payload['username']))
+                ->orWhere('nis', function ($builder) use ($payload) {
+                    return $builder->select('nis')->from('pengguna')->where('nama_pengguna', trim((string) $payload['username']))->where('peran', 'sekretaris')->where('aktif', 1)->limit(1);
+                })->groupEnd()->get()->getRowArray();
+            if ($student) {
+                $linked = $model->where('nis', $student['nis'])->where('aktif', 1)->first();
+                if (hash_equals((string) $student['nis'], (string) $payload['password']) || ($linked && password_verify((string) $payload['password'], $linked->kata_sandi))) {
+                    $sessionUser = ['id' => 0, 'nama_pengguna' => $student['nis'], 'nama_lengkap' => $student['nama_lengkap'], 'peran' => 'siswa', 'nis' => $student['nis']];
+                    session()->regenerate(); session()->set('pengguna', $sessionUser);
+                    return $this->json(['ok' => true, 'user' => $this->frontendUser($sessionUser)]);
+                }
+            }
+        }
         if ($pengguna === null || ! password_verify((string) $payload['password'], $pengguna->kata_sandi)) {
             return $this->json(['ok' => false, 'message' => 'Username atau password tidak sesuai.'], 401);
         }

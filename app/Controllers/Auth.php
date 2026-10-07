@@ -66,7 +66,8 @@ class Auth extends BaseController
                 ->where('nis', $nis)
                 ->where('aktif', 1)
                 ->get()->getRowArray();
-            if ($student && hash_equals($nis, (string) $payload['password'])) {
+            $existingLinked = $student ? $model->where('nis', $nis)->where('aktif', 1)->first() : null;
+            if ($student && ! $existingLinked && hash_equals($nis, (string) $payload['password'])) {
                 $userId = $model->insert([
                     'nama_pengguna' => $nis,
                     'kata_sandi' => password_hash($nis, PASSWORD_DEFAULT),

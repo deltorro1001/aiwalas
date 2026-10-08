@@ -8,10 +8,17 @@
   function semester(){return window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil'}
   function teacherFor(subject){var contact=(window.teacherContacts||{})[subject]||{},name=contact.name||'guru mata pelajaran',record=(window.schoolTeachers||[]).find(function(item){return String(item.name||'').trim()===String(name).trim()})||{},gender=String(record.gender||record.jenis_kelamin||'').toLowerCase(),prefix=(gender==='l'||gender.indexOf('pria')>=0||gender.indexOf('laki')>=0)?'Bpk':'Ibu';return prefix+' '+name}
   function message(student,subject,component,score){var teacher=teacherFor(subject);return 'Assalamualaikum, Bapak/Ibu Orangtua/Wali '+student[0]+'. Kami menginformasikan bahwa capaian nilai ananda pada mata pelajaran '+subject+', komponen '+component+', adalah '+score+'. Nilai tersebut masih di bawah batas ketuntasan 80. Mohon untuk meminta ananda menghubungi '+teacher+' untuk mendapatkan arahan perbaikan nilai.'}
+  function studentMessage(student,subject,component,score){var teacher=teacherFor(subject);return 'Assalamualaikum, '+student[0]+'. Nilai kamu pada mata pelajaran '+subject+', komponen '+component+', adalah '+score+', masih di bawah batas ketuntasan 80. Silakan menghubungi '+teacher+' untuk mendapatkan arahan perbaikan nilai.'}
   function notification(student,subject,component,score){
     if(score===null||score>=threshold)return '<span class="walas-grade-notification-empty">—</span>';
-    var number=phone(student[6]);if(!number)return '<span class="wa-parent-action disabled" aria-disabled="true">Nomor orangtua belum tersedia</span>';
-    return '<a class="wa-parent-action" href="https://web.whatsapp.com/send?phone='+number+'&text='+encodeURIComponent(message(student,subject,component,score))+'" target="_blank" rel="noopener">Siapkan WhatsApp</a>';
+    var parentNumber=phone(student[6]),studentNumber=phone(student[5]);
+    var parentAction=parentNumber
+      ? '<a class="wa-parent-action" href="https://web.whatsapp.com/send?phone='+parentNumber+'&text='+encodeURIComponent(message(student,subject,component,score))+'" target="_blank" rel="noopener">Siapkan WhatsApp Orangtua</a>'
+      : '<span class="wa-parent-action disabled" aria-disabled="true">Nomor orangtua belum tersedia</span>';
+    var studentAction=studentNumber
+      ? '<a class="wa-parent-action wa-student-action" href="https://web.whatsapp.com/send?phone='+studentNumber+'&text='+encodeURIComponent(studentMessage(student,subject,component,score))+'" target="_blank" rel="noopener">Siapkan WhatsApp Siswa</a>'
+      : '<span class="wa-parent-action disabled" aria-disabled="true">Nomor siswa belum tersedia</span>';
+    return '<div class="walas-notification-actions">'+parentAction+studentAction+'</div>';
   }
   function normalizeData(result){
     var subjects=(result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}),components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
@@ -23,7 +30,7 @@
     var components=cache.components.filter(function(row){return Number(row.mata_pelajaran_id)===Number(subject.id)}).sort(function(a,b){return Number(a.urutan)-Number(b.urutan)});
     var rows=components.map(function(component){var key=String(student[7])+'-'+String(component.id),exists=Object.prototype.hasOwnProperty.call(cache.scoreMap,key),score=exists?Math.round(cache.scoreMap[key]):null,status=score===null?'—':score>=threshold?'Lulus':'Tidak Lulus',kind=score===null?'':score>=threshold?'teal':'coral';return '<tr><td>'+esc(component.nama_komponen)+'</td><td><strong>'+(score===null?'—':score)+'</strong></td><td>'+(score===null?'—':'<span class="pill '+kind+'">'+status+'</span>')+'</td><td>'+notification(student,subject.nama_mata_pelajaran,component.nama_komponen,score)+'</td></tr>'}).join('');
     var target=document.getElementById('walasGradeTableWrap'),summary=document.getElementById('walasGradeSummary'),info=document.getElementById('walasGradeStudent');
-    if(target)target.innerHTML='<div class="student-grade-selected"><strong>Mapel: '+esc(subject.nama_mata_pelajaran)+'</strong></div><div class="score-sheet-wrap"><table class="score-sheet student-component-grades walas-component-grades"><thead><tr><th>Komponen Nilai</th><th>Nilai</th><th>Status</th><th>Notifikasi Orangtua</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="empty-state">Belum ada komponen nilai.</td></tr>')+'</tbody></table></div>';
+    if(target)target.innerHTML='<div class="student-grade-selected"><strong>Mapel: '+esc(subject.nama_mata_pelajaran)+'</strong></div><div class="score-sheet-wrap"><table class="score-sheet student-component-grades walas-component-grades"><thead><tr><th>Komponen Nilai</th><th>Nilai</th><th>Status</th><th>Notifikasi Orangtua &amp; Siswa</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="empty-state">Belum ada komponen nilai.</td></tr>')+'</tbody></table></div>';
     if(summary)summary.textContent='Komponen penilaian '+subject.nama_mata_pelajaran+' · tombol WhatsApp aktif untuk nilai di bawah 80';
     if(info)info.textContent=student[0]+' · NIS '+student[1];
     document.querySelectorAll('[data-walas-grade-subject]').forEach(function(button){button.classList.toggle('active',String(button.dataset.walasGradeSubject)===String(subject.id))});

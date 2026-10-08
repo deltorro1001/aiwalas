@@ -15,6 +15,7 @@ class AbsensiModel extends Model
         'siswa_id',
         'kelas_id',
         'tanggal',
+        'semester',
         'waktu_scan',
         'status',
         'keterangan',

@@ -20,7 +20,7 @@
   function storageKey() {
     var user = window.currentUser || {};
     var identity = user.id || user.username || user.name || 'unknown-teacher';
-    return storagePrefix + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_');
+    return storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_');
   }  function readValues() {
     try { return JSON.parse(localStorage.getItem(storageKey()) || '{}'); }
     catch (error) { return {}; }

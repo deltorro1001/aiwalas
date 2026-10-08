@@ -7,7 +7,9 @@
     authRequest(url).then(function(data){window.activeSemester=value;applyBootstrapData(data);if(window.page==='assessment'&&window.renderAssessmentPage)window.renderAssessmentPage();else render()}).catch(function(error){toast(error.message||'Semester gagal dimuat.')});
   }
   function install(){
-    var select=document.getElementById('semesterSelect');if(!select||select.dataset.bound==='1')return;
+    var select=document.getElementById('semesterSelect');if(!select)return;
+    if(window.currentRole==='assistant'||window.currentRole==='student'){var row=select.closest('.academic-year-row');if(row)row.style.display='none';window.activeSemester='Ganjil';return}
+    if(select.dataset.bound==='1')return;
     select.dataset.bound='1';select.value=current();window.activeSemester=select.value;
     select.onchange=function(){var value=allowed.indexOf(this.value)>=0?this.value:'Ganjil';localStorage.setItem(key,value);window.activeSemester=value;load(value)};
   }

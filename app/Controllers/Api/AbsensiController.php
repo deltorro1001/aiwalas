@@ -29,6 +29,7 @@ class AbsensiController extends BaseApiController
 
  public function save(){
   $p=$this->payload();$u=$this->currentUser();$isStudent=($u['peran']??'')==='siswa';
+  if(!$isStudent)$p['tanggal']=date('Y-m-d');
   if($isStudent){
    $parts=explode('|',(string)($p['qr_code']??''));
    $kelasId=(int)($p['kelas_id']??0);

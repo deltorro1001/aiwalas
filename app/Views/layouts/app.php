@@ -37,7 +37,7 @@
 <script src='<?= base_url('assets/hud-chart.js?v=20260914-trends4') ?>'></script>
 <script src='<?= base_url('assets/dashboard-summary.js?v=20260926-absence-card') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20260919-qr-realtime') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261008-correction-display') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261006-persistent-qr') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
@@ -110,7 +110,7 @@
 })();
 </script><script src='<?= base_url('assets/assessment-redesign.js?v=20261001-main-all-components') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
-<script src='<?= base_url('assets/attendance-realtime.js?v=20261006-realtime') ?>'></script>
+<script src='<?= base_url('assets/attendance-realtime.js?v=20261008-correction-display') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
 </body>
 </html>

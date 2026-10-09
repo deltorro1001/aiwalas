@@ -19,7 +19,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20260930-ledger-takamca-full') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261009-walas-menu') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
@@ -113,7 +113,7 @@
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261009-parent-notification') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261009-ledger-order') ?>'></script>
 </body>
 </html>
 

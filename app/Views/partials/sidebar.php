@@ -26,7 +26,7 @@
     <button class="nav-item" data-page="remedial"><span></span> Remedial &amp; Tugas</button>
     <button class="nav-item" data-page="notifications"><span></span> Notifikasi <b class="nav-badge light">3</b></button>
   </nav>
-  <div class="sidebar-bottom"><button class="nav-item" data-page="settings"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button>Tanya sekarang <span></span></button></div><div class="sidebar-footer">AIWalas v1.0 <span></span> Mode demo</div></div>
+  <div class="sidebar-bottom"><button class="nav-item" data-page="settings"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button>Tanya sekarang <span></span></button></div><div class="sidebar-footer">aiwalas v1.0 - Developed by Sumantoro Kasdhani - 2026</div></div>
 </aside>
 
 

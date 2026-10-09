@@ -45,6 +45,7 @@ $routes->get('api/nilai', 'Api\NilaiController::index', ['filter' => ['auth', 'r
 $routes->post('api/nilai', 'Api\NilaiController::save', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/pesan', 'Api\PesanKomunikasiController::index', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->post('api/pesan', 'Api\PesanKomunikasiController::prepare', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/pesan/masuk', 'Api\PesanKomunikasiController::incoming', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->patch('api/pesan/(:num)/dibuka', 'Api\PesanKomunikasiController::opened/$1', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/guru', 'Api\GuruController::index', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/guru/(:num)', 'Api\GuruController::show/$1', ['filter' => ['auth', 'role:wali_kelas']]);

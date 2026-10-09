@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261009-walas-assessment') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261009-teacher-reminders') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
 <style>.grid-stats .absence-summary-card{overflow:visible!important}.grid-stats .absence-summary-card .absence-summary-list{display:grid!important;grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;position:relative!important;z-index:3!important}.grid-stats .absence-summary-card .absence-summary-row{display:flex!important;visibility:visible!important;opacity:1!important;min-height:10px!important}</style>
@@ -25,6 +25,7 @@
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20260925-absence-note1') ?>'></script>
+<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261009-panel') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>
 <script src='<?= base_url('assets/school-teachers.js?v=20260913-teachers-export6') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-mapel.js?v=20260918-mapel-kelas-imported') ?>'></script>

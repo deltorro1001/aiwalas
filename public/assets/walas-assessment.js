@@ -25,7 +25,8 @@
     var order=[['pai'],['ppkn'],['bahasaindonesia'],['olahraga','pjok','pendidikanjasmaniolahragadankesehatan'],['sejarah'],['muatanlokal','mulok'],['matematika'],['bahasainggris'],['manajemenproduksi','manajemenproduksifilm'],['naskahpenyutradaraan'],['tatakamera','tatacahaya','tatakameradancahaya'],['editingvideo','tataartistik','editingfilm'],['pkk','kreativitasinovasidankewirausahaan'],['mapelpilihananimasi3d','animasi3d']];
     var rank={};order.forEach(function(group,index){group.forEach(function(name){rank[name]=index})});
     return subjects.filter(function(subject){var key=subjectKey(subject.nama_mata_pelajaran);return key.indexOf('kokurikuler')<0&&key.indexOf('upacara')<0}).sort(function(a,b){var ar=rank[subjectKey(a.nama_mata_pelajaran)],br=rank[subjectKey(b.nama_mata_pelajaran)];ar=ar==null?999:ar;br=br==null?999:br;return ar===br?String(a.nama_mata_pelajaran).localeCompare(String(b.nama_mata_pelajaran),'id'):ar-br});
-  }\n  function normalizeData(result){
+  }
+  function normalizeData(result){
     var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0})),components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
     scores.forEach(function(row){scoreMap[String(row.siswa_id)+'-'+String(row.komponen_nilai_id)]=Number(row.nilai)});
     return {subjects:subjects,components:components,scoreMap:scoreMap};

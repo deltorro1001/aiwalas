@@ -75,7 +75,7 @@
 
 
 
-<script src='<?= base_url('assets/teacher-journal-ui.js?v=20260926-shared-journal') ?>'></script>
+<script src='<?= base_url('assets/teacher-journal-ui.js?v=20261009-complete-subjects') ?>'></script>
 <script src='<?= base_url('assets/settings-page.js?v=20260926-password-form') ?>'></script>
 <script src='<?= base_url('assets/teacher-journal-five.js?v=20260920-five') ?>'></script>
 <script src='<?= base_url('assets/student-home.js?v=20260924-layout-fix2') ?>'></script>

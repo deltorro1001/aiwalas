@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261007-whatsapp-parent') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261009-walas-assessment') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
 <style>.grid-stats .absence-summary-card{overflow:visible!important}.grid-stats .absence-summary-card .absence-summary-list{display:grid!important;grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;position:relative!important;z-index:3!important}.grid-stats .absence-summary-card .absence-summary-row{display:flex!important;visibility:visible!important;opacity:1!important;min-height:10px!important}</style>
@@ -19,7 +19,8 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20260930-ledger-takamca-full') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261009-walas-routing4') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261009-hide-friday') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
@@ -60,7 +61,7 @@
     event.stopImmediatePropagation();
     if(typeof window.render!=='function'){window.alert('AIWalas belum selesai memuat. Silakan tunggu sebentar.');return}
     window.page=button.dataset.page;
-    try{if(button.dataset.page==='assessment'&&typeof window.renderAssessmentPage==='function'){window.renderAssessmentPage()}else{window.render()}}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
+    try{if(button.dataset.page==='walasAssessment'&&typeof window.renderWalasAssessmentPage==='function'){window.renderWalasAssessmentPage()}else if(button.dataset.page==='assessment'&&typeof window.renderAssessmentPage==='function'){window.renderAssessmentPage()}else{window.render()}}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
    },true);
   });
  }

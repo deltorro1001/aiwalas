@@ -113,7 +113,7 @@
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261009-ledger-order') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261009-menu-fix') ?>'></script>
 </body>
 </html>
 

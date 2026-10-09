@@ -19,7 +19,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261009-walas-routing2') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261009-walas-routing3') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
@@ -60,7 +60,7 @@
     event.stopImmediatePropagation();
     if(typeof window.render!=='function'){window.alert('AIWalas belum selesai memuat. Silakan tunggu sebentar.');return}
     window.page=button.dataset.page;
-    try{if(button.dataset.page==='assessment'&&typeof window.renderAssessmentPage==='function'){window.renderAssessmentPage()}else{window.render()}}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
+    try{if(button.dataset.page==='walasAssessment'&&typeof window.renderWalasAssessmentPage==='function'){window.renderWalasAssessmentPage()}else if(button.dataset.page==='assessment'&&typeof window.renderAssessmentPage==='function'){window.renderAssessmentPage()}else{window.render()}}catch(error){console.error(error);window.alert('Menu gagal dibuka: '+error.message)}
    },true);
   });
  }
@@ -113,7 +113,7 @@
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261009-routing2') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261009-routing3') ?>'></script>
 </body>
 </html>
 

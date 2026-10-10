@@ -102,6 +102,7 @@ class InitialDataSeeder extends Seeder
                 'memiliki_penyakit' => $this->yesValue($detail['Apakah siswa mengidap penyakit/penyakit bawaan'] ?? ''),
                 'catatan_penyakit' => $this->nullValue($detail['Jika jawaban YA, penyakit apa yang harus diketahui Wali Kelas'] ?? null),
                 'hobi' => $this->nullValue($detail['Hobi/kegiatan yang sering dilakukan'] ?? null),
+                'kegiatan_ekskul' => $this->nullValue($detail['Kegiatan Ekskul Yang Diikuti '] ?? $detail['Kegiatan Ekskul Yang Diikuti'] ?? null),
                 'prestasi' => $this->nullValue($detail['Prestasi atau kelebihan yang pernah diraih '] ?? null),
                 'kelas_id' => $kelasId,
                 'nomor_hp' => $this->nullValue($contact['nomor_hp'] ?? null),

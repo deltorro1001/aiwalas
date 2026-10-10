@@ -73,7 +73,7 @@ class SiswaController extends BaseApiController
 
     private function clean(array $p): array
     {
-        $fields=['nis','nisn','nama_lengkap','jenis_kelamin','tempat_lahir','tanggal_lahir','agama','alamat_lengkap','status_tempat_tinggal','transportasi','nama_ayah','nama_ibu','nama_wali','hubungan_wali','kerabat_yang_bisa_dihubungi','jumlah_saudara','anak_ke','pekerjaan_ayah','pekerjaan_ibu','menerima_bantuan','memiliki_penyakit','catatan_penyakit','hobi','prestasi','kelas_id','nomor_hp','nomor_hp_orang_tua','aktif'];
+        $fields=['nis','nisn','nama_lengkap','jenis_kelamin','tempat_lahir','tanggal_lahir','agama','alamat_lengkap','status_tempat_tinggal','transportasi','nama_ayah','nama_ibu','nama_wali','hubungan_wali','kerabat_yang_bisa_dihubungi','jumlah_saudara','anak_ke','pekerjaan_ayah','pekerjaan_ibu','menerima_bantuan','memiliki_penyakit','catatan_penyakit','hobi','prestasi','kegiatan_ekskul','kelas_id','nomor_hp','nomor_hp_orang_tua','aktif'];
         $data=[];foreach($fields as $field){if(array_key_exists($field,$p))$data[$field]=is_string($p[$field])?trim($p[$field]):$p[$field];}
         foreach(['nisn','tempat_lahir','tanggal_lahir','agama','alamat_lengkap','nama_wali','nomor_hp','nomor_hp_orang_tua'] as $nullable){if(($data[$nullable]??null)==='')$data[$nullable]=null;}
         $data['aktif']=(int)($p['aktif']??1);return $data;

@@ -36,6 +36,7 @@ class SiswaModel extends Model
         'catatan_penyakit',
         'hobi',
         'prestasi',
+        'kegiatan_ekskul',
         'kelas_id',
         'nomor_hp',
         'nomor_hp_orang_tua',

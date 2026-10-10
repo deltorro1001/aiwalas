@@ -1,11 +1,11 @@
 (function(){
   var eventTimer=null,academicEnd='2027-06-30';
   var fixedSchedule={
-    Senin:[['07.30—09.00','PKK','Nani Aminah, SE.'],['09.00—10.45','Sejarah','Englena Nastaria Purba, S.Pd.'],['10.45—13.30','Tata Artistik','Ruby Eka Prawira, S.Pd.'],['13.30—15.00','Bahasa Inggris','Ika Inayah, S.Pd.']],
-    Selasa:[['06.30—08.15','Bahasa Indonesia','Erna Cahyani, S.Pd.'],['09.00—10.45','Tata Cahaya','Wahyu Lukman Hakim, S.Kom.'],['10.45—12.15','PPKN','Ngatman, S.Pd.'],['12.45—15.00','Manajemen Produksi','Sumantoro Kasdhani, S.Kom., M.I.Kom.']],
-    Rabu:[['06.30—08.15','Tata Kamera','Putu Arya Ranesda, S.Kom.'],['09.00—10.45','Olahraga','Putu Arya Ranesda, S.Kom.'],['10.45—12.15','Tata Cahaya','Wahyu Lukman Hakim, S.Kom.'],['12.45—15.00','Tata Artistik','Ruby Eka Prawira, S.Pd.']],
-    Kamis:[['06.30—08.15','PAI','Lutfi Faridil Aftros, S.Pd.I'],['08.15—10.45','Matematika','Robert Henry Hutapea, S.Si., M.Pd.'],['10.45—13.30','PKK','Nani Aminah, SE.'],['13.30—15.00','Kokurikuler','Englena Nastaria Purba, S.Pd.']],
-    Jumat:[['07.30—09.30','Naskah & Penyutradaraan','Sumantoro Kasdhani, S.Kom., M.I.Kom.'],['09.30—10.10','Bahasa Inggris','Ika Inayah, S.Pd.'],['10.25—11.45','Muatan Lokal','Englena Nastaria Purba, S.Pd.'],['13.00—15.00','Tata Kamera','Putu Arya Ranesda, S.Kom.']]
+    Senin:[['07.30—09.00','KIK','Nani Aminah, SE.'],['09.00—10.45','Sejarah','Englena Nastaria Purba, S.Pd.'],['10.45—13.30','Tata Artistik','Ruby Eka Prawira, S.Pd.'],['13.30—15.00','Bahasa Inggris','Ika Inayah, S.Pd.']],
+    Selasa:[['06.30—08.15','Bahasa Indonesia','Erna Cahyani, S.Pd.'],['09.00—10.45','Tata Kamera & Cahaya','Wahyu Lukman Hakim, S.Kom.'],['10.45—12.15','PPKN','Ngatman, S.Pd.'],['12.45—15.00','Manajemen Produksi','Sumantoro Kasdhani, S.Kom., M.I.Kom.']],
+    Rabu:[['06.30—08.15','Tata Kamera & Cahaya','Wahyu Lukman Hakim, S.Kom.'],['09.00—10.45','Olahraga','Putu Arya Ranesda, S.Kom.'],['10.45—12.15','Tata Kamera & Cahaya','Wahyu Lukman Hakim, S.Kom.'],['12.45—15.00','Tata Artistik','Ruby Eka Prawira, S.Pd.']],
+    Kamis:[['06.30—08.15','PAI','Lutfi Faridil Aftros, S.Pd.I'],['08.15—10.45','Matematika','Robert Henry Hutapea, S.Si., M.Pd.'],['10.45—13.30','KIK','Nani Aminah, SE.'],['13.30—15.00','Kokurikuler','Englena Nastaria Purba, S.Pd.']],
+    Jumat:[['07.30—09.30','Naskah & Penyutradaraan','Sumantoro Kasdhani, S.Kom., M.I.Kom.'],['09.30—10.10','Bahasa Inggris','Ika Inayah, S.Pd.'],['10.25—11.45','Muatan Lokal','Englena Nastaria Purba, S.Pd.'],['13.00—15.00','Tata Kamera & Cahaya','Wahyu Lukman Hakim, S.Kom.']]
   };
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function phone(value){var number=String(value||'').replace(/\D/g,'');if(number.indexOf('0')===0)number='62'+number.slice(1);return /^62\d{8,15}$/.test(number)?number:''}

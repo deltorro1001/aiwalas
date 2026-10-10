@@ -139,7 +139,7 @@ class InitialDataSeeder extends Seeder
             ]);
         }
 
-        $subjects = ['PAI','Matematika','PKK','Kokurikuler','Bahasa Indonesia','Tata Cahaya','PPKN','Manajemen Produksi','Tata Kamera','Olahraga','Tata Artistik','Bahasa Inggris','Sejarah','Muatan Lokal','Naskah & Penyutradaraan'];
+        $subjects = ['PAI','Matematika','KIK','Kokurikuler','Bahasa Indonesia','Tata Kamera & Cahaya','PPKN','Manajemen Produksi','Olahraga','Tata Artistik','Bahasa Inggris','Sejarah','Muatan Lokal','Naskah & Penyutradaraan'];
         foreach ($subjects as $subject) {
             $this->db->table('mata_pelajaran')->insert(['nama_mata_pelajaran' => $subject, 'aktif' => 1]);
         }
@@ -151,10 +151,10 @@ class InitialDataSeeder extends Seeder
         }
 
         $schedule = [
-            ['Senin','07:30','09:00','PKK','Nani Aminah'], ['Senin','09:00','10:45','Sejarah','Englena Nastaria Purba'],
+            ['Senin','07:30','09:00','KIK','Nani Aminah'], ['Senin','09:00','10:45','Sejarah','Englena Nastaria Purba'],
             ['Senin','10:45','13:30','Tata Artistik','Ruby Eka Prawira'], ['Senin','13:30','15:00','Bahasa Inggris','Ika Inayah'],
-            ['Selasa','06:30','09:00','Bahasa Indonesia','Erna Cahyani'], ['Selasa','09:00','10:45','Tata Cahaya','Wahyu Lukman Hakim'],
-            ['Rabu','06:30','09:00','Tata Kamera','Putu Arya Ranesda'], ['Kamis','06:30','08:15','PAI','Lutfi Faridil Aftros'], ['Kamis','08:15','10:45','Matematika','Robert Henry Hutapea'], ['Kamis','10:45','13:30','PKK','Nani Aminah'], ['Kamis','13:30','15:00','Kokurikuler','Englena Nastaria Purba'],
+            ['Selasa','06:30','09:00','Bahasa Indonesia','Erna Cahyani'], ['Selasa','09:00','10:45','Tata Kamera & Cahaya','Wahyu Lukman Hakim'],
+            ['Rabu','06:30','09:00','Tata Kamera & Cahaya','Wahyu Lukman Hakim'], ['Kamis','06:30','08:15','PAI','Lutfi Faridil Aftros'], ['Kamis','08:15','10:45','Matematika','Robert Henry Hutapea'], ['Kamis','10:45','13:30','KIK','Nani Aminah'], ['Kamis','13:30','15:00','Kokurikuler','Englena Nastaria Purba'],
             ['Jumat','07:30','09:30','Naskah & Penyutradaraan','Sumantoro Kasdhani'],
         ];
         foreach ($schedule as [$hari, $mulai, $selesai, $subject, $teacherName]) {

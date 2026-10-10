@@ -25,7 +25,7 @@
   }
   function subjectKey(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
   function orderedSubjects(subjects){
-    var order=[['pai'],['ppkn'],['bahasaindonesia'],['olahraga','pjok','pendidikanjasmaniolahragadankesehatan'],['sejarah'],['muatanlokal','mulok'],['matematika'],['bahasainggris'],['manajemenproduksi','manajemenproduksifilm'],['naskahpenyutradaraan'],['tatakamera','tatacahaya','tatakameradancahaya'],['editingvideo','tataartistik','editingfilm'],['pkk','kreativitasinovasidankewirausahaan'],['mapelpilihananimasi3d','animasi3d']];
+    var order=[['pai'],['ppkn'],['bahasaindonesia'],['olahraga','pjok','pendidikanjasmaniolahragadankesehatan'],['sejarah'],['muatanlokal','mulok'],['matematika'],['bahasainggris'],['manajemenproduksi','manajemenproduksifilm'],['naskahpenyutradaraan'],['tatakamera','tatacahaya','tatakameradancahaya'],['editingvideo','tataartistik','editingfilm'],['kik','pkk','kreativitasinovasidankewirausahaan'],['mapelpilihananimasi3d','animasi3d']];
     var rank={};order.forEach(function(group,index){group.forEach(function(name){rank[name]=index})});
     return subjects.filter(function(subject){var key=subjectKey(subject.nama_mata_pelajaran);return key.indexOf('kokurikuler')<0&&key.indexOf('upacara')<0&&key.indexOf('pembiasaanharijumat')<0&&key.indexOf('pembiasaanjumat')<0}).sort(function(a,b){var ar=rank[subjectKey(a.nama_mata_pelajaran)],br=rank[subjectKey(b.nama_mata_pelajaran)];ar=ar==null?999:ar;br=br==null?999:br;return ar===br?String(a.nama_mata_pelajaran).localeCompare(String(b.nama_mata_pelajaran),'id'):ar-br});
   }

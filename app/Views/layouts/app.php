@@ -111,7 +111,7 @@
       .finally(function(){if(button){button.disabled=false;button.textContent='Masuk ke AIWalas'}});
   },true);
 })();
-</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261008-semester') ?>'></script>
+</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261010-nr-formula') ?>'></script>
 <script src='<?= base_url('assets/semester-context.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>

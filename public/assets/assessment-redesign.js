@@ -47,8 +47,11 @@
       : null;
     var ats = score(row.ATS);
     var ass = score(row.ASS);
-    var report = null;
-    if (average !== null && ats !== null) {
+    var available = uhValues.slice();
+    if (ats !== null) available.push(ats);
+    if (ass !== null) available.push(ass);
+    var report = available.length === 1 ? available[0] : null;
+    if (report === null && average !== null && ats !== null) {
       report = ass === null
         ? Math.round((3 * average + ats) / 4)
         : Math.round((3 * average + ats + 2 * ass) / 6);
@@ -62,7 +65,7 @@
     if (uhColumns.length >= 2) columns.push('Rerata UH');
     if (active.indexOf('ATS') >= 0) columns.push('ATS');
     if (active.indexOf('ASS') >= 0) columns.push('ASS');
-    if (uhColumns.length >= 1 && active.indexOf('ATS') >= 0) columns.push('Nilai Raport');
+    if (active.length === 1 || (uhColumns.length >= 1 && active.indexOf('ATS') >= 0)) columns.push('Nilai Raport');
     return columns;
   }
   function renderTable(values) {

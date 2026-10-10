@@ -20,3 +20,8 @@ security.redirect = false
 WHATSAPP_ACCESS_TOKEN = ''
 WHATSAPP_PHONE_NUMBER_ID = ''
 WHATSAPP_API_VERSION = 'v20.0'
+
+# WhatsApp gateway (API key hanya di .env server, jangan commit nilai rahasia)
+WHATSAPP_GATEWAY_URL = 'https://wa.ats.co.id'
+WHATSAPP_GATEWAY_API_KEY = ''
+WHATSAPP_GATEWAY_SENDER = '6285810283863'

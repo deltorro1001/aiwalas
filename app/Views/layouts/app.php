@@ -19,7 +19,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261010-mapel-guru-wahyu') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261010-startup-fix') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>

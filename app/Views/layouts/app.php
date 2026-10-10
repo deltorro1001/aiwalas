@@ -33,7 +33,7 @@
 <script src='<?= base_url('assets/school-teachers-actions.js?v=20260919-detail-trash') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-cleanup.js?v=20260919') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-layout.js?v=20260920') ?>'></script>
-<script src='<?= base_url('assets/api-ui.js?v=20261010-edit-student-scroll') ?>'></script>
+<script src='<?= base_url('assets/api-ui.js?v=20261010-full-student-biodata') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'></script>
 <script src='<?= base_url('assets/ledger-import.js?v=20260914-report-data') ?>'></script>
 <script src='<?= base_url('assets/ledger-page.js?v=20260918-name-left') ?>'></script>

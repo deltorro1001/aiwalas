@@ -488,3 +488,26 @@
   background:#fff!important;
   padding-top:10px!important;
 }
+
+/* Form Edit/Tambah siswa: seluruh biodata dapat digulir */
+#modalBackdrop.show .modal:has(#fNis) {
+  display:flex!important;
+  flex-direction:column!important;
+  width:min(760px,100%)!important;
+  height:min(90vh,760px)!important;
+  max-height:calc(100vh - 24px)!important;
+  overflow:hidden!important;
+}
+#modalBackdrop.show .modal:has(#fNis) form {
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-right:4px!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#modalBackdrop.show .modal:has(#fNis) .modal-actions {
+  flex:0 0 auto!important;
+  background:#fff!important;
+  padding-top:10px!important;
+}

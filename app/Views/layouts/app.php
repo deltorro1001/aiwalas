@@ -81,7 +81,7 @@
 <script src='<?= base_url('assets/teacher-journal-five.js?v=20260920-five') ?>'></script>
 <script src='<?= base_url('assets/student-home.js?v=20260924-layout-fix2') ?>'></script>
 <script src='<?= base_url('assets/student-sidebar.js?v=20260923-groups3') ?>'></script>
-<script src='<?= base_url('assets/teacher-sidebar.js?v=20261010-mapel-guru-update') ?>'></script>
+<script src='<?= base_url('assets/teacher-sidebar.js?v=20261010-teacher-subjects') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
 <script src='<?= base_url('assets/student-home-force.js?v=20260923-student-profile4') ?>'></script>
 <script src='<?= base_url('assets/student-grades.js?v=20260921-horizontal-modal') ?>'></script>
@@ -111,7 +111,7 @@
       .finally(function(){if(button){button.disabled=false;button.textContent='Masuk ke AIWalas'}});
   },true);
 })();
-</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261010-ledger-alias') ?>'></script>
+</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261010-teacher-subject-storage') ?>'></script>
 <script src='<?= base_url('assets/semester-context.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>

@@ -17,20 +17,22 @@
     return isNaN(parsed) ? null : Math.max(0, Math.min(100, parsed));
   }
   function studentsList() { return window.students || []; }
+  function subjectName() { var select = document.getElementById('teacherSubjectSelect'); return (select && select.value) || localStorage.getItem('aiwalas.teacher.subject') || 'Mapel'; }
+  function subjectToken(value) { return String(value || 'Mapel').replace(/[^a-z0-9_-]/gi, '_'); }
   function storageKey() {
     var user = window.currentUser || {};
     var identity = user.id || user.username || user.name || 'unknown-teacher';
-    return storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_');
+    return storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_') + '.' + subjectToken(subjectName());
   }  function readValues() {
     try {
       var current = JSON.parse(localStorage.getItem(storageKey()) || '{}');
       if (Object.keys(current).length || (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') !== 'Ganjil') return current;
       var user = window.currentUser || {}, identity = user.id || user.username || user.name || 'unknown-teacher';
-      var legacyKey = 'aiwalas.assessment.v6.' + String(identity).replace(/[^a-z0-9_-]/gi, '_');
+      var legacyKey = storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_') + '.' + subjectToken(subjectName());
       return JSON.parse(localStorage.getItem(legacyKey) || '{}');
     } catch (error) { return {}; }
   }
-  function saveValues(values) { memoryValues = values || {}; var serialized=JSON.stringify(values || {}),user=window.currentUser||{},semester=window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil',identity=user.id||user.username||user.name||user.nama_lengkap||'unknown-teacher',aliases=[identity,user.name,user.nama_lengkap,user.username].filter(function(value,index,list){return value&&list.indexOf(value)===index}).map(function(value){return String(value).replace(/[^a-z0-9_-]/gi,'_')});localStorage.setItem(storageKey(),serialized);aliases.forEach(function(alias){localStorage.setItem('aiwalas.assessment.v6.'+semester+'.'+alias,serialized);localStorage.setItem('aiwalas.assessment.v6.'+alias,serialized)}); }
+  function saveValues(values) { memoryValues = values || {}; var serialized=JSON.stringify(values || {}),user=window.currentUser||{},semester=window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil',identity=user.id||user.username||user.name||user.nama_lengkap||'unknown-teacher',aliases=[identity,user.name,user.nama_lengkap,user.username].filter(function(value,index,list){return value&&list.indexOf(value)===index}).map(function(value){return String(value).replace(/[^a-z0-9_-]/gi,'_')});localStorage.setItem(storageKey(),serialized);aliases.forEach(function(alias){var safe=String(alias).replace(/[^a-z0-9_-]/gi,'_'),subject=subjectToken(subjectName());localStorage.setItem('aiwalas.assessment.v6.'+semester+'.'+safe+'.'+subject,serialized);localStorage.setItem('aiwalas.assessment.v6.'+safe+'.'+subject,serialized)}); }
   function activeComponents(values) {
     return components.filter(function (component) {
       return Object.keys(values).some(function (nis) {

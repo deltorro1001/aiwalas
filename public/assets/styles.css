@@ -511,3 +511,31 @@
   background:#fff!important;
   padding-top:10px!important;
 }
+
+/* Explicit class for the Edit siswa form (works without :has selector) */
+#modalBackdrop.show .student-edit-modal {
+  display:flex!important;
+  flex-direction:column!important;
+  width:min(760px,calc(100vw - 24px))!important;
+  height:calc(100vh - 24px)!important;
+  max-height:calc(100vh - 24px)!important;
+  overflow:hidden!important;
+}
+#modalBackdrop.show .student-edit-modal form {
+  display:grid!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  align-content:start!important;
+  padding:4px 8px 18px 0!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#modalBackdrop.show .student-edit-modal form .modal-actions {
+  position:sticky!important;
+  bottom:0!important;
+  z-index:2!important;
+  flex:0 0 auto!important;
+  padding:12px 0 2px!important;
+  background:#fff!important;
+}

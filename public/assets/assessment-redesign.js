@@ -30,7 +30,7 @@
       return JSON.parse(localStorage.getItem(legacyKey) || '{}');
     } catch (error) { return {}; }
   }
-  function saveValues(values) { memoryValues = values || {}; localStorage.setItem(storageKey(), JSON.stringify(values || {})); }
+  function saveValues(values) { memoryValues = values || {}; var serialized=JSON.stringify(values || {}),user=window.currentUser||{},semester=window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil',identity=user.id||user.username||user.name||user.nama_lengkap||'unknown-teacher',aliases=[identity,user.name,user.nama_lengkap,user.username].filter(function(value,index,list){return value&&list.indexOf(value)===index}).map(function(value){return String(value).replace(/[^a-z0-9_-]/gi,'_')});localStorage.setItem(storageKey(),serialized);aliases.forEach(function(alias){localStorage.setItem('aiwalas.assessment.v6.'+semester+'.'+alias,serialized);localStorage.setItem('aiwalas.assessment.v6.'+alias,serialized)}); }
   function activeComponents(values) {
     return components.filter(function (component) {
       return Object.keys(values).some(function (nis) {

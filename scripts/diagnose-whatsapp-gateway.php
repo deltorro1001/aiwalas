@@ -45,7 +45,7 @@ foreach (array_slice($logs, 0, 3) as $log) {
     $contents = file_get_contents($log);
     $blocks = preg_split('/(?=^(?:CRITICAL|ERROR|WARNING|INFO|DEBUG|NOTICE|ALERT|EMERGENCY)\s+-)/m', $contents);
     foreach (array_reverse($blocks) as $block) {
-        if (!preg_match('/LaporanFileController|WhatsAppController|curl_|Gateway|gateway/i', $block)) continue;
+        if (!preg_match('/^CRITICAL|^ERROR|LaporanFileController|WhatsAppController|curl_|Gateway|gateway/i', $block)) continue;
         $lines = explode("\n", $block);
         echo 'Application event: ' . safeDiagnosticText($lines[0]) . PHP_EOL;
         // Only include stack frame function/file names, never arguments or payloads.
@@ -57,7 +57,25 @@ foreach (array_slice($logs, 0, 3) as $log) {
         if (++$found >= 8) break 2;
     }
 }
-if (!$found) echo "No Gateway-related application exception found in recent logs.\n";
+if (!$found) echo "No recent application error found.\n";
+
+foreach (['/var/log/nginx/error.log', '/var/log/apache2/error.log'] as $webLog) {
+    if (!is_readable($webLog)) continue;
+    $handle = fopen($webLog, 'r');
+    fseek($handle, max(0, filesize($webLog) - 1048576));
+    $tail = stream_get_contents($handle); fclose($handle);
+    $events = array_values(array_filter(explode("\n", $tail), static fn($line) => preg_match('~api/laporan|laporan/preview|api/csrf~', $line)));
+    foreach (array_slice($events, -8) as $event) echo 'Web-server event: ' . safeDiagnosticText($event) . PHP_EOL;
+    echo 'Matching web-server errors: ' . count($events) . PHP_EOL;
+}
+foreach (['pdf', 'part', 'json'] as $extension) {
+    $uploads = glob($project . '/writable/uploads/laporan-pdf/*.' . $extension) ?: [];
+    echo 'Upload files (' . $extension . '): ' . count($uploads) . PHP_EOL;
+    if ($uploads) {
+        usort($uploads, static fn($a, $b) => filemtime($b) <=> filemtime($a));
+        echo 'Latest upload (' . $extension . '): ' . json_encode(['age_seconds' => time() - filemtime($uploads[0]), 'bytes' => filesize($uploads[0])]) . PHP_EOL;
+    }
+}
 
 $files = glob($project . '/writable/uploads/laporan-pdf/*.pdf') ?: [];
 usort($files, static fn($a, $b) => filemtime($b) <=> filemtime($a));

@@ -6,22 +6,41 @@
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function phone(value){var number=String(value||'').replace(/\D/g,'');if(number.indexOf('0')===0)number='62'+number.slice(1);return /^62\d{8,15}$/.test(number)?number:''}
   function semester(){return window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil'}
-  function teacherFor(subject){var contact=(window.teacherContacts||{})[subject]||{},name=contact.name||'guru mata pelajaran',record=(window.schoolTeachers||[]).find(function(item){return String(item.name||'').trim()===String(name).trim()})||{},gender=String(record.gender||record.jenis_kelamin||'').toLowerCase(),prefix=(gender==='l'||gender.indexOf('pria')>=0||gender.indexOf('laki')>=0)?'Bpk':'Ibu';return prefix+' '+name}
+  function teacherFor(subject){var contacts=window.teacherContacts||{},contact=contacts[subject]||contacts[subject==='PJOK'?'Olahraga':'PJOK']||{},name=contact.name||'guru mata pelajaran',record=(window.schoolTeachers||[]).find(function(item){return String(item.name||'').trim()===String(name).trim()})||{},gender=String(record.gender||record.jenis_kelamin||'').toLowerCase(),prefix=(gender==='l'||gender.indexOf('pria')>=0||gender.indexOf('laki')>=0)?'Bpk':'Ibu';return prefix+' '+name}
   function dynamicGreeting(){var parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jakarta',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),hour=Number((parts.find(function(part){return part.type==='hour'})||{}).value||0);return hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<18?'Selamat sore':'Selamat malam'}
   function isTimothy(student){return /^timothy\s+frans(?:\s|$)/i.test(String(student&&student[0]||'').trim())}
   function studentGreeting(student){return isTimothy(student)?dynamicGreeting():'Assalamualaikum'}
-  function message(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', Bapak/Ibu Orangtua/Wali '+student[0]+'. Kami menginformasikan bahwa capaian nilai ananda pada mata pelajaran '+subject+', komponen '+component+', adalah '+score+'. Nilai tersebut masih di bawah batas ketuntasan 80. Mohon untuk meminta ananda menghubungi '+teacher+' untuk mendapatkan arahan perbaikan nilai.'}
-  function studentMessage(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', '+student[0]+'. Nilai anda pada mata pelajaran '+subject+', komponen '+component+', adalah '+score+', masih di bawah batas ketuntasan 80. Silakan menghubungi '+teacher+' untuk mendapatkan arahan perbaikan nilai.'}
+  function message(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', Bapak/Ibu Orangtua/Wali '+student[0]+'. Kami memberitahukan bahwa nilai ananda pada mata pelajaran '+subject+', komponen '+component+', sebesar '+score+' belum mencukupi sehingga ananda berstatus Tidak Lulus. Mohon diingatkan kepada ananda untuk menghubungi '+teacher+' untuk mengikuti ujian perbaikan atau tugas tambahan.'}
+  function studentMessage(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', '+student[0]+'. Nilai anda pada mata pelajaran '+subject+', komponen '+component+', sebesar '+score+' belum mencukupi sehingga anda berstatus Tidak Lulus. Mohon menghubungi '+teacher+' untuk mengikuti ujian perbaikan atau tugas tambahan.'}
+  function gatewayButton(number,text,label){return number?'<button type="button" class="wa-parent-action gateway-grade-action" data-gateway-phone="'+esc(number)+'" data-gateway-message="'+esc(text)+'" data-gateway-label="'+esc(label)+'">Kirim via Gateway</button>':'<span class="wa-parent-action disabled" aria-disabled="true">Nomor '+label.toLowerCase()+' belum tersedia</span>'}
   function notification(student,subject,component,score){
     if(score===null||score>=threshold)return '<span class="walas-grade-notification-empty">—</span>';
     var parentNumber=phone(student[6]),studentNumber=phone(student[5]);
-    var parentAction=parentNumber
-      ? '<a class="wa-parent-action" href="https://web.whatsapp.com/send?phone='+parentNumber+'&text='+encodeURIComponent(message(student,subject,component,score))+'" target="_blank" rel="noopener">Siapkan WhatsApp Orangtua</a>'
-      : '<span class="wa-parent-action disabled" aria-disabled="true">Nomor orangtua belum tersedia</span>';
-    var studentAction=studentNumber
-      ? '<a class="wa-parent-action wa-student-action" href="https://web.whatsapp.com/send?phone='+studentNumber+'&text='+encodeURIComponent(studentMessage(student,subject,component,score))+'" target="_blank" rel="noopener">Siapkan WhatsApp Siswa</a>'
-      : '<span class="wa-parent-action disabled" aria-disabled="true">Nomor siswa belum tersedia</span>';
+    var parentAction=gatewayButton(parentNumber,message(student,subject,component,score),'Orangtua');
+    var studentAction=gatewayButton(studentNumber,studentMessage(student,subject,component,score),'Siswa');
     return '<div class="walas-notification-actions">'+parentAction+studentAction+'</div>';
+  }
+  function bindGatewayActions(){
+    document.querySelectorAll('.gateway-grade-action').forEach(function(button){
+      if(button.dataset.bound)return;
+      button.dataset.bound='1';
+      button.onclick=function(){
+        var phone=button.dataset.gatewayPhone||'',text=button.dataset.gatewayMessage||'',label=button.dataset.gatewayLabel||'penerima';
+        modal('Konfirmasi pengiriman','Pesan belum dikirim. Periksa narasi sebelum mengirim melalui Gateway.','<p><strong>Penerima:</strong> '+esc(label)+'</p><textarea id="gatewayGradeMessage" rows="8" readonly>'+esc(text)+'</textarea><p class="login-error" id="gatewayGradeError"></p><div class="modal-actions"><button type="button" class="filter-btn" id="cancelModal">Batal</button><button type="button" class="primary-btn" id="confirmGatewayGrade">Kirim via Gateway</button></div>');
+        var send=document.getElementById('confirmGatewayGrade');
+        if(!send)return;
+        send.onclick=function(){
+          send.disabled=true;send.textContent='Mengirim...';
+          if(typeof window.sendWhatsAppGateway!=='function'){
+            send.disabled=false;send.textContent='Kirim via Gateway';
+            document.getElementById('gatewayGradeError').textContent='Gateway WhatsApp belum siap.';return;
+          }
+          window.sendWhatsAppGateway({kelas_id:window.activeClassId||1,nomor_tujuan:phone,nama_penerima:label,isi_pesan:text})
+            .then(function(){closeModal();toast('Pesan '+label+' terkirim melalui Gateway.');})
+            .catch(function(error){send.disabled=false;send.textContent='Kirim via Gateway';var err=document.getElementById('gatewayGradeError');if(err)err.textContent=error.message||'Gateway gagal mengirim pesan.';});
+        };
+      };
+    });
   }
   function subjectKey(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
   function orderedSubjects(subjects){
@@ -30,9 +49,44 @@
     return subjects.filter(function(subject){var key=subjectKey(subject.nama_mata_pelajaran);return key.indexOf('kokurikuler')<0&&key.indexOf('upacara')<0&&key.indexOf('pembiasaanharijumat')<0&&key.indexOf('pembiasaanjumat')<0}).sort(function(a,b){var ar=rank[subjectKey(a.nama_mata_pelajaran)],br=rank[subjectKey(b.nama_mata_pelajaran)];ar=ar==null?999:ar;br=br==null?999:br;return ar===br?String(a.nama_mata_pelajaran).localeCompare(String(b.nama_mata_pelajaran),'id'):ar-br});
   }
   function normalizeData(result){
-    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0})),components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
+    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='olahraga')subject.nama_mata_pelajaran='PJOK';});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
     scores.forEach(function(row){scoreMap[String(row.siswa_id)+'-'+String(row.komponen_nilai_id)]=Number(row.nilai)});
-    return {subjects:subjects,components:components,scoreMap:scoreMap};
+    return mergeTeacherInput({subjects:subjects,components:components,scoreMap:scoreMap});
+  }
+  function mergeTeacherInput(data){
+    var students=window.students||[], existing={};
+    data.components.forEach(function(component){existing[String(component.mata_pelajaran_id)+'-'+subjectKey(component.nama_komponen)]=component;});
+    data.subjects.forEach(function(subject){
+      var values={};
+      try { if(typeof window.ledgerTeacherAssessment==='function') values=window.ledgerTeacherAssessment(subject.nama_mata_pelajaran)||{}; } catch(e) { values={}; }
+      if(!Object.keys(values).length){
+        try {
+          var selectedSubject=localStorage.getItem('aiwalas.teacher.subject')||'';
+          if(subjectKey(selectedSubject)===subjectKey(subject.nama_mata_pelajaran)){
+            values=JSON.parse(localStorage.getItem('aiwalas.teacher.assessment.values')||'{}')||{};
+            if(!Object.keys(values).some(function(key){return typeof values[key]==='object'})){
+              var flat=values;values={};Object.keys(flat).forEach(function(key){var parts=key.split('_'),nis=parts.shift();if(!values[nis])values[nis]={};values[nis][parts.join('_')]=flat[key]});
+            }
+          }
+        } catch(e) { values={}; }
+      }
+      Object.keys(values).forEach(function(nisKey){
+        var row=values[nisKey]||{}, normalizedNis=String(nisKey).trim().replace(/[.]0$/,'');
+        var student=students.find(function(item){return String(item[1]).trim().replace(/[.]0$/,'')===normalizedNis});
+        if(!student)return;
+        Object.keys(row).forEach(function(name){
+          var value=row[name];
+          if(value===''||value==null||isNaN(Number(value)))return;
+          var lookup=String(subject.id)+'-'+subjectKey(name), component=existing[lookup];
+          if(!component){
+            component={id:'local-'+subject.id+'-'+subjectKey(name),mata_pelajaran_id:subject.id,nama_komponen:name,jenis_komponen:/^UH/i.test(name)?'UH':'Tugas',urutan:900+data.components.length,aktif:1};
+            data.components.push(component);existing[lookup]=component;
+          }
+          data.scoreMap[String(student[7])+'-'+String(component.id)]=Number(value);
+        });
+      });
+    });
+    return data;
   }
   function renderSubject(student,subject){
     if(!student||!subject||!cache)return;
@@ -40,6 +94,7 @@
     var rows=components.map(function(component){var key=String(student[7])+'-'+String(component.id),exists=Object.prototype.hasOwnProperty.call(cache.scoreMap,key),score=exists?Math.round(cache.scoreMap[key]):null,status=score===null?'—':score>=threshold?'Lulus':'Tidak Lulus',kind=score===null?'':score>=threshold?'teal':'coral';return '<tr><td>'+esc(component.nama_komponen)+'</td><td><strong>'+(score===null?'—':score)+'</strong></td><td>'+(score===null?'—':'<span class="pill '+kind+'">'+status+'</span>')+'</td><td>'+notification(student,subject.nama_mata_pelajaran,component.nama_komponen,score)+'</td></tr>'}).join('');
     var target=document.getElementById('walasGradeTableWrap'),summary=document.getElementById('walasGradeSummary'),info=document.getElementById('walasGradeStudent');
     if(target)target.innerHTML='<div class="student-grade-selected"><strong>Mapel: '+esc(subject.nama_mata_pelajaran)+'</strong></div><div class="score-sheet-wrap"><table class="score-sheet student-component-grades walas-component-grades"><thead><tr><th>Komponen Nilai</th><th>Nilai</th><th>Status</th><th>Notifikasi Orangtua &amp; Siswa</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="empty-state">Belum ada komponen nilai.</td></tr>')+'</tbody></table></div>';
+    bindGatewayActions();
     if(summary)summary.textContent='Komponen penilaian '+subject.nama_mata_pelajaran+' · tombol WhatsApp aktif untuk nilai di bawah 80';
     if(info)info.textContent=student[0]+' · NIS '+student[1];
     document.querySelectorAll('[data-walas-grade-subject]').forEach(function(button){button.classList.toggle('active',String(button.dataset.walasGradeSubject)===String(subject.id))});

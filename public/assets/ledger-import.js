@@ -11,7 +11,7 @@ var importedLedger={
                      "Bahasa Inggris",
                      "Manajemen Produksi",
                      "Naskah dan Penyutradaraan",
-                     "Tata Artistik",
+                     "Editing Film",
                      "Tata Cahaya",
                      "Tata Kamera",
                      "KIK",
@@ -23,7 +23,7 @@ var importedLedger={
                      "nis":  "12985",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  91.666666666666671,
+                                   "Editing Film":  91.666666666666671,
                                    "Kokurikuler":  82,
                                    "KIK":  87.222222222222214,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  88.333333333333329,
@@ -45,7 +45,7 @@ var importedLedger={
                      "nis":  "12994",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  84,
+                                   "Editing Film":  84,
                                    "Kokurikuler":  82,
                                    "KIK":  85.944444444444443,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.333333333333329,
@@ -67,7 +67,7 @@ var importedLedger={
                      "nis":  "12997",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  82,
                                    "KIK":  85.055555555555557,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.333333333333329,
@@ -89,7 +89,7 @@ var importedLedger={
                      "nis":  "13012",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  82,
                                    "KIK":  86.138888888888872,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.333333333333329,
@@ -111,7 +111,7 @@ var importedLedger={
                      "nis":  "13019",
                      "nilai":  {
                                    "Muatan Lokal":  84,
-                                   "Tata Artistik":  87,
+                                   "Editing Film":  87,
                                    "Kokurikuler":  86,
                                    "KIK":  87.472222222222214,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  88.833333333333329,
@@ -133,7 +133,7 @@ var importedLedger={
                      "nis":  "13020",
                      "nilai":  {
                                    "Muatan Lokal":  87,
-                                   "Tata Artistik":  86.666666666666671,
+                                   "Editing Film":  86.666666666666671,
                                    "Kokurikuler":  82,
                                    "KIK":  86.25,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  85,
@@ -155,7 +155,7 @@ var importedLedger={
                      "nis":  "13034",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  85,
+                                   "Editing Film":  85,
                                    "Kokurikuler":  82,
                                    "KIK":  87.305555555555557,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  89.666666666666671,
@@ -177,7 +177,7 @@ var importedLedger={
                      "nis":  "13041",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  82.666666666666671,
+                                   "Editing Film":  82.666666666666671,
                                    "Kokurikuler":  82,
                                    "KIK":  82.777777777777771,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.833333333333329,
@@ -199,7 +199,7 @@ var importedLedger={
                      "nis":  "13047",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  87.666666666666671,
+                                   "Editing Film":  87.666666666666671,
                                    "Kokurikuler":  83,
                                    "KIK":  85.722222222222229,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  86.333333333333329,
@@ -221,7 +221,7 @@ var importedLedger={
                      "nis":  "13062",
                      "nilai":  {
                                    "Muatan Lokal":  89,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  83,
                                    "KIK":  84.722222222222229,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  87.166666666666671,
@@ -243,7 +243,7 @@ var importedLedger={
                      "nis":  "13064",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  82,
                                    "KIK":  83.833333333333329,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  83.833333333333329,
@@ -265,7 +265,7 @@ var importedLedger={
                      "nis":  "13069",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  85,
+                                   "Editing Film":  85,
                                    "Kokurikuler":  86,
                                    "KIK":  87.194444444444443,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  88.333333333333329,
@@ -287,7 +287,7 @@ var importedLedger={
                      "nis":  "13070",
                      "nilai":  {
                                    "Muatan Lokal":  87,
-                                   "Tata Artistik":  85.666666666666671,
+                                   "Editing Film":  85.666666666666671,
                                    "Kokurikuler":  89,
                                    "KIK":  87.6388888888889,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  89.166666666666671,
@@ -309,7 +309,7 @@ var importedLedger={
                      "nis":  "13074",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  83.666666666666671,
+                                   "Editing Film":  83.666666666666671,
                                    "Kokurikuler":  81,
                                    "KIK":  83.555555555555557,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84,
@@ -331,7 +331,7 @@ var importedLedger={
                      "nis":  "13079",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  83,
+                                   "Editing Film":  83,
                                    "Kokurikuler":  85,
                                    "KIK":  82.194444444444443,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  83.833333333333329,
@@ -353,7 +353,7 @@ var importedLedger={
                      "nis":  "13084",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  84.666666666666671,
+                                   "Editing Film":  84.666666666666671,
                                    "Kokurikuler":  85,
                                    "KIK":  86.805555555555543,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  87.166666666666671,
@@ -375,7 +375,7 @@ var importedLedger={
                      "nis":  "13085",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  84.666666666666671,
+                                   "Editing Film":  84.666666666666671,
                                    "Kokurikuler":  84,
                                    "KIK":  85.416666666666671,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  85.833333333333329,
@@ -397,7 +397,7 @@ var importedLedger={
                      "nis":  "13086",
                      "nilai":  {
                                    "Muatan Lokal":  84,
-                                   "Tata Artistik":  84,
+                                   "Editing Film":  84,
                                    "Kokurikuler":  84,
                                    "KIK":  85,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84,
@@ -419,7 +419,7 @@ var importedLedger={
                      "nis":  "13088",
                      "nilai":  {
                                    "Muatan Lokal":  87,
-                                   "Tata Artistik":  87,
+                                   "Editing Film":  87,
                                    "Kokurikuler":  83,
                                    "KIK":  86.916666666666671,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  87.166666666666671,
@@ -441,7 +441,7 @@ var importedLedger={
                      "nis":  "13093",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  83.666666666666671,
+                                   "Editing Film":  83.666666666666671,
                                    "Kokurikuler":  85,
                                    "KIK":  84.083333333333329,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.666666666666671,
@@ -463,7 +463,7 @@ var importedLedger={
                      "nis":  "13096",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  83.666666666666671,
+                                   "Editing Film":  83.666666666666671,
                                    "Kokurikuler":  83,
                                    "KIK":  85.527777777777786,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  85.833333333333329,
@@ -485,7 +485,7 @@ var importedLedger={
                      "nis":  "13101",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  87.666666666666671,
+                                   "Editing Film":  87.666666666666671,
                                    "Kokurikuler":  83,
                                    "KIK":  85.916666666666671,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  86.333333333333329,
@@ -507,7 +507,7 @@ var importedLedger={
                      "nis":  "13104",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  88,
+                                   "Editing Film":  88,
                                    "Kokurikuler":  82,
                                    "KIK":  85.527777777777771,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  86.833333333333329,
@@ -529,7 +529,7 @@ var importedLedger={
                      "nis":  "13116",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  84.333333333333329,
+                                   "Editing Film":  84.333333333333329,
                                    "Kokurikuler":  83,
                                    "KIK":  83.527777777777771,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  83.833333333333329,
@@ -551,7 +551,7 @@ var importedLedger={
                      "nis":  "13130",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  82.666666666666671,
+                                   "Editing Film":  82.666666666666671,
                                    "Kokurikuler":  83,
                                    "KIK":  84.638888888888872,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.166666666666671,
@@ -573,7 +573,7 @@ var importedLedger={
                      "nis":  "13133",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  86,
+                                   "Editing Film":  86,
                                    "Kokurikuler":  83,
                                    "KIK":  85.694444444444443,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.333333333333329,
@@ -595,7 +595,7 @@ var importedLedger={
                      "nis":  "13138",
                      "nilai":  {
                                    "Muatan Lokal":  84,
-                                   "Tata Artistik":  86,
+                                   "Editing Film":  86,
                                    "Kokurikuler":  83,
                                    "KIK":  87.944444444444457,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  87.666666666666671,
@@ -617,7 +617,7 @@ var importedLedger={
                      "nis":  "13146",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  83.666666666666671,
+                                   "Editing Film":  83.666666666666671,
                                    "Kokurikuler":  82,
                                    "KIK":  85.944444444444457,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.833333333333329,
@@ -639,7 +639,7 @@ var importedLedger={
                      "nis":  "13151",
                      "nilai":  {
                                    "Muatan Lokal":  81,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  83,
                                    "KIK":  82.833333333333329,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.333333333333329,
@@ -661,7 +661,7 @@ var importedLedger={
                      "nis":  "13160",
                      "nilai":  {
                                    "Muatan Lokal":  83,
-                                   "Tata Artistik":  89.333333333333329,
+                                   "Editing Film":  89.333333333333329,
                                    "Kokurikuler":  83,
                                    "KIK":  87.1111111111111,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.666666666666671,
@@ -683,7 +683,7 @@ var importedLedger={
                      "nis":  "13176",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  83.333333333333329,
+                                   "Editing Film":  83.333333333333329,
                                    "Kokurikuler":  82,
                                    "KIK":  82.722222222222229,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  83.833333333333329,
@@ -705,7 +705,7 @@ var importedLedger={
                      "nis":  "13183",
                      "nilai":  {
                                    "Muatan Lokal":  87,
-                                   "Tata Artistik":  83.666666666666671,
+                                   "Editing Film":  83.666666666666671,
                                    "Kokurikuler":  82,
                                    "KIK":  87.3611111111111,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84.5,
@@ -727,7 +727,7 @@ var importedLedger={
                      "nis":  "13186",
                      "nilai":  {
                                    "Muatan Lokal":  85,
-                                   "Tata Artistik":  86,
+                                   "Editing Film":  86,
                                    "Kokurikuler":  82,
                                    "KIK":  86.833333333333329,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  85.166666666666671,
@@ -749,7 +749,7 @@ var importedLedger={
                      "nis":  "13190",
                      "nilai":  {
                                    "Muatan Lokal":  84,
-                                   "Tata Artistik":  86.333333333333329,
+                                   "Editing Film":  86.333333333333329,
                                    "Kokurikuler":  82,
                                    "KIK":  86.694444444444443,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  83.833333333333329,
@@ -771,7 +771,7 @@ var importedLedger={
                      "nis":  "13198",
                      "nilai":  {
                                    "Muatan Lokal":  82,
-                                   "Tata Artistik":  84,
+                                   "Editing Film":  84,
                                    "Kokurikuler":  83,
                                    "KIK":  85.638888888888872,
                                    "Pendidikan Jasmani, Olahraga dan Kesehatan":  84,

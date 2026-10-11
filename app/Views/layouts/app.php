@@ -19,14 +19,15 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261010-ledger-subject-read') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261010-mapel-guru-update') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261011-time-encoding') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261011-gateway-confirm-v2') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment-fallback.js?v=20261011') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20260920-assessment-journal') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
-<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261010-mapel-guru-update') ?>'></script>
+<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261011-time-encoding') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>
 <script src='<?= base_url('assets/school-teachers.js?v=20260913-teachers-export6') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-mapel.js?v=20260918-mapel-kelas-imported') ?>'></script>
@@ -79,11 +80,11 @@
 <script src='<?= base_url('assets/teacher-journal-ui.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/settings-page.js?v=20260926-password-form') ?>'></script>
 <script src='<?= base_url('assets/teacher-journal-five.js?v=20260920-five') ?>'></script>
-<script src='<?= base_url('assets/student-home.js?v=20260924-layout-fix2') ?>'></script>
+<script src='<?= base_url('assets/student-home.js?v=20261011-time-encoding') ?>'></script>
 <script src='<?= base_url('assets/student-sidebar.js?v=20260923-groups3') ?>'></script>
 <script src='<?= base_url('assets/teacher-sidebar.js?v=20261010-teacher-subjects') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
-<script src='<?= base_url('assets/student-home-force.js?v=20260923-student-profile4') ?>'></script>
+<script src='<?= base_url('assets/student-home-force.js?v=20261011-time-encoding') ?>'></script>
 <script src='<?= base_url('assets/student-grades.js?v=20260921-horizontal-modal') ?>'></script>
 <script src='<?= base_url('assets/student-grades-access.js?v=20260921-access') ?>'></script>
 <script src='<?= base_url('assets/student-grades-route.js?v=20260921-route') ?>'></script>
@@ -116,6 +117,18 @@
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
+<script>
+(function(){
+  function ensureWalasAssessment(){
+    if(window.currentRole!=='walas')return;
+    var button=document.querySelector('.sidebar .nav-item[data-page="walasAssessment"]');
+    if(button)button.style.display='flex';
+  }
+  document.addEventListener('DOMContentLoaded',ensureWalasAssessment);
+  setTimeout(ensureWalasAssessment,500);
+  setTimeout(ensureWalasAssessment,1500);
+})();
+</script>
 </body>
 </html>
 

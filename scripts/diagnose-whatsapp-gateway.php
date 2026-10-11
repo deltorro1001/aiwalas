@@ -37,6 +37,18 @@ function diagnosticGet(string $label, string $url, bool $pdf = false): void
 echo "READ-ONLY DIAGNOSTICS: no message sends, no configuration writes.\n";
 echo 'PHP CLI: ' . PHP_VERSION . '; curl=' . (extension_loaded('curl') ? 'yes' : 'no') . PHP_EOL;
 diagnosticGet('Gateway root', $settings['WHATSAPP_GATEWAY_URL']);
+$appBase = rtrim((string) ($values['app.baseURL'] ?? ''), '/');
+if (filter_var($appBase, FILTER_VALIDATE_URL)) {
+    diagnosticGet('Application public root', $appBase . '/');
+    diagnosticGet('Application CSRF GET', $appBase . '/api/auth/csrf');
+}
+foreach (array_merge(glob('/etc/nginx/sites-enabled/*') ?: [], glob('/etc/apache2/sites-enabled/*') ?: []) as $siteConfig) {
+    if (!is_file($siteConfig) || !is_readable($siteConfig)) continue;
+    $site = file_get_contents($siteConfig);
+    if (preg_match_all('~(?:^|\n)\s*(?:root|DocumentRoot|Alias)\s+([^;\r\n]+)~i', $site, $roots)) {
+        foreach ($roots[1] as $documentRoot) echo 'Web document root: ' . safeDiagnosticText(trim($documentRoot)) . PHP_EOL;
+    }
+}
 
 $logs = glob($project . '/writable/logs/log-*.log') ?: [];
 rsort($logs);
@@ -67,6 +79,19 @@ foreach (['/var/log/nginx/error.log', '/var/log/apache2/error.log'] as $webLog) 
     $events = array_values(array_filter(explode("\n", $tail), static fn($line) => preg_match('~api/laporan|laporan/preview|api/csrf~', $line)));
     foreach (array_slice($events, -8) as $event) echo 'Web-server event: ' . safeDiagnosticText($event) . PHP_EOL;
     echo 'Matching web-server errors: ' . count($events) . PHP_EOL;
+}
+foreach (['/var/log/nginx/access.log', '/var/log/apache2/access.log'] as $accessLog) {
+    if (!is_readable($accessLog)) continue;
+    $handle = fopen($accessLog, 'r'); fseek($handle, max(0, filesize($accessLog) - 1048576));
+    $tail = stream_get_contents($handle); fclose($handle);
+    $events = [];
+    foreach (explode("\n", $tail) as $line) {
+        if (preg_match('~\[([^\]]+)\].*?"(GET|POST) (/[^ ?"]*(?:api/laporan|laporan/preview|api/auth/csrf)[^ ?"]*)[^"\r\n]*" (\d{3})~', $line, $match)) {
+            $path = preg_replace('~(pdf-upload)/[^/]+~', '$1/[TOKEN]', $match[3]);
+            $events[] = $match[1] . ' ' . $match[2] . ' ' . $path . ' status=' . $match[4];
+        }
+    }
+    foreach (array_slice($events, -12) as $event) echo 'Access event: ' . $event . PHP_EOL;
 }
 foreach (['pdf', 'part', 'json'] as $extension) {
     $uploads = glob($project . '/writable/uploads/laporan-pdf/*.' . $extension) ?: [];

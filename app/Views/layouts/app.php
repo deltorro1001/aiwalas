@@ -19,7 +19,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261011-time-encoding') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261011-editing-film') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261011-gateway-confirm-v2') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment-fallback.js?v=20261011') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>

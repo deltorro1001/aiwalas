@@ -484,7 +484,7 @@ var teacherContacts = {
   },
   "Tata Cahaya": { name: "Wahyu Lukman Hakim, S.Kom.", phone: "085784968990" },
   "Tata Kamera": { name: "Putu Arya Ranesda, S.Kom.", phone: "081288388842" },
-  "Tata Artistik": { name: "Ruby Eka Prawira, S.Pd.", phone: "081293339968" },
+  "Editing Film": { name: "Ruby Eka Prawira, S.Pd.", phone: "081293339968" },
   PKK: { name: "Nani Aminah, SE.", phone: "081210802912" },
 };
 function schedule() {
@@ -495,7 +495,7 @@ function schedule() {
         ["06.30—07.30", "—", "Belum ada mapel"],
         ["07.30—09.00", "PKK", "2 jam pelajaran"],
         ["09.00—10.45", "Sejarah", "2 jam pelajaran"],
-        ["10.45—13.30", "Tata Artistik", "3 jam pelajaran"],
+        ["10.45—13.30", "Editing Film", "3 jam pelajaran"],
         ["13.30—15.00", "Bahasa Inggris", "2 jam pelajaran"],
       ],
     ],
@@ -514,7 +514,7 @@ function schedule() {
         ["06.30—09.00", "Tata Kamera", "3 jam pelajaran"],
         ["09.00—10.45", "Olahraga", "2 jam pelajaran"],
         ["10.45—12.15", "Tata Cahaya", "2 jam pelajaran"],
-        ["12.45—15.00", "Tata Artistik", "3 jam pelajaran"],
+        ["12.45—15.00", "Editing Film", "3 jam pelajaran"],
       ],
     ],
     [
@@ -643,7 +643,7 @@ var reportSubjects = [
   ["Manajemen Produksi Film", "Manajemen Produksi"],
   ["Penulisan Naskah & Penyutradaraan", "Naskah & Penyutradaraan"],
   ["Tata Kamera dan Tata Cahaya", "Tata Kamera"],
-  ["Tata Artistik", "Tata Artistik"],
+  ["Editing Film", "Editing Film"],
   ["Kreativitas, Inovasi, dan Kewirausahaan", "PKK"],
   ["Animasi 3D", null],
 ];
@@ -1412,7 +1412,7 @@ var teacherScoreData = {
   "Naskah & Penyutradaraan": [88, 91, 94, 92, 90, 89, 93, 95],
   "Tata Cahaya": [82, 86, 89, 91, 80, 84, 88, 90],
   "Tata Kamera": [85, 87, 90, 93, 83, 86, 89, 92],
-  "Tata Artistik": [89, 91, 88, 94, 87, 90, 92, 95],
+  "Editing Film": [89, 91, 88, 94, 87, 90, 92, 95],
   PKK: [84, 88, 90, 92, 82, 86, 89, 91],
 };
 function teachersPage() {
@@ -1475,7 +1475,7 @@ function dashboardCarousel() {
   if (!panel) return;
   clearInterval(carouselTimer);
   panel.innerHTML =
-    '<div class="panel-head"><div><h2>Ringkasan kelas</h2><p>Informasi bergantian secara otomatis</p></div><span class="pill teal">Live</span></div><div class="dashboard-carousel"><div class="carousel-tabs"><button class="carousel-tab active" data-slide="0">Rekap absen</button><button class="carousel-tab" data-slide="1">Jadwal mapel</button></div><div class="carousel-view active"><div class="panel-head"><div><h2>Rekap Absen Minggu Ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart"><div class="bar-group"><div class="bar" style="height:78%"></div><div class="bar late" style="height:24%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Sen</span></div><div class="bar-group"><div class="bar" style="height:84%"></div><div class="bar late" style="height:15%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Sel</span></div><div class="bar-group"><div class="bar" style="height:88%"></div><div class="bar late" style="height:9%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Rab</span></div><div class="bar-group"><div class="bar" style="height:82%"></div><div class="bar late" style="height:18%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Kam</span></div><div class="bar-group"><div class="bar" style="height:80%"></div><div class="bar late" style="height:12%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Jum</span></div></div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></div><div class="carousel-view"><div class="panel-head"><div><h2>Jadwal Mapel Hari Ini</h2><p>Senin, 14 Oktober 2024 · Kelas 11PF1</p></div><button class="panel-action" id="showSchedule">Lihat jadwal →</button></div><div class="today-schedule"><div class="schedule-item"><span class="schedule-time">07.30—09.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>PKK</strong><small>Nani Aminah, SE.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">09.00—10.45</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Sejarah</strong><small>Englena Nastaria Purba, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">10.45—13.30</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Tata Artistik</strong><small>Ruby Eka Prawira, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">13.30—15.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Bahasa Inggris</strong><small>Ika Inayah, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div></div></div><div class="carousel-controls"><button class="carousel-dot active" data-slide="0"></button><button class="carousel-dot" data-slide="1"></button></div></div>';
+    '<div class="panel-head"><div><h2>Ringkasan kelas</h2><p>Informasi bergantian secara otomatis</p></div><span class="pill teal">Live</span></div><div class="dashboard-carousel"><div class="carousel-tabs"><button class="carousel-tab active" data-slide="0">Rekap absen</button><button class="carousel-tab" data-slide="1">Jadwal mapel</button></div><div class="carousel-view active"><div class="panel-head"><div><h2>Rekap Absen Minggu Ini</h2><p>Senin, 14 Oktober 2024</p></div><button class="panel-action" data-page="attendance">Lihat detail →</button></div><div class="attendance-chart"><div class="bar-group"><div class="bar" style="height:78%"></div><div class="bar late" style="height:24%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Sen</span></div><div class="bar-group"><div class="bar" style="height:84%"></div><div class="bar late" style="height:15%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Sel</span></div><div class="bar-group"><div class="bar" style="height:88%"></div><div class="bar late" style="height:9%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Rab</span></div><div class="bar-group"><div class="bar" style="height:82%"></div><div class="bar late" style="height:18%"></div><div class="bar absent" style="height:10%"></div><span class="bar-label">Kam</span></div><div class="bar-group"><div class="bar" style="height:80%"></div><div class="bar late" style="height:12%"></div><div class="bar absent" style="height:5%"></div><span class="bar-label">Jum</span></div></div><div class="chart-legend"><span class="legend"><i></i> Hadir</span><span class="legend"><i class="late"></i> Terlambat</span><span class="legend"><i class="absent"></i> Tidak hadir</span></div></div><div class="carousel-view"><div class="panel-head"><div><h2>Jadwal Mapel Hari Ini</h2><p>Senin, 14 Oktober 2024 · Kelas 11PF1</p></div><button class="panel-action" id="showSchedule">Lihat jadwal →</button></div><div class="today-schedule"><div class="schedule-item"><span class="schedule-time">07.30—09.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>PKK</strong><small>Nani Aminah, SE.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">09.00—10.45</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Sejarah</strong><small>Englena Nastaria Purba, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">10.45—13.30</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Editing Film</strong><small>Ruby Eka Prawira, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div><div class="schedule-item"><span class="schedule-time">13.30—15.00</span><i class="schedule-bar"></i><div class="schedule-info"><strong>Bahasa Inggris</strong><small>Ika Inayah, S.Pd.</small></div><span class="teacher-status">Terjadwal</span></div></div></div><div class="carousel-controls"><button class="carousel-dot active" data-slide="0"></button><button class="carousel-dot" data-slide="1"></button></div></div>';
   var views = panel.querySelectorAll(".carousel-view"),
     tabs = panel.querySelectorAll("[data-slide]");
   function show(i) {
@@ -1544,7 +1544,7 @@ var realtimeWeeklySchedule = {
     ["06.30—07.30", "Upacara", "Aktivitas sekolah"],
     ["07.30—09.00", "PKK", "Nani Aminah, SE."],
     ["09.00—10.45", "Sejarah", "Englena Nastaria Purba, S.Pd."],
-    ["10.45—13.30", "Tata Artistik", "Ruby Eka Prawira, S.Pd."],
+    ["10.45—13.30", "Editing Film", "Ruby Eka Prawira, S.Pd."],
     ["13.30—15.00", "Bahasa Inggris", "Ika Inayah, S.Pd."],
   ],
   Selasa: [
@@ -1561,7 +1561,7 @@ var realtimeWeeklySchedule = {
     ["06.30—09.00", "Tata Kamera", "Putu Arya Ranesda, S.Kom."],
     ["09.00—10.45", "Olahraga", "Putu Arya Ranesda, S.Kom."],
     ["10.45—12.15", "Tata Cahaya", "Wahyu Lukman Hakim, S.Kom."],
-    ["12.45—15.00", "Tata Artistik", "Ruby Eka Prawira, S.Pd."],
+    ["12.45—15.00", "Editing Film", "Ruby Eka Prawira, S.Pd."],
   ],
   Kamis: [
     ["06.30—09.00", "PAI", "Lutfi Faridil Aftros, S.Pd.I"],
@@ -2539,7 +2539,7 @@ render = function () {
   renderWithoutTaskReminder();
   if (page === "dashboard") {
     document.querySelectorAll(".activity").forEach(function (item) {
-      if (item.textContent.indexOf("Tugas Tata Artistik") >= 0) {
+      if (item.textContent.indexOf("Tugas Editing Film") >= 0) {
         var text = item.querySelector(".activity-text");
         if (text)
           text.innerHTML =

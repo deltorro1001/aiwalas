@@ -75,6 +75,12 @@ $routes->post('api/notifikasi', 'Api\NotifikasiController::create', ['filter' =>
 $routes->patch('api/notifikasi/(:num)/baca', 'Api\NotifikasiController::read/$1', ['filter' => 'auth']);
 $routes->patch('api/notifikasi/baca-semua', 'Api\NotifikasiController::readAll', ['filter' => 'auth']);
 $routes->get('api/laporan', 'Api\LaporanController::index', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/laporan/kirim-pdf', 'Api\LaporanFileController::sendReport', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/laporan/pdf-upload', 'Api\LaporanFileController::startUpload', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/laporan/pdf-upload/(:segment)', 'Api\LaporanFileController::uploadChunk/$1', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->get('laporan/preview', 'Api\LaporanFileController::preview', ['filter' => ['auth', 'role:wali_kelas']]);
+// The Gateway fetches this temporary document without an application session.
+$routes->get('laporan/pdf/(:segment)', 'Api\LaporanFileController::download/$1');
 $routes->post('api/maintenance/upload', 'Api\MaintenanceController::upload', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->post('api/maintenance/apply', 'Api\MaintenanceController::apply', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('laporan/csv', 'Api\LaporanController::csv', ['filter' => ['auth', 'role:wali_kelas']]);

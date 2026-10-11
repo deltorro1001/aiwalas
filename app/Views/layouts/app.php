@@ -7,6 +7,7 @@
   <title>AIWalas</title>
   <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261010-edit-student-scroll-v2') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
+<style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
 <style>.grid-stats .absence-summary-card{overflow:visible!important}.grid-stats .absence-summary-card .absence-summary-list{display:grid!important;grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;position:relative!important;z-index:3!important}.grid-stats .absence-summary-card .absence-summary-row{display:flex!important;visibility:visible!important;opacity:1!important;min-height:10px!important}</style>
 </head>
@@ -47,6 +48,7 @@
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
 <script src='<?= base_url('assets/attendance-recap-detail.js?v=20260914-september-data') ?>'></script>
 <script src='<?= base_url('assets/reports-tabs.js?v=20260914c') ?>'></script>
+<script src='<?= base_url('assets/reports-teacher-share.js?v=20261011-two-reports') ?>'></script>
 <script src='<?= base_url('assets/schedule-actions.js?v=20260918-observer-fix') ?>'></script>
 <script src='<?= base_url('assets/maintenance-ui.js?v=20260919-fix') ?>'></script>
 <script src='<?= base_url('assets/maintenance-fix.js?v=20260919c') ?>'></script>

@@ -26,7 +26,7 @@ class WhatsAppController extends BaseApiController
         return $this->respond(['ok' => $ok, 'message' => $ok ? 'Pesan WhatsApp terkirim.' : ($result['message'] ?: 'Gateway WhatsApp gagal mengirim pesan.'), 'data' => ['id' => $id, 'status' => $ok ? 'Terkirim' : 'Gagal', 'response' => $result['response']]], $ok ? 200 : 502);
     }
 
-    private function gatewayRequest(string $phone, string $message, string $mediaType = '', string $mediaUrl = ''): array
+    protected function gatewayRequest(string $phone, string $message, string $mediaType = '', string $mediaUrl = ''): array
     {
         $base = rtrim((string) env('WHATSAPP_GATEWAY_URL', 'https://wa.ats.co.id'), '/');
         $key = (string) env('WHATSAPP_GATEWAY_API_KEY');
@@ -43,7 +43,7 @@ class WhatsAppController extends BaseApiController
         return ['ok' => $ok, 'message' => $error ?: (is_array($response) ? (string) ($response['message'] ?? $response['msg'] ?? '') : ''), 'response' => $response ?: ['http_code' => $code, 'body' => (string) $body]];
     }
 
-    private function phone($value): string
+    protected function phone($value): string
     {
         $phone = preg_replace('/\D+/', '', (string) $value);
         if (str_starts_with($phone, '0')) $phone = '62' . substr($phone, 1);

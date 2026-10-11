@@ -1,0 +1,32 @@
+.report-preview-body{background:#edf1f5;color:#102033}
+.report-preview-page{max-width:1280px;margin:24px auto;padding:0 20px}
+.report-preview-toolbar{padding:20px;margin-bottom:20px}
+.report-preview-toolbar h1{font-size:22px;margin:0 0 6px}
+.report-preview-toolbar p{margin-top:8px}
+.report-preview-actions{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-top:18px}
+.report-preview-actions label{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.report-preview-actions select,.report-preview-actions input{padding:10px;border:1px solid #dce4e9;border-radius:7px;background:#fff;min-width:220px;font:inherit}
+.report-preview-actions select{max-width:380px}
+.report-preview-actions a{text-decoration:none}
+.report-preview-scroll{overflow:auto;padding:12px 0}
+#reportPreviewContent{width:190mm;max-width:none;background:#fff;margin:0 auto;box-sizing:border-box}
+#reportPreviewContent .report-sheet{display:block!important;margin:0;border:0;border-radius:0;box-shadow:none;padding:4mm}
+#reportPreviewContent .report-table{min-width:0!important;max-width:100%;width:100%;font-size:10px;table-layout:fixed;border-collapse:collapse}
+#reportPreviewContent .table-wrap{overflow:visible;margin:0!important;padding:0!important;width:100%;max-width:100%}
+#reportPreviewContent .report-table th{white-space:normal}
+#reportPreviewContent .report-table td,#reportPreviewContent .report-table th{padding:5px 4px;overflow-wrap:anywhere}
+#reportPreviewContent .report-meta{grid-template-columns:1fr 1fr}
+#reportPreviewContent .report-letterhead{padding-left:80px;padding-right:80px}
+#reportPreviewContent .report-logo{top:2px;width:62px;height:62px;object-fit:contain}
+#reportPreviewContent .report-logo-school{left:4px;right:auto}
+#reportPreviewContent .report-logo-pf{right:4px;left:auto}
+#reportPreviewContent .report-signatures{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+#reportPreviewContent .report-signatures span:first-child{grid-column:1;grid-row:1}
+#reportPreviewContent .report-signatures span:nth-child(2){grid-column:2;grid-row:1}
+#reportPreviewContent .report-signatures .headmaster-signature{grid-column:1/-1;grid-row:2}
+#reportPreviewContent tr,#reportPreviewContent .report-signatures{break-inside:avoid}
+#reportPdfPreview{display:block;width:100%;max-width:1200px;height:calc(100vh - 280px);height:calc(100dvh - 280px);min-height:320px;margin:0 auto 20px;border:1px solid #dce4e9;background:#e4e8ed;border-radius:8px}
+#reportPdfPreview[hidden]{display:none}
+@media(max-width:650px){.report-preview-page{padding:0 10px;margin:12px auto}.report-preview-actions{align-items:stretch;flex-direction:column}.report-preview-actions select,.report-preview-actions input{width:100%;max-width:100%}}
+@page{size:A4 portrait;margin:10mm}
+@media print{.report-preview-toolbar,#reportPdfPreview{display:none!important}.report-preview-scroll{display:block!important;overflow:visible;padding:0}.report-preview-page{margin:0;padding:0}#reportPreviewContent{display:block!important;width:190mm;margin:0 auto}}

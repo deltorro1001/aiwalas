@@ -21,7 +21,7 @@
     var handler=(window.AIWalasPages||{})[window.page];
     if(!handler)return fallback.apply(this,arguments);
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){item.classList.toggle('active',item.dataset.page===window.page)});
-    var crumb=document.getElementById('breadcrumbCurrent');if(crumb)crumb.textContent=({journal:'Jurnal Kelas',assessment:'Penilaian',studentGrades:'Nilai dan Capaian',grades:'Ledger Nilai',reports:'Laporan Wali Kelas',maintenance:'Maintenance',walasAssessment:'Penilaian'})[window.page]||window.page;
+    var crumb=document.getElementById('breadcrumbCurrent');if(crumb)crumb.textContent=({journal:'Jurnal Kelas',assessment:'Penilaian',studentGrades:'Nilai dan Capaian',grades:'Ledger Nilai',reports:'Laporan Wali Kelas',maintenance:'Maintenance',teacherAccounts:'Akun Guru',walasAssessment:'Penilaian'})[window.page]||window.page;
     return handler();
   };
 })();

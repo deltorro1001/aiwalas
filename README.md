@@ -20,7 +20,7 @@ php spark db:seed InitialDataSeeder
 php spark serve
 ```
 
-Akun guru dibuat dengan `php spark aiwalas:teacher GURU_ID USERNAME` dan password acak.
+Wali Kelas dapat membuat akun atau reset password melalui menu **Akun Guru**. Username ditentukan Wali Kelas dan password acak ditampilkan sekali. Alternatif CLI: `php spark aiwalas:teacher GURU_ID USERNAME`.
 
 Aplikasi pengembangan tersedia di `http://localhost:8080`.
 

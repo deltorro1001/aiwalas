@@ -107,7 +107,9 @@ git rebase --abort
 
 ## Akun guru
 
-Login nama panggilan sebagai password telah dihapus. Buat akun menggunakan ID guru dari database lokal:
+Login nama panggilan sebagai password telah dihapus. Wali Kelas dapat membuka **Akun Guru**, memilih **Buat Akun**, lalu menyampaikan username dan password awal yang ditampilkan kepada guru. Untuk akun yang sudah ada, pilih **Reset Password**; password lama tidak berlaku setelah reset.
+
+Alternatif melalui CLI menggunakan ID guru dari database lokal:
 
 ```bash
 php spark aiwalas:teacher GURU_ID USERNAME

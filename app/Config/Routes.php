@@ -92,3 +92,6 @@ $routes->get('nilai', 'Dashboard::index', ['filter' => ['auth', 'role:wali_kelas
 
 $routes->get('api/akademik', 'Api\AkademikController::index', ['filter' => ['auth', 'role:wali_kelas,guru,siswa']]);
 $routes->post('api/akademik', 'Api\AkademikController::save', ['filter' => ['auth', 'role:wali_kelas,guru']]);
+
+$routes->get('api/akun-guru', 'Api\AkunGuruController::index', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/akun-guru/(:num)', 'Api\AkunGuruController::save/$1', ['filter' => ['auth', 'role:wali_kelas']]);

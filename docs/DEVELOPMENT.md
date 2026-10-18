@@ -107,7 +107,7 @@ git rebase --abort
 
 ## Akun guru
 
-Login nama panggilan sebagai password telah dihapus. Wali Kelas dapat membuka **Akun Guru**, memilih **Buat Akun**, lalu menyampaikan username dan password awal yang ditampilkan kepada guru. Untuk akun yang sudah ada, pilih **Reset Password**; password lama tidak berlaku setelah reset.
+Migration `BuatAkunPanggilanGuru` membuat atau menyesuaikan seluruh akun guru satu kali sesuai permintaan pemilik aplikasi: nama panggilan tanpa sapaan/spasi dan huruf kecil menjadi username serta password awal, misalnya `Pak Ruby` → `ruby` / `ruby`. Password tetap disimpan sebagai hash. Migration memeriksa benturan username dan membatalkan seluruh transaksi jika ada konflik. Perubahan password berikutnya tidak ditimpa pada deployment ulang. Wali Kelas dapat membuka **Akun Guru**, memilih **Buat Akun**, lalu menyampaikan username dan password awal yang ditampilkan kepada guru. Untuk akun yang sudah ada, pilih **Reset Password**; password lama tidak berlaku setelah reset.
 
 Alternatif melalui CLI menggunakan ID guru dari database lokal:
 

@@ -1,9 +1,5 @@
 (function () {
-  var previousRender = window.render;
   var components = ['UH1', 'UH2', 'UH3', 'UH4', 'UH5', 'UH6', 'ATS', 'ASS'];
-  var storagePrefix = 'aiwalas.assessment.v6';
-  var memoryValues = null;
-  var memoryComponent = null;
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
@@ -14,25 +10,17 @@
   function score(value) {
     if (value == null || String(value).trim() === '') return null;
     var parsed = Number(String(value).trim().replace(',', '.').replace(/[^0-9.-]/g, ''));
-    return isNaN(parsed) ? null : Math.max(0, Math.min(100, parsed));
+    return !isFinite(parsed) || parsed < 0 || parsed > 100 ? null : parsed;
   }
   function studentsList() { return window.students || []; }
   function subjectName() { var select = document.getElementById('teacherSubjectSelect'); return (select && select.value) || localStorage.getItem('aiwalas.teacher.subject') || 'Mapel'; }
-  function subjectToken(value) { return String(value || 'Mapel').replace(/[^a-z0-9_-]/gi, '_'); }
-  function storageKey() {
-    var user = window.currentUser || {};
-    var identity = user.id || user.username || user.name || 'unknown-teacher';
-    return storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_') + '.' + subjectToken(subjectName());
-  }  function readValues() {
-    try {
-      var current = JSON.parse(localStorage.getItem(storageKey()) || '{}');
-      if (Object.keys(current).length || (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') !== 'Ganjil') return current;
-      var user = window.currentUser || {}, identity = user.id || user.username || user.name || 'unknown-teacher';
-      var legacyKey = storagePrefix + '.' + (window.activeSemester || localStorage.getItem('aiwalas.semester') || 'Ganjil') + '.' + String(identity).replace(/[^a-z0-9_-]/gi, '_') + '.' + subjectToken(subjectName());
-      return JSON.parse(localStorage.getItem(legacyKey) || '{}');
-    } catch (error) { return {}; }
+  var remoteValues = {}, remoteSubject = null, requestVersion = 0;
+  function readValues() { return JSON.parse(JSON.stringify(remoteValues)); }
+  function saveValues(values, component) {
+    if (!remoteSubject) return Promise.reject(new Error('Mata pelajaran belum tersedia.'));
+    var selected = {}; studentsList().forEach(function(student){selected[normalize(student[1])] = score((values[normalize(student[1])] || {})[component]);});
+    return authRequest('api/akademik', {method:'POST',body:JSON.stringify({kelas_id:window.activeClassId,semester:window.activeSemester||'Ganjil',mata_pelajaran_id:remoteSubject.id,komponen:component,values:selected})}).then(function(){remoteValues=values;});
   }
-  function saveValues(values) { memoryValues = values || {}; var serialized=JSON.stringify(values || {}),user=window.currentUser||{},semester=window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil',identity=user.id||user.username||user.name||user.nama_lengkap||'unknown-teacher',aliases=[identity,user.name,user.nama_lengkap,user.username].filter(function(value,index,list){return value&&list.indexOf(value)===index}).map(function(value){return String(value).replace(/[^a-z0-9_-]/gi,'_')});localStorage.setItem(storageKey(),serialized);aliases.forEach(function(alias){var safe=String(alias).replace(/[^a-z0-9_-]/gi,'_'),subject=subjectToken(subjectName());localStorage.setItem('aiwalas.assessment.v6.'+semester+'.'+safe+'.'+subject,serialized);localStorage.setItem('aiwalas.assessment.v6.'+safe+'.'+subject,serialized)}); }
   function activeComponents(values) {
     return components.filter(function (component) {
       return Object.keys(values).some(function (nis) {
@@ -121,7 +109,7 @@
         if (rows.length > bestRows.length) bestRows = rows;
       });
       if (!bestRows.length) throw new Error('File Excel kosong.');
-      var headerName = function (value) { return String(value == null ? '' : value).replace(/[\\uFEFF\\u200B]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+      var headerName = function (value) { return String(value == null ? '' : value).replace(/[\uFEFF\u200B]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
       var headerIndex = bestRows.findIndex(function (row) {
         return row.some(function (cell) { var name = headerName(cell); return name === 'nis' || (name.indexOf('nis') >= 0 && name !== 'nisn'); });
       });
@@ -198,6 +186,7 @@
       });
     };
     document.getElementById('saveAssessmentValues').onclick = function () {
+      if (Array.prototype.some.call(document.querySelectorAll('.assessment-score'),function(input){return input.validity.badInput || (input.value.trim()!=='' && score(input.value)===null)})) {errorBox.textContent='Nilai harus antara 0 dan 100.';return;}
       var saved = 0;
       document.querySelectorAll('.assessment-score').forEach(function (input) {
         var nis = normalize(input.dataset.nis);
@@ -206,17 +195,17 @@
         if (value === null) delete values[nis][selected];
         else { values[nis][selected] = Math.round(value); saved++; }
       });
-      if (!saved) { errorBox.textContent = 'Tidak ada nilai yang dapat disimpan.'; return; }
-      saveValues(values);
-      memoryValues = values;
+      var button=this;button.disabled=true;
+      saveValues(values, selected).then(function(){
       closeModal();
       renderAssessment();
       if (!document.querySelector('#pageContent .assessment-table') && activeComponents(values).length) { setTimeout(renderAssessment, 0); }
       toast(saved + ' nilai ' + selected + ' berhasil disimpan.');
+      }).catch(function(error){errorBox.textContent=error.message;button.disabled=false;});
     };
     fillInputs(selected);
   }
-  function renderAssessment() {
+  function drawAssessment() {
     var subjectSelect = document.getElementById('teacherSubjectSelect');
     var yearSelect = document.getElementById('academicYearSelect');
     var subject = subjectSelect ? subjectSelect.value : 'Mata Pelajaran';
@@ -234,9 +223,20 @@
     document.getElementById('exportAssessmentTemplate').onclick = downloadTemplate;
     document.getElementById('openAssessmentInput').onclick = openInputModal;
   }
+  function renderAssessment() {
+    var version=++requestVersion, classId=window.activeClassId, semester=window.activeSemester||'Ganjil';
+    document.getElementById('pageContent').innerHTML='<p class="stat-note">Memuat nilai dari database...</p>';
+    authRequest('api/akademik?kelas_id='+classId+'&semester='+encodeURIComponent(semester)).then(function(data){
+      if(version!==requestVersion||window.page!=='assessment')return;
+      var selected=subjectName(), token=function(v){return String(v).toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^pjok$/,'olahraga')};
+      remoteSubject=(data.subjects||[]).find(function(s){return token(s.nama_mata_pelajaran)===token(selected)})||(data.subjects||[])[0];
+      remoteValues={};(data.data||[]).filter(function(row){return remoteSubject&&Number(row.mata_pelajaran_id)===Number(remoteSubject.id)}).forEach(function(row){if(!remoteValues[row.nis])remoteValues[row.nis]={};remoteValues[row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
+      drawAssessment();
+      var heading=document.querySelector('#pageContent h1');if(heading)heading.textContent='Nilai '+(remoteSubject?remoteSubject.nama_mata_pelajaran:'—');
+      document.getElementById('openAssessmentInput').disabled=!remoteSubject;
+    }).catch(function(error){if(version===requestVersion&&window.page==='assessment')document.getElementById('pageContent').textContent=error.message;});
+  }
   window.renderAssessmentPage = renderAssessment;
-  window.render = function () {
-    if (window.page === 'assessment') { renderAssessment(); return; }
-    return previousRender.apply(this, arguments);
-  };
+  window.AIWalasPages = window.AIWalasPages || {};
+  window.AIWalasPages.assessment = renderAssessment;
 })();

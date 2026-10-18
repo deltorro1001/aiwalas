@@ -13,5 +13,5 @@
     select.dataset.bound='1';select.value=current();window.activeSemester=select.value;
     select.onchange=function(){var value=allowed.indexOf(this.value)>=0?this.value:'Ganjil';localStorage.setItem(key,value);window.activeSemester=value;load(value)};
   }
-  window.activeSemester=current();setInterval(install,300);install();
+  window.activeSemester=current();new MutationObserver(install).observe(document.body,{childList:true,subtree:true});install();
 })();

@@ -14,6 +14,7 @@ class Auth extends BaseController
     public function session()
     {
         $pengguna = session()->get('pengguna');
+        if (($pengguna['peran']??'')==='guru' && ((int)($pengguna['id']??0)<1 || !(int)($pengguna['guru_id']??0))) {session()->remove('pengguna');$pengguna=null;}
 
         return $this->json([
             'authenticated' => $pengguna !== null,
@@ -41,17 +42,6 @@ class Auth extends BaseController
         }
 
         $roleMap = ['walas' => 'wali_kelas', 'assistant' => 'sekretaris', 'student' => 'siswa', 'teacher' => 'guru', 'guest' => 'guest'];
-        if ($payload['role'] === 'teacher') {
-            $needle = strtolower(trim((string)$payload['username']));
-            $guru = db_connect()->table('guru')->where('aktif',1)->get()->getResultArray();
-            foreach ($guru as $g) {
-                $u = strtolower(preg_replace('/[^a-z0-9]/i','',preg_replace('/^(pak|bu|bapak|ibu)\s+/i','',trim((string)($g['nama_panggilan']??'')))));
-                if ($u !== '' && $u === $needle && (string)$payload['password'] === $u) {
-                    session()->regenerate(); session()->set('pengguna',['id'=>0,'guru_id'=>(int)$g['id'],'nama_pengguna'=>$u,'nama_lengkap'=>$g['nama_lengkap'],'peran'=>'guru','nis'=>null]);
-                    return $this->json(['ok'=>true,'user'=>$this->frontendUser(['id'=>0,'nama_pengguna'=>$u,'nama_lengkap'=>$g['nama_lengkap'],'peran'=>'guru','nis'=>null])]);
-                }
-            }
-        }
         $model = new PenggunaModel();
         $pengguna = $model->where('nama_pengguna', trim((string) $payload['username']))
             ->where('peran', $roleMap[$payload['role']])
@@ -107,6 +97,7 @@ class Auth extends BaseController
             'nama_lengkap' => $pengguna->nama_lengkap,
             'peran' => $pengguna->peran,
             'nis' => $pengguna->nis,
+            'guru_id' => $pengguna->guru_id,
         ];
         session()->set('pengguna', $sessionUser);
 

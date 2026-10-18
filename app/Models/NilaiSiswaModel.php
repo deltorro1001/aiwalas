@@ -15,6 +15,7 @@ class NilaiSiswaModel extends Model
         'siswa_id',
         'komponen_nilai_id',
         'nilai',
+        'semester',
         'keterangan',
         'dinilai_oleh',
         'dibuat_pada',

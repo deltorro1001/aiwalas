@@ -1,6 +1,6 @@
 (function(){
   var pageName='walasAssessment', threshold=80, cache=null;
-  var oldAccess=window.applyRoleAccess, oldRender=window.render;
+  var oldAccess=window.applyRoleAccess;
   if(window.names)window.names[pageName]='Penilaian';
   if(window.roleAccess)window.roleAccess.walas=(window.roleAccess.walas||[]).concat([pageName]);
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -51,42 +51,7 @@
   function normalizeData(result){
     var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='olahraga')subject.nama_mata_pelajaran='PJOK';});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
     scores.forEach(function(row){scoreMap[String(row.siswa_id)+'-'+String(row.komponen_nilai_id)]=Number(row.nilai)});
-    return mergeTeacherInput({subjects:subjects,components:components,scoreMap:scoreMap});
-  }
-  function mergeTeacherInput(data){
-    var students=window.students||[], existing={};
-    data.components.forEach(function(component){existing[String(component.mata_pelajaran_id)+'-'+subjectKey(component.nama_komponen)]=component;});
-    data.subjects.forEach(function(subject){
-      var values={};
-      try { if(typeof window.ledgerTeacherAssessment==='function') values=window.ledgerTeacherAssessment(subject.nama_mata_pelajaran)||{}; } catch(e) { values={}; }
-      if(!Object.keys(values).length){
-        try {
-          var selectedSubject=localStorage.getItem('aiwalas.teacher.subject')||'';
-          if(subjectKey(selectedSubject)===subjectKey(subject.nama_mata_pelajaran)){
-            values=JSON.parse(localStorage.getItem('aiwalas.teacher.assessment.values')||'{}')||{};
-            if(!Object.keys(values).some(function(key){return typeof values[key]==='object'})){
-              var flat=values;values={};Object.keys(flat).forEach(function(key){var parts=key.split('_'),nis=parts.shift();if(!values[nis])values[nis]={};values[nis][parts.join('_')]=flat[key]});
-            }
-          }
-        } catch(e) { values={}; }
-      }
-      Object.keys(values).forEach(function(nisKey){
-        var row=values[nisKey]||{}, normalizedNis=String(nisKey).trim().replace(/[.]0$/,'');
-        var student=students.find(function(item){return String(item[1]).trim().replace(/[.]0$/,'')===normalizedNis});
-        if(!student)return;
-        Object.keys(row).forEach(function(name){
-          var value=row[name];
-          if(value===''||value==null||isNaN(Number(value)))return;
-          var lookup=String(subject.id)+'-'+subjectKey(name), component=existing[lookup];
-          if(!component){
-            component={id:'local-'+subject.id+'-'+subjectKey(name),mata_pelajaran_id:subject.id,nama_komponen:name,jenis_komponen:/^UH/i.test(name)?'UH':'Tugas',urutan:900+data.components.length,aktif:1};
-            data.components.push(component);existing[lookup]=component;
-          }
-          data.scoreMap[String(student[7])+'-'+String(component.id)]=Number(value);
-        });
-      });
-    });
-    return data;
+    return {subjects:subjects,components:components,scoreMap:scoreMap};
   }
   function renderSubject(student,subject){
     if(!student||!subject||!cache)return;
@@ -104,9 +69,9 @@
     root.innerHTML='<div class="page student-grades-page"><div class="page-heading"><div><div class="eyebrow">Aktivitas akademik</div><h1>Penilaian</h1><p id="walasGradeStudent">Memuat data nilai siswa...</p></div></div><section class="panel table-panel"><div class="panel-head"><div><h2>Rekap Nilai</h2><p id="walasGradeSummary">Pilih siswa dan mata pelajaran untuk melihat nilai.</p></div><label class="walas-student-filter">Siswa<select id="walasGradeStudentSelect" class="filter-btn"></select></label></div><div id="walasGradeSubjectButtons" class="student-grade-subject-buttons"></div><div id="walasGradeTableWrap"><p class="summary-empty">Memuat data penilaian...</p></div></section></div>';
     var breadcrumb=document.getElementById('breadcrumbCurrent');if(breadcrumb)breadcrumb.textContent='Penilaian';
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){item.classList.toggle('active',item.dataset.page===pageName)});
-    Promise.all([authRequest('api/mata-pelajaran'),authRequest('api/komponen-nilai?kelas_id='+activeClassId),authRequest('api/nilai?kelas_id='+activeClassId)]).then(function(result){if(window.page!==pageName)return;cache=normalizeData(result);var select=document.getElementById('walasGradeStudentSelect'),buttons=document.getElementById('walasGradeSubjectButtons');if(!select||!buttons)return;select.innerHTML=(window.students||[]).map(function(student){return '<option value="'+esc(student[7])+'">'+esc(student[0])+' · '+esc(student[1])+'</option>'}).join('');buttons.innerHTML=cache.subjects.map(function(subject){return '<button type="button" class="student-grade-subject" data-walas-grade-subject="'+esc(subject.id)+'">'+esc(subject.nama_mata_pelajaran)+'</button>'}).join('');function selectedStudent(){return (window.students||[]).find(function(student){return String(student[7])===String(select.value)})}function selectedSubject(id){return cache.subjects.find(function(subject){return String(subject.id)===String(id)})||cache.subjects[0]}var activeSubject=cache.subjects[0];buttons.querySelectorAll('[data-walas-grade-subject]').forEach(function(button){button.onclick=function(){activeSubject=selectedSubject(button.dataset.walasGradeSubject);renderSubject(selectedStudent(),activeSubject)}});select.onchange=function(){renderSubject(selectedStudent(),activeSubject)};if(cache.subjects.length&&window.students.length)renderSubject(selectedStudent(),activeSubject);else document.getElementById('walasGradeTableWrap').innerHTML='<p class="summary-empty">Belum ada data nilai siswa.</p>'}).catch(function(error){var target=document.getElementById('walasGradeTableWrap');if(target)target.innerHTML='<p class="summary-empty">'+esc(error.message||'Data nilai tidak dapat dimuat.')+'</p>'});
+    Promise.all([authRequest('api/mata-pelajaran'),authRequest('api/komponen-nilai?kelas_id='+activeClassId),authRequest('api/nilai?kelas_id='+activeClassId+'&semester='+encodeURIComponent(semester()))]).then(function(result){if(window.page!==pageName)return;cache=normalizeData(result);var select=document.getElementById('walasGradeStudentSelect'),buttons=document.getElementById('walasGradeSubjectButtons');if(!select||!buttons)return;select.innerHTML=(window.students||[]).map(function(student){return '<option value="'+esc(student[7])+'">'+esc(student[0])+' · '+esc(student[1])+'</option>'}).join('');buttons.innerHTML=cache.subjects.map(function(subject){return '<button type="button" class="student-grade-subject" data-walas-grade-subject="'+esc(subject.id)+'">'+esc(subject.nama_mata_pelajaran)+'</button>'}).join('');function selectedStudent(){return (window.students||[]).find(function(student){return String(student[7])===String(select.value)})}function selectedSubject(id){return cache.subjects.find(function(subject){return String(subject.id)===String(id)})||cache.subjects[0]}var activeSubject=cache.subjects[0];buttons.querySelectorAll('[data-walas-grade-subject]').forEach(function(button){button.onclick=function(){activeSubject=selectedSubject(button.dataset.walasGradeSubject);renderSubject(selectedStudent(),activeSubject)}});select.onchange=function(){renderSubject(selectedStudent(),activeSubject)};if(cache.subjects.length&&window.students.length)renderSubject(selectedStudent(),activeSubject);else document.getElementById('walasGradeTableWrap').innerHTML='<p class="summary-empty">Belum ada data nilai siswa.</p>'}).catch(function(error){var target=document.getElementById('walasGradeTableWrap');if(target)target.innerHTML='<p class="summary-empty">'+esc(error.message||'Data nilai tidak dapat dimuat.')+'</p>'});
   }
   window.renderWalasAssessmentPage=renderPage;
   window.applyRoleAccess=function(){oldAccess.apply(this,arguments);var button=document.querySelector('[data-page="'+pageName+'"]');if(button)button.style.display=window.currentRole==='walas'?'flex':'none'};
-  window.render=function(){if(window.page===pageName){renderPage();return}return oldRender.apply(this,arguments)};
+  window.AIWalasPages=window.AIWalasPages||{};window.AIWalasPages[pageName]=renderPage;
 })();

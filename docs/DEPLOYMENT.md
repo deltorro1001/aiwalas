@@ -1,6 +1,6 @@
 # Panduan Deployment AIWalas ke VPS
 
-Dokumen ini menggunakan repository private `rahmad3501/aiwalas` dan aplikasi pada `/var/www/html/aiwalas`.
+Dokumen ini menggunakan repository private `deltorro1001/aiwalas` dan aplikasi pada `/var/www/html/aiwalas`.
 
 ## 1. Struktur VPS
 
@@ -23,7 +23,7 @@ Clone repository:
 
 ```bash
 cd /var/www/html
-git clone git@github.com:rahmad3501/aiwalas.git aiwalas
+git clone git@github.com:deltorro1001/aiwalas.git aiwalas
 cd aiwalas
 ```
 
@@ -69,18 +69,9 @@ sudo chmod 640 /var/www/html/aiwalas/.env
 
 ## 4. Update normal dari GitHub
 
-Jalankan setelah Pull Request sudah di-merge ke `master`:
+Merge ke `main` memicu workflow `.github/workflows/deploy.yml`. Workflow mengambil `origin/main`, menerapkan konfigurasi gateway dan menjalankan migration. Lihat [panduan deployment aktif](DEPLOYMENT-GUIDE.md).
 
-```bash
-cd /var/www/html/aiwalas
-git pull --ff-only origin master
-composer install --no-dev --optimize-autoloader
-php spark migrate
-php spark cache:clear
-sudo systemctl reload php8.2-fpm
-```
-
-Perintah tersebut tidak menimpa `.env` atau menghapus `writable/`.
+Jangan gunakan ZIP Maintenance untuk memperbarui kode; endpoint tersebut dinonaktifkan. File `.env` dan runtime `writable/` tetap dikelola di VPS.
 
 ## 5. Backup sebelum update besar
 
@@ -115,7 +106,7 @@ Uji di browser:
 - Dashboard
 - Absensi
 - Menu Maintenance
-- Upload patch hanya jika memang diperlukan
+- Pastikan Maintenance tidak menyediakan penerapan ZIP melalui web
 
 ## 7. Rollback sederhana
 
@@ -124,7 +115,7 @@ Jika update bermasalah dan commit sebelumnya masih sehat:
 ```bash
 cd /var/www/html/aiwalas
 git log --oneline -5
-git checkout master
+git checkout main
 git reset --hard COMMIT_SEBELUMNYA
 composer install --no-dev --optimize-autoloader
 php spark cache:clear

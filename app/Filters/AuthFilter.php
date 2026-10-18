@@ -10,6 +10,10 @@ class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
+        $user=session()->get('pengguna');
+        if (($user['peran']??'')==='guru' && ((int)($user['id']??0)<1 || !(int)($user['guru_id']??0))) {
+            session()->remove('pengguna');
+        }
         if (session()->has('pengguna')) {
             return null;
         }

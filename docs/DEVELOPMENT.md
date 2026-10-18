@@ -15,7 +15,7 @@ Kebutuhan:
 Clone repository private:
 
 ```bash
-git clone git@github.com:rahmad3501/aiwalas.git
+git clone git@github.com:deltorro1001/aiwalas.git
 cd aiwalas
 composer install
 ```
@@ -45,7 +45,7 @@ ssh-keygen -t ed25519 -C "email-github-developer"
 cat ~/.ssh/id_ed25519.pub
 ```
 
-Tambahkan public key ke akun GitHub yang memiliki akses ke repository `rahmad3501/aiwalas`, lalu uji:
+Tambahkan public key ke akun GitHub yang memiliki akses ke repository `deltorro1001/aiwalas`, lalu uji:
 
 ```bash
 ssh -T git@github.com
@@ -56,37 +56,22 @@ Private key (`~/.ssh/id_ed25519`) tidak boleh dibagikan.
 
 ## 3. Alur kerja harian
 
-Jangan mengerjakan langsung di `master`. Buat branch berdasarkan fitur atau perbaikan:
+Buat branch fitur dari `main`, kerjakan dan uji lokal, lalu push branch fitur dan buka Pull Request jika perubahan sudah disetujui. Push atau merge ke `main` memicu deployment VPS.
 
 ```bash
-git switch master
-git pull --ff-only origin master
+git switch main
+git pull --ff-only origin main
 git switch -c feature/nama-fitur
+php spark migrate --all
 ```
 
-Kerjakan perubahan, lalu periksa:
-
-```bash
-php -l app/Controllers/NamaController.php
-composer validate
-php spark routes
-```
-
-Commit dengan pesan yang jelas:
-
-```bash
-git add app public composer.json composer.lock README.md docs
-git commit -m "Perbaiki menu Maintenance"
-git push -u origin feature/nama-fitur
-```
-
-Buat Pull Request ke `master`. Developer lain meninjau perubahan dan menjalankan pengujian sebelum merge.
+Untuk perubahan lokal saja, jangan commit atau push sampai diminta.
 
 ## 4. Sinkronisasi sebelum mulai bekerja
 
 ```bash
-git switch master
-git pull --ff-only origin master
+git switch main
+git pull --ff-only origin main
 git switch feature/nama-fitur
 ```
 
@@ -94,7 +79,7 @@ Jika branch sudah lama dan ingin diperbarui:
 
 ```bash
 git fetch origin
-git rebase origin/master
+git rebase origin/main
 ```
 
 Jika konflik muncul, selesaikan file yang ditandai Git, lalu:
@@ -116,6 +101,30 @@ git rebase --abort
 - Jangan mengubah `.env`, `writable/`, atau `vendor/` lalu meng-commit-nya.
 - Migration baru harus memiliki nama timestamp unik.
 - Setelah mengubah database, sertakan migration pada commit yang sama.
-- Jangan melakukan `git push --force` ke `master`.
-- Sebelum Pull Request, jalankan `git pull --ff-only origin master` atau rebase branch.
+- Jangan melakukan `git push --force` ke `main`.
+- Sebelum Pull Request, jalankan `git pull --ff-only origin main` atau rebase branch.
 - Jangan menghapus migration yang sudah pernah dijalankan di VPS.
+
+## Akun guru
+
+Login nama panggilan sebagai password telah dihapus. Buat akun menggunakan ID guru dari database lokal:
+
+```bash
+php spark aiwalas:teacher GURU_ID USERNAME
+```
+
+Perintah menampilkan password acak sekali. Guru dapat menggantinya melalui Pengaturan. Akun dibatasi pada kelas dan mapel di `jadwal_kelas`.
+
+Nilai guru dan jurnal baru disimpan ke database. Data lama di localStorage tidak dihapus dan tidak diimpor otomatis karena identitas guru pada penyimpanan lama tidak dapat dipercaya. Tinjau dan impor kembali nilai melalui template Excel bila diperlukan.
+
+## Tes regresi lokal
+
+```bash
+php tests/gateway-config.php
+php tests/report-gateway.php
+python3 tests/academic-local.py
+```
+
+Tes akademik membutuhkan server localhost:8080, database development `aiwalas` dan MySQL lokal dengan user root tanpa password sesuai template. Fixture dibuat terpisah dan dihapus setelah tes. Tes mencakup login guru, hak akses, persistensi lintas sesi, semester, jurnal dan penolakan patch ZIP. Untuk tes Chrome, jalankan Chrome headless dengan profil sementara, port debugging 9222 dan `--remote-allow-origins=http://localhost:9222`, kemudian gunakan `AIWALAS_BROWSER_TEST=1 python3 tests/academic-local.py`.
+
+Routing halaman penilaian, jurnal, ledger, laporan, maintenance dan nilai siswa dikelola melalui `window.AIWalasPages` di `public/assets/page-router.js`. Modul halaman baru mendaftarkan handler di sana, tanpa menimpa `window.render` lagi. Halaman lama lainnya masih memakai render sebelumnya sebagai fallback.

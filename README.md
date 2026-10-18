@@ -20,6 +20,8 @@ php spark db:seed InitialDataSeeder
 php spark serve
 ```
 
+Akun guru dibuat dengan `php spark aiwalas:teacher GURU_ID USERNAME` dan password acak.
+
 Aplikasi pengembangan tersedia di `http://localhost:8080`.
 
 ## Apache
@@ -54,7 +56,7 @@ Aplikasi menggunakan session CI4, CSRF, filter autentikasi/role, validasi server
 
 ## Fallback layanan eksternal
 
-WhatsApp menyimpan histori sebagai `Disiapkan`, membuat URL `wa.me`, lalu dapat menandainya `Dibuka`; aplikasi tidak mengklaim pesan terkirim tanpa WhatsApp Business API. PDF memakai dialog cetak browser. CSV dapat dibuka di Excel dan menjadi fallback saat pustaka SheetJS CDN tidak tersedia.
+Komunikasi manual memakai tautan `wa.me` dengan histori `Disiapkan`/`Dibuka`. Pengiriman langsung dan PDF menggunakan gateway jika konfigurasi tersedia; status gagal tidak dilaporkan sebagai terkirim. PDF memakai dialog cetak browser. CSV dapat dibuka di Excel dan menjadi fallback saat pustaka SheetJS CDN tidak tersedia.
 
 ## Pemeriksaan
 
@@ -66,3 +68,5 @@ php spark db:seed InitialDataSeeder
 ```
 
 Seeder data awal idempotent. Aplikasi belum dianggap siap produksi sebelum seluruh skenario spesifikasi dan pengujian UI selesai.
+
+Nilai dan jurnal disimpan di database. Patch ZIP lewat web dinonaktifkan; pembaruan kode menggunakan Git. Push ke `main` memicu deployment VPS.

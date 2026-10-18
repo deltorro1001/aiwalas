@@ -61,11 +61,25 @@ class InitialDataSeeder extends Seeder
             throw new RuntimeException('Berkas sumber siswa tidak ditemukan.');
         }
 
-        preg_match('/var students=\[(.*?)\];/s', $appJs, $studentBlock);
+        preg_match('/var students\s*=\s*\[(.*?)\];/s', $appJs, $studentBlock);
         preg_match_all("/\\['((?:\\\\.|[^'])*)','(\\d+)','[^']*','([^']*)','([LP])'\\]/", $studentBlock[1] ?? '', $rows, PREG_SET_ORDER);
+        $jsonRows = json_decode('[' . rtrim(trim($studentBlock[1] ?? ''), ',') . ']', true);
+        if (is_array($jsonRows) && $jsonRows !== []) {
+            $rows = array_map(static fn (array $student): array => [
+                '', addslashes((string) $student[0]), (string) $student[1],
+                (string) $student[3], (string) $student[4],
+            ], $jsonRows);
+        }
+        if ($rows === []) {
+            throw new RuntimeException('Data siswa pada app.js tidak dapat dibaca.');
+        }
         preg_match_all("/'(\\d+)':\\{phone:'([^']*)',parentPhone:'([^']*)'\\}/", $appJs, $contactRows, PREG_SET_ORDER);
         $contacts = [];
         foreach ($contactRows as $row) {
+            $contacts[$row[1]] = ['nomor_hp' => $row[2], 'nomor_hp_orang_tua' => $row[3]];
+        }
+        preg_match_all('/(\d+)\s*:\s*\{\s*phone:\s*"([^"]*)",\s*parentPhone:\s*"([^"]*)"\s*\}/', $appJs, $jsonContacts, PREG_SET_ORDER);
+        foreach ($jsonContacts as $row) {
             $contacts[$row[1]] = ['nomor_hp' => $row[2], 'nomor_hp_orang_tua' => $row[3]];
         }
 

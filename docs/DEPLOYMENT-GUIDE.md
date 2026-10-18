@@ -65,6 +65,8 @@ Workflow `.github/workflows/deploy.yml` berjalan pada push ke `main` dan menjala
 cd /var/www/html/aiwalas
 git fetch origin
 git reset --hard origin/main
+php scripts/configure-whatsapp-gateway.php --apply
+php spark migrate --all
 ```
 
 ## Setup laptop Rahmad dan Deltorro
@@ -78,15 +80,7 @@ git config --global user.name "Nama Developer"
 git config --global user.email "email@example.com"
 ```
 
-Alur kerja:
-
-```bash
-git pull --rebase origin main
-# edit file
-git add .
-git commit -m "deskripsi perubahan"
-git push origin main
-```
+Alur kerja: buat branch fitur dari `main`, lakukan pengujian lokal, lalu ajukan Pull Request bila sudah siap. Push atau merge ke `main` langsung memicu deployment; jangan push untuk pekerjaan lokal saja.
 
 ## Verifikasi
 

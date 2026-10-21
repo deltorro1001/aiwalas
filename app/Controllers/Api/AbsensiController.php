@@ -7,6 +7,9 @@ class AbsensiController extends BaseApiController
  public function index(){
   $kelas=(int)$this->request->getGet('kelas_id');
   $tanggal=$this->request->getGet('tanggal')?:date('Y-m-d');
+  if(!is_string($tanggal))return $this->respond(['ok'=>false,'message'=>'Tanggal absensi tidak valid.'],422);
+  $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$tanggal);
+  if(!$date||$date->format('Y-m-d')!==$tanggal)return $this->respond(['ok'=>false,'message'=>'Tanggal absensi tidak valid.'],422);
   $semester=$this->request->getGet('semester')?:'Ganjil';if(!in_array($semester,['Ganjil','Genap'],true))$semester='Ganjil';
   $q=(new AbsensiModel())->select('absensi.*,siswa.nis,siswa.nama_lengkap')->join('siswa','siswa.id=absensi.siswa_id')->where('absensi.kelas_id',$kelas)->where('absensi.tanggal',$tanggal)->where('absensi.semester',$semester)->orderBy('siswa.nama_lengkap');
   $u=$this->currentUser();
@@ -52,7 +55,7 @@ class AbsensiController extends BaseApiController
   if(!$student)return $this->respond(['ok'=>false,'message'=>'Siswa tidak terdaftar pada kelas tersebut.'],422);
   $data=['siswa_id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id'],'tanggal'=>$p['tanggal'],'semester'=>$p['semester'],'waktu_scan'=>empty($p['waktu_scan'])?null:$p['waktu_scan'],'status'=>$p['status'],'keterangan'=>trim((string)($p['keterangan']??''))?:null,'dicatat_oleh'=>$u['id']];
   $model=new AbsensiModel();$existing=$model->where(['siswa_id'=>$data['siswa_id'],'kelas_id'=>$data['kelas_id'],'tanggal'=>$data['tanggal'],'semester'=>$data['semester']])->first();
-  if($existing){$model->where(["siswa_id"=>$data["siswa_id"],"kelas_id"=>$data["kelas_id"],"tanggal"=>$data["tanggal"]])->set($data)->update();$id=$existing->id;}else{$id=$model->insert($data,true);}
+  if($existing){$model->where(["siswa_id"=>$data["siswa_id"],"kelas_id"=>$data["kelas_id"],"tanggal"=>$data["tanggal"],"semester"=>$data["semester"]])->set($data)->update();$id=$existing->id;}else{$id=$model->insert($data,true);}
   return $this->respond(['ok'=>true,'data'=>$model->find($id)],$existing?200:201);
  }
 }

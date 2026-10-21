@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261010-edit-student-scroll-v2') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261021-attendance-controls') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
@@ -20,7 +20,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261018-teacher-nicknames') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261021-notifications') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261007-camera-permission3') ?>'></script>
@@ -41,8 +41,8 @@
 <script src='<?= base_url('assets/hud-chart.js?v=20260914-trends4') ?>'></script>
 <script src='<?= base_url('assets/dashboard-summary.js?v=20260926-absence-card') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20261008-semester') ?>'></script>
-<script src='<?= base_url('assets/attendance-live.js?v=20261006-persistent-qr') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261021-date-filter') ?>'></script>
+<script src='<?= base_url('assets/attendance-live.js?v=20261021-date-filter') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
 <script src='<?= base_url('assets/attendance-recap-detail.js?v=20260914-september-data') ?>'></script>
@@ -107,8 +107,8 @@
 </script><script src='<?= base_url('assets/assessment-redesign.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/semester-context.js?v=20261008-semester') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
-<script src='<?= base_url('assets/attendance-realtime.js?v=20261008-semester') ?>'></script>
-<script src='<?= base_url('assets/attendance-whatsapp.js?v=20261007-parent-message') ?>'></script>
+<script src='<?= base_url('assets/attendance-realtime.js?v=20261021-date-filter') ?>'></script>
+<script src='<?= base_url('assets/attendance-whatsapp.js?v=20261021-date-filter') ?>'></script>
 <script>
 (function(){
   function ensureWalasAssessment(){
@@ -122,6 +122,7 @@
 })();
 </script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
+<script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261018-accounts') ?>'></script>
 </body>
 </html>

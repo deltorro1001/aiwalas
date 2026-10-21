@@ -130,3 +130,31 @@ python3 tests/academic-local.py
 Tes akademik membutuhkan server localhost:8080, database development `aiwalas` dan MySQL lokal dengan user root tanpa password sesuai template. Fixture dibuat terpisah dan dihapus setelah tes. Tes mencakup login guru, hak akses, persistensi lintas sesi, semester, jurnal dan penolakan patch ZIP. Untuk tes Chrome, jalankan Chrome headless dengan profil sementara, port debugging 9222 dan `--remote-allow-origins=http://localhost:9222`, kemudian gunakan `AIWALAS_BROWSER_TEST=1 python3 tests/academic-local.py`.
 
 Routing halaman penilaian, jurnal, ledger, laporan, maintenance dan nilai siswa dikelola melalui `window.AIWalasPages` di `public/assets/page-router.js`. Modul halaman baru mendaftarkan handler di sana, tanpa menimpa `window.render` lagi. Halaman lama lainnya masih memakai render sebelumnya sebagai fallback.
+
+## Notifikasi berdasarkan tanggal
+
+Beranda mengambil maksimal 10 notifikasi terbaru untuk hari ini menurut zona waktu aplikasi (`Asia/Jakarta`). Menu Notifikasi memuat riwayat lewat API tersendiri, sehingga tidak bergantung pada data ringkas Beranda. Pilihan tanggal berada tepat di bawah tombol Tandai Semua Dibaca. Pilih Semua tanggal untuk membuka seluruh riwayat; hasil lebih dari 30 notifikasi dapat dibuka melalui pagination. Tandai Semua Dibaca tetap menandai seluruh notifikasi akun, termasuk tanggal lain, dan mempertahankan pilihan tanggal di layar.
+
+API: `GET api/notifikasi?tanggal=YYYY-MM-DD&page=1`. Tanpa `tanggal` (atau nilai kosong), semua tanggal tersedia. Tanggal tidak valid menghasilkan HTTP 422. Semua hasil tetap dibatasi ke pengguna yang login.
+
+```bash
+python3 tests/notifications-local.py
+# Jika Chrome pengujian sudah berjalan pada port 9222:
+AIWALAS_BROWSER_TEST=1 python3 tests/notifications-local.py
+```
+
+Tes berjalan pada localhost:8080 dan hanya menggunakan akun/notifikasi fixture yang dibersihkan setelah selesai.
+
+## Tanggal dan filter Absensi Harian
+
+Wali Kelas dan Sekretaris dapat memilih tanggal pada tabel Absensi Harian. Dropdown **Pilih berdasarkan** berisi **Nama** (seluruh siswa secara alfabetis), **Terlambat**, **Sakit**, **Izin**, dan **Alpha** (siswa dengan status tersebut). Data diambil dari API menggunakan kelas, tanggal, dan semester terpilih; polling lima detik mempertahankan pilihan tersebut. Siswa tanpa catatan pada tanggal itu ditampilkan sebagai Menunggu keterangan, tanpa waktu scan buatan.
+
+Riwayat hanya untuk dilihat; koreksi serta pembuatan/scanner QR tersedia untuk tanggal hari ini. Koreksi tetap mengikuti aturan akses sebelumnya dan tidak mengubah semester lain. Tombol WhatsApp pada baris yang difilter mengacu ke ID siswa dan status yang sedang ditampilkan.
+
+```bash
+python3 tests/attendance-filters-local.py
+# Dengan Chrome pengujian di port 9222:
+AIWALAS_BROWSER_TEST=1 python3 tests/attendance-filters-local.py
+```
+
+Tes menggunakan fixture pada localhost:8080 dan membersihkannya setelah selesai. Pemanggilan gateway WhatsApp pada tes browser diganti stub, sehingga tidak mengirim pesan sungguhan.

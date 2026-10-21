@@ -539,3 +539,19 @@
   padding:12px 0 2px!important;
   background:#fff!important;
 }
+
+/* Notification date controls stay directly below Mark All Read. */
+.notification-actions{display:flex;align-items:flex-start;gap:10px}
+.notification-date-controls{display:grid;grid-template-columns:max-content minmax(145px,1fr);gap:8px 12px;min-width:190px;max-width:100%}
+.notification-date-controls #markRead{grid-column:1/-1}
+.notification-date-controls label{font-size:12px;font-weight:600;align-self:center}
+.notification-date-controls input{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel,#fff);color:var(--text,inherit);min-width:0;width:100%;box-sizing:border-box}
+.notification-date-controls #allNotificationDates{grid-column:2;justify-self:end;text-align:right;padding-right:0}
+.notification-pagination{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:16px}
+@media(max-width:600px){.notification-actions{flex-wrap:wrap}.notification-date-controls{min-width:170px}.notification-pagination{justify-content:space-between;gap:6px}}
+
+.attendance-view-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.attendance-view-controls label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600}
+.attendance-view-controls input,.attendance-view-controls select{font:inherit;min-width:155px;max-width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel,#fff);color:var(--text,inherit)}
+.attendance-action-buttons button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){.attendance-view-controls{width:100%}.attendance-view-controls label{flex:1;min-width:140px}.attendance-view-controls input,.attendance-view-controls select{width:100%;min-width:0;box-sizing:border-box}}

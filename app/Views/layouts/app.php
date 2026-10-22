@@ -38,8 +38,8 @@
 <script src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'></script>
 <script src='<?= base_url('assets/ledger-import.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/ledger-page.js?v=20260918-name-left') ?>'></script>
-<script src='<?= base_url('assets/hud-chart.js?v=20260914-trends4') ?>'></script>
-<script src='<?= base_url('assets/dashboard-summary.js?v=20260926-absence-card') ?>'></script>
+<script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
+<script src='<?= base_url('assets/dashboard-summary.js?v=20261022-student-summary') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
 <script src='<?= base_url('assets/attendance-ui.js?v=20261021-date-filter') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261021-date-filter') ?>'></script>
@@ -80,7 +80,7 @@
 <script src='<?= base_url('assets/student-sidebar.js?v=20260923-groups3') ?>'></script>
 <script src='<?= base_url('assets/teacher-sidebar.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
-<script src='<?= base_url('assets/student-home-force.js?v=20261011-time-encoding') ?>'></script>
+<script src='<?= base_url('assets/student-home-force.js?v=20261022-class-summary') ?>'></script>
 <script src='<?= base_url('assets/student-grades-access.js?v=20260921-access') ?>'></script>
 <script src='<?= base_url('assets/student-grades-vertical.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/student-welcome-name.js?v=20260922-name') ?>'></script>
@@ -124,7 +124,7 @@
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
 <script src='<?= base_url('assets/communication-history.js?v=20261022') ?>'></script>
-<script src='<?= base_url('assets/page-router.js?v=20261022-communication') ?>'></script>
+<script src='<?= base_url('assets/page-router.js?v=20261022-student-home') ?>'></script>
 </body>
 </html>
 

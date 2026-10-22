@@ -14,6 +14,28 @@ class SiswaDashboardController extends BaseApiController
         if(!in_array($semester,['Ganjil','Genap'],true))return $this->respond(['ok'=>false],422);
         $today = date('Y-m-d');
         $classId = (int) $student['kelas_id'];
+        // Class overview contains only names/statuses, scoped to the authenticated student's class.
+        $class = $db->table('kelas')->select('nama_kelas')->where('id', $classId)->get()->getRowArray();
+        $classRows = $db->table('siswa s')->select("s.nama_lengkap,COALESCE(a.status,'Menunggu keterangan') AS status")
+            ->join('absensi a', "a.siswa_id=s.id AND a.tanggal=" . $db->escape($today) . " AND a.semester=" . $db->escape($semester), 'left')
+            ->where(['s.kelas_id' => $classId, 's.aktif' => 1])->orderBy('s.nama_lengkap')->get()->getResultArray();
+        $classSummary = ['nama_kelas' => $class['nama_kelas'] ?? '', 'status' => [], 'siswa_tidak_hadir' => [], 'menunggu_keterangan' => [], 'tren_absensi' => []];
+        foreach ($classRows as $row) {
+            $classSummary['status'][$row['status']] = ($classSummary['status'][$row['status']] ?? 0) + 1;
+            if (in_array($row['status'], ['Sakit', 'Izin', 'Alpha'], true)) $classSummary['siswa_tidak_hadir'][] = $row;
+            if ($row['status'] === 'Menunggu keterangan') $classSummary['menunggu_keterangan'][] = $row;
+        }
+        $weekStart = (new \DateTimeImmutable($today))->modify('monday this week');
+        $weekRows = $db->table('absensi a')->select('a.tanggal,a.status,COUNT(*) AS jumlah')
+            ->join('siswa s', 's.id=a.siswa_id')->where(['s.kelas_id' => $classId, 's.aktif' => 1, 'a.semester' => $semester])
+            ->where('a.tanggal >=', $weekStart->format('Y-m-d'))->where('a.tanggal <=', $today)
+            ->whereIn('a.status', ['Sakit', 'Izin', 'Terlambat'])->groupBy('a.tanggal,a.status')->get()->getResultArray();
+        for ($i = 0; $i < 5; $i++) {
+            $date = $weekStart->modify('+' . $i . ' days')->format('Y-m-d');
+            $values = ['tanggal' => $date, 'Sakit' => 0, 'Izin' => 0, 'Terlambat' => 0];
+            foreach ($weekRows as $row) if ($row['tanggal'] === $date) $values[$row['status']] = (int) $row['jumlah'];
+            $classSummary['tren_absensi'][] = $values;
+        }
         $attendance = $db->table('absensi')->where(['siswa_id' => $student['id'], 'tanggal' => $today])->get()->getRowArray();
         $counts = $db->table('absensi')->select('status, COUNT(*) jumlah')->where('siswa_id', $student['id'])->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->groupBy('status')->get()->getResultArray();
         $summary = ['Sakit' => 0, 'Izin' => 0, 'Alpha' => 0];
@@ -27,6 +49,7 @@ class SiswaDashboardController extends BaseApiController
         $wali = $db->table('kelas')->select('wali_kelas_id')->where('id', $classId)->get()->getRowArray();
         $notifications = [];
         if ($wali && $wali['wali_kelas_id']) $notifications = $db->table('notifikasi')->where('pengguna_id', $wali['wali_kelas_id'])->orderBy('id', 'DESC')->limit(3)->get()->getResultArray();
-        return $this->respond(['ok' => true, 'data' => ['student' => ['nama' => $student['nama_lengkap'], 'nis' => $student['nis']], 'scan' => ['tanggal' => $today, 'waktu' => $attendance['waktu_scan'] ?? null, 'status' => $attendance['status'] ?? 'Belum scan'], 'keterlambatan' => ['sejak' => '2026-07-13', 'jumlah' => count($lateRows), 'riwayat' => $lateRows], 'absensi' => $summary, 'notifikasi_wali' => $notifications, 'jadwal_hari_ini' => $schedule, 'capaian_nilai' => $scores, 'capaian_mapel' => $classScores, 'ulangan_harian' => [], 'tugas_belum_selesai' => $tasks]]);
+        $this->response->setHeader('Cache-Control', 'no-store');
+        return $this->respond(['ok' => true, 'data' => ['student' => ['nama' => $student['nama_lengkap'], 'nis' => $student['nis']], 'ringkasan_kelas' => $classSummary, 'scan' => ['tanggal' => $today, 'waktu' => $attendance['waktu_scan'] ?? null, 'status' => $attendance['status'] ?? 'Belum scan'], 'keterlambatan' => ['sejak' => '2026-07-13', 'jumlah' => count($lateRows), 'riwayat' => $lateRows], 'absensi' => $summary, 'notifikasi_wali' => $notifications, 'jadwal_hari_ini' => $schedule, 'capaian_nilai' => $scores, 'capaian_mapel' => $classScores, 'ulangan_harian' => [], 'tugas_belum_selesai' => $tasks]]);
     }
 }

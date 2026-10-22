@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261022-attendance-status-colors') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261022-discipline-normal') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
@@ -80,7 +80,7 @@
 <script src='<?= base_url('assets/student-sidebar.js?v=20260923-groups3') ?>'></script>
 <script src='<?= base_url('assets/teacher-sidebar.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
-<script src='<?= base_url('assets/student-home-force.js?v=20261022-class-summary') ?>'></script>
+<script src='<?= base_url('assets/student-home-force.js?v=20261022-discipline-empty') ?>'></script>
 <script src='<?= base_url('assets/student-grades-access.js?v=20260921-access') ?>'></script>
 <script src='<?= base_url('assets/student-grades-vertical.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/student-welcome-name.js?v=20260922-name') ?>'></script>
@@ -124,7 +124,8 @@
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
 <script src='<?= base_url('assets/communication-history.js?v=20261022') ?>'></script>
-<script src='<?= base_url('assets/page-router.js?v=20261022-student-attendance') ?>'></script>
+<script src='<?= base_url('assets/discipline-page.js?v=20261022') ?>'></script>
+<script src='<?= base_url('assets/page-router.js?v=20261022-discipline') ?>'></script>
 </body>
 </html>
 

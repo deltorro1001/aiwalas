@@ -23,7 +23,7 @@
     var handler=(window.AIWalasPages||{})[route];
     if(!handler)return fallback.apply(this,arguments);
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){item.classList.toggle('active',item.dataset.page===window.page)});
-    var crumb=document.getElementById('breadcrumbCurrent');if(crumb)crumb.textContent=({dashboard:'Beranda',attendance:'Absensi Harian',journal:'Jurnal Kelas',assessment:'Penilaian',studentGrades:'Nilai dan Capaian',grades:'Ledger Nilai',reports:'Laporan Wali Kelas',maintenance:'Maintenance',teacherAccounts:'Akun Guru',notifications:'Notifikasi',communication:'Komunikasi',walasAssessment:'Penilaian'})[window.page]||window.page;
+    var crumb=document.getElementById('breadcrumbCurrent');if(crumb)crumb.textContent=({dashboard:'Beranda',attendance:'Absensi Harian',discipline:'Status Kedisiplinan',journal:'Jurnal Kelas',assessment:'Penilaian',studentGrades:'Nilai dan Capaian',grades:'Ledger Nilai',reports:'Laporan Wali Kelas',maintenance:'Maintenance',teacherAccounts:'Akun Guru',notifications:'Notifikasi',communication:'Komunikasi',walasAssessment:'Penilaian'})[window.page]||window.page;
     return handler();
   };
   // A restored session may render before the final router finishes loading.

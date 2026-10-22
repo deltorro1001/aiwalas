@@ -561,3 +561,5 @@
 .student-attendance-value[data-status]:not([data-status="Hadir"]){color:#dc2626}
 .student-attendance-feedback{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.student-attendance-feedback .outline-btn{margin-left:auto;flex-shrink:0}
 @media(max-width:650px){.student-attendance-overview{grid-template-columns:1fr;gap:12px}}
+
+.student-discipline-summary{font-size:16px;font-weight:400;margin-top:12px;line-height:1.4;overflow-wrap:anywhere}.student-discipline-note{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.student-discipline-note:last-child{border-bottom:0}.student-discipline-note p{font-size:12px;line-height:1.5;margin-top:6px;white-space:pre-wrap}

@@ -52,6 +52,26 @@ try:
     genap=a.call('api/siswa/dashboard?semester=Genap')['data']['ringkasan_kelas']
     assert genap['status']['Sakit']==1 and genap['status']['Menunggu keterangan']==6
     a.call('api/siswa/dashboard?semester=invalid',status=422)
+    assert data['kedisiplinan']['catatan']==[] and 'notifikasi_wali' not in data
+    anonymous.call('api/kedisiplinan?kelas_id='+class_id,status=401)
+    a.call('api/kedisiplinan?kelas_id='+class_id,status=403)
+    a.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Unauthorized'},status=403)
+    wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_wali','password':password})
+    late_peer=next(x for x in wali.call('api/kedisiplinan?kelas_id='+class_id)['data'] if str(x['id'])==pupils[1])
+    assert late_peer['keterlambatan']['jumlah']==1 and late_peer['catatan'][0]['kategori']=='terlambat'
+    for category,values in [('etika',{'pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','alasan':'Alasan etika','tindakan':'Pembinaan'}),('atribut',{'pelanggaran':'Atribut kurang lengkap','perbaikan':'Lengkapi atribut'}),('terlambat',{'jumlah_terlambat':2,'tanggal':str(today),'alasan':'Alasan terlambat'})]:
+        wali.call('api/kedisiplinan',dict(siswa_id=int(pupils[0]),kategori=category,**values))
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[2]),'kategori':'etika','pelanggaran':'CATATAN SISWA LAIN'})
+    own_notes=a.call('api/siswa/dashboard?kelas_id='+classes[1])['data']['kedisiplinan']['catatan']
+    assert len(own_notes)==3 and 'CATATAN SISWA LAIN' not in json.dumps(own_notes)
+    assert own_notes[1]['status']=='Dalam Peringatan (Terlambat 2x)'
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','tanggal':'2026-02-31'},status=422)
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'terlambat','jumlah_terlambat':-1},status=422)
+    users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran) VALUES('{prefix}_other','{hashed}','Other Wali','wali_kelas');SELECT LAST_INSERT_ID();"))
+    outsider=Client();outsider.call('api/auth/login',{'role':'walas','username':prefix+'_other','password':password})
+    outsider.call('api/kedisiplinan?kelas_id='+class_id,status=404)
+    outsider.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Other Wali'},status=404)
+
     sql(f"UPDATE absensi SET waktu_scan='06:12:34' WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
     attendance_endpoint='api/absensi?kelas_id='+class_id+'&semester=Ganjil'
     own=a.call(attendance_endpoint)['data']
@@ -64,12 +84,34 @@ try:
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies')
         c.call('Page.navigate',{'url':BASE});c.wait("typeof authRequest==='function' && !!window.AIWalasPages && window.render.toString().includes('var studentRoutes')")
+        wali_credentials=json.dumps({'role':'walas','username':prefix+'_wali','password':password})
+        c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+wali_credentials+")}).then(function(d){return finishLogin(d.user)}).then(function(){return authRequest('api/bootstrap?kelas_id="+class_id+"')}).then(function(d){applyBootstrapData(d);window.page='discipline';window.render()})")
+        c.wait("!!document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]')")
+        c.js("document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]').click()")
+        c.js("document.getElementById('storedDiscipline_pelanggaran').value='Etika UI <img src=x onerror=alert(1)>';document.getElementById('saveStoredDiscipline').click()")
+        c.wait("!document.getElementById('modalBackdrop').classList.contains('show')")
+        c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes('Etika UI')")
+        c.js("window.render()")
+        c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes('Etika UI')")
+        assert not c.js("!!document.querySelector('#storedDisciplineRows img')")
         credentials=json.dumps({'role':'student','username':prefix+'_0','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(function(d){return finishLogin(d.user)})")
         c.wait("!!document.querySelector('.student-home .analytics-svg') && !!document.querySelector('.dashboard-absence-card')")
         assert c.js("document.querySelectorAll('.student-home .summary-panel').length")==1
+        discipline_text=c.js("document.querySelector('.student-home').textContent")
+        assert 'Etika UI <img src=x onerror=alert(1)>' in discipline_text and 'CATATAN SISWA LAIN' not in discipline_text
+        assert 'Dalam Peringatan (Terlambat 2x)' in discipline_text and 'Lengkapi atribut' in discipline_text
+        assert 'Notifikasi' not in discipline_text and not c.js("!!document.querySelector('.student-discipline-note img')")
+        for category in ['etika','atribut','terlambat']:
+            wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':category,'jumlah_terlambat':0})
+        assert not a.call('api/siswa/dashboard')['data']['kedisiplinan']['catatan']
+        c.js("window.render()")
+        c.wait("!!document.querySelector('.student-discipline-summary') && document.querySelector('.student-discipline-summary').textContent==='Tidak Ada Catatan Pelanggaran'")
+        c.wait("!!document.querySelector('.dashboard-absence-card')")
+        assert c.js("document.querySelector('.student-home .activity-list').textContent")=='Tidak Ada Catatan Pelanggaran'
+
         text=c.js("document.querySelector('.student-home').textContent")
-        for label in ['Waktu Kehadiran','Jumlah Keterlambatan','Rekap Absensi','Jadwal Ulangan Harian Minggu Ini','Daftar Tugas Yang Harus Diselesaikan','Notifikasi Terakhir','Siswa Tidak Hadir Hari Ini']:
+        for label in ['Waktu Kehadiran','Jumlah Keterlambatan','Rekap Absensi','Jadwal Ulangan Harian Minggu Ini','Daftar Tugas Yang Harus Diselesaikan','Status Kedisiplinan','Siswa Tidak Hadir Hari Ini']:
             assert label in text,label
         assert 'Test <img src=x onerror=alert(1)>' in c.js("document.querySelector('.dashboard-absence-list').textContent") and not c.js("!!document.querySelector('.dashboard-absence-list img')")
         assert 'Foreign Peer' not in text and 'Inactive Peer' not in text
@@ -117,6 +159,7 @@ try:
         c.js("logout()")
         print('PASS: Attendance cards show current student/day/semester, all recorded statuses, missing scan/data, QR scan results, automatic refresh and mobile layout.')
         print('PASS: Student home chart, schedule/waiting tabs, absence card, existing personal/task cards retained, repeat navigation, escaped names and mobile layout.')
+    print('PASS: Discipline API ownership/role isolation, shared saved notes, separate categories, validation and no-notes state.')
     print('PASS: Own-class student overview, semester/active-student filtering, real weekly counts and minimal classmate fields.')
 finally:
     if classes:

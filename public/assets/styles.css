@@ -555,3 +555,9 @@
 .attendance-view-controls input,.attendance-view-controls select{font:inherit;min-width:155px;max-width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel,#fff);color:var(--text,inherit)}
 .attendance-action-buttons button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:600px){.attendance-view-controls{width:100%}.attendance-view-controls label{flex:1;min-width:140px}.attendance-view-controls input,.attendance-view-controls select{width:100%;min-width:0;box-sizing:border-box}}
+
+.student-attendance-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:14px}
+.student-attendance-overview h2{font-size:15px}.student-attendance-value{font-size:16pt;font-weight:700;color:#15803d;margin:14px 0 8px;overflow-wrap:anywhere}
+.student-attendance-value[data-status]:not([data-status="Hadir"]){color:#dc2626}
+.student-attendance-feedback{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.student-attendance-feedback .outline-btn{margin-left:auto;flex-shrink:0}
+@media(max-width:650px){.student-attendance-overview{grid-template-columns:1fr;gap:12px}}

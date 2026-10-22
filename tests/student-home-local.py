@@ -1,7 +1,7 @@
 """Local API/browser checks for preserved student home cards. Disposable fixtures only.
 Run: AIWALAS_BROWSER_TEST=1 python3 tests/student-home-local.py
 """
-import datetime,http.cookiejar,json,os,re,secrets,shutil,subprocess,urllib.request,urllib.error
+import time,datetime,http.cookiejar,json,os,re,secrets,shutil,subprocess,urllib.request,urllib.error
 from pathlib import Path
 from zoneinfo import ZoneInfo
 ROOT=Path(__file__).resolve().parent.parent
@@ -52,10 +52,18 @@ try:
     genap=a.call('api/siswa/dashboard?semester=Genap')['data']['ringkasan_kelas']
     assert genap['status']['Sakit']==1 and genap['status']['Menunggu keterangan']==6
     a.call('api/siswa/dashboard?semester=invalid',status=422)
+    sql(f"UPDATE absensi SET waktu_scan='06:12:34' WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
+    attendance_endpoint='api/absensi?kelas_id='+class_id+'&semester=Ganjil'
+    own=a.call(attendance_endpoint)['data']
+    assert len(own)==1 and str(own[0]['siswa_id'])==pupils[0] and own[0]['waktu_scan']=='06:12:34' and own[0]['status']=='Hadir'
+    assert not a.call('api/absensi?kelas_id='+classes[1])['data']
+    assert a.call('api/absensi?kelas_id='+class_id+'&semester=Genap')['data'][0]['waktu_scan'] is None
+    yesterday=today-datetime.timedelta(days=1)
+    sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,waktu_scan,semester,dicatat_oleh) VALUES({pupils[0]},{class_id},'{yesterday}','Hadir','05:55:55','Ganjil',{users[0]});")
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies')
-        c.call('Page.navigate',{'url':BASE});c.wait("typeof authRequest==='function' && !!window.AIWalasPages")
+        c.call('Page.navigate',{'url':BASE});c.wait("typeof authRequest==='function' && !!window.AIWalasPages && window.render.toString().includes('var studentRoutes')")
         credentials=json.dumps({'role':'student','username':prefix+'_0','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(function(d){return finishLogin(d.user)})")
         c.wait("!!document.querySelector('.student-home .analytics-svg') && !!document.querySelector('.dashboard-absence-card')")
@@ -77,13 +85,43 @@ try:
         assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Mobile overflow'
         c.call('Emulation.clearDeviceMetricsOverride')
         errors=[e for e in c.events if e.get('method')=='Runtime.exceptionThrown'];assert not errors,errors
+        c.js("window.page='attendance';window.render()")
+        c.wait("document.getElementById('studentAttendanceStatus')?.textContent==='Hadir'")
+        assert c.js("document.getElementById('studentAttendanceScan').textContent")=='06:12:34 WIB'
+        assert c.js("document.getElementById('studentQrButton').textContent")=='Buka scanner QR'
+        for status,scan_time in [('Izin',None),('Sakit',None),('Alpha',None),('Terlambat','06:45:00'),('Menunggu keterangan',None)]:
+            stamp="'"+scan_time+"'" if scan_time else 'NULL'
+            sql(f"UPDATE absensi SET status='{status}',waktu_scan={stamp} WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
+            c.js("document.getElementById('refreshStudentAttendance').click()")
+            c.wait("document.getElementById('studentAttendanceStatus').textContent==="+json.dumps(status))
+            assert c.js("document.getElementById('studentAttendanceScan').textContent")==((scan_time+' WIB') if scan_time else 'Belum ada scan')
+        sql(f"DELETE FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
+        c.js("document.getElementById('refreshStudentAttendance').click()")
+        c.wait("document.getElementById('studentAttendanceStatus').textContent==='Belum tercatat'")
+        assert c.js("document.getElementById('studentAttendanceScan').textContent")=='Belum ada scan'
+        # A valid QR scan is submitted locally; the server supplies status and time.
+        wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_wali','password':password})
+        qr=wali.call('api/absensi/qr',{'kelas_id':int(class_id)})['data']['qr_code']
+        payload=json.dumps({'kelas_id':int(class_id),'semester':'Ganjil','qr_code':qr})
+        saved=c.js("authRequest('api/absensi',{method:'POST',body:JSON.stringify("+payload+")}).then(function(d){window.render();return d.data})")
+        c.wait("document.getElementById('studentAttendanceScan').textContent==="+json.dumps(saved['waktu_scan']+' WIB'))
+        assert c.js("document.getElementById('studentAttendanceStatus').textContent")==saved['status']
+        sql(f"UPDATE absensi SET status='Alpha',waktu_scan=NULL WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
+        time.sleep(16)
+        assert c.js("document.getElementById('studentAttendanceStatus').textContent")=='Alpha','Status did not refresh automatically'
+        assert c.js("document.getElementById('studentAttendanceScan').textContent")=='Belum ada scan'
+        c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
+        assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Attendance mobile overflow'
+        c.call('Emulation.clearDeviceMetricsOverride')
+        assert not [e for e in c.events if e.get('method')=='Runtime.exceptionThrown']
         c.js("logout()")
+        print('PASS: Attendance cards show current student/day/semester, all recorded statuses, missing scan/data, QR scan results, automatic refresh and mobile layout.')
         print('PASS: Student home chart, schedule/waiting tabs, absence card, existing personal/task cards retained, repeat navigation, escaped names and mobile layout.')
     print('PASS: Own-class student overview, semester/active-student filtering, real weekly counts and minimal classmate fields.')
 finally:
     if classes:
         ids=','.join(classes)
-        sql('DELETE FROM absensi WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
+        sql('DELETE FROM qr_absensi_aktif WHERE kelas_id IN ('+ids+');DELETE FROM absensi WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
     if year:sql('DELETE FROM tahun_ajaran WHERE id='+year)
     if teacher:sql('DELETE FROM guru WHERE id='+teacher)
     if subject:sql('DELETE FROM mata_pelajaran WHERE id='+subject)

@@ -27,3 +27,15 @@ jobs:
             git reset --hard origin/main
             php scripts/configure-whatsapp-gateway.php --apply
             php spark migrate --all
+            systemctl is-active --quiet cron
+            php scripts/configure-teacher-scheduler.php --apply
+            php spark whatsapp:teacher-schedule
+            scheduler_ready=0
+            for attempt in $(seq 1 20); do
+              if php spark whatsapp:teacher-schedule --status; then
+                scheduler_ready=1
+                break
+              fi
+              sleep 5
+            done
+            test "$scheduler_ready" -eq 1

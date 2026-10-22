@@ -72,3 +72,8 @@ php spark db:seed InitialDataSeeder
 Seeder data awal idempotent. Aplikasi belum dianggap siap produksi sebelum seluruh skenario spesifikasi dan pengujian UI selesai.
 
 Nilai dan jurnal disimpan di database. Patch ZIP lewat web dinonaktifkan; pembaruan kode menggunakan Git. Push ke `main` memicu deployment VPS.
+
+
+## Pengingat guru otomatis
+
+Scheduler server menyiapkan pengingat 10 menit sebelum jadwal mengajar dan ucapan terima kasih saat jadwal selesai melalui gateway WhatsApp. Histori tampil di Komunikasi dengan status Terkirim/Pending. Wahyu Lukman Hakim, Putu Arya Ranesda, dan Ruby Eka Prawira dikecualikan dari otomatisasi. Lokal default nonaktif; deployment memasang cron VPS dan mengaktifkan flag jika belum dikonfigurasi. Simulasi tersedia lewat `php spark whatsapp:teacher-schedule`. Petunjuk konfigurasi dan pengujian ada di [docs/TEACHER-WHATSAPP-AUTOMATION.md](docs/TEACHER-WHATSAPP-AUTOMATION.md).

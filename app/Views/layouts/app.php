@@ -27,7 +27,7 @@
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
-<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261011-time-encoding') ?>'></script>
+<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261022-exclusions') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>
 <script src='<?= base_url('assets/school-teachers.js?v=20260913-teachers-export6') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-mapel.js?v=20260918-mapel-kelas-imported') ?>'></script>
@@ -123,7 +123,8 @@
 </script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
-<script src='<?= base_url('assets/page-router.js?v=20261018-accounts') ?>'></script>
+<script src='<?= base_url('assets/communication-history.js?v=20261022') ?>'></script>
+<script src='<?= base_url('assets/page-router.js?v=20261022-communication') ?>'></script>
 </body>
 </html>
 

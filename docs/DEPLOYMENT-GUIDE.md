@@ -67,7 +67,13 @@ git fetch origin
 git reset --hard origin/main
 php scripts/configure-whatsapp-gateway.php --apply
 php spark migrate --all
+systemctl is-active --quiet cron
+php scripts/configure-teacher-scheduler.php --apply
+php spark whatsapp:teacher-schedule
+php spark whatsapp:teacher-schedule --status
 ```
+
+Deployment memasang cron pengingat/terima kasih guru setiap menit, mengaktifkan flag otomatisasi jika belum ada, dan menunggu heartbeat worker. Konfigurasi nonaktif yang sudah disimpan administrator tetap dipertahankan. Detail status Komunikasi dan pengecualian guru ada di [panduan otomatisasi guru](TEACHER-WHATSAPP-AUTOMATION.md).
 
 ## Setup laptop Rahmad dan Deltorro
 

@@ -95,3 +95,5 @@ $routes->post('api/akademik', 'Api\AkademikController::save', ['filter' => ['aut
 
 $routes->get('api/akun-guru', 'Api\AkunGuruController::index', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->post('api/akun-guru/(:num)', 'Api\AkunGuruController::save/$1', ['filter' => ['auth', 'role:wali_kelas']]);
+
+$routes->get('api/whatsapp/teacher-schedule', 'Api\TeacherScheduleAutomationController::index', ['filter'=>['auth','role:wali_kelas']]);

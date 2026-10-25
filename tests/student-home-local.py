@@ -53,6 +53,23 @@ try:
     assert genap['status']['Sakit']==1 and genap['status']['Menunggu keterangan']==6
     a.call('api/siswa/dashboard?semester=invalid',status=422)
     assert data['kedisiplinan']['catatan']==[] and 'notifikasi_wali' not in data
+    assert data['notifikasi_whatsapp']==[]
+    sql(f"UPDATE siswa SET nomor_hp='081111000111',nomor_hp_orang_tua='081222000111' WHERE id={pupils[0]};UPDATE siswa SET nomor_hp_orang_tua='081222000111' WHERE id={pupils[1]};")
+    def message(body,student_id,stamp,status='Terkirim',phone='6281111000111',klass=None,category='WhatsApp'):
+        sql(f"INSERT INTO pesan_komunikasi(siswa_id,kelas_id,pengirim,penerima,nomor_tujuan,isi_pesan,kategori,status_pengiriman,dikirim_pada,dibuat_oleh) VALUES({student_id or 'NULL'},{klass or class_id},'Test Wali','Test Recipient','{phone}','{body}','{category}','{status}','{stamp}',{users[0]});")
+    for i in range(6):message('Pesan <img src=x onerror=alert(1)>' if i==5 else f'Own message {i}',pupils[0],f'{today} 10:0{i}:00')
+    message('Legacy own phone',None,f'{today} 10:07:00')
+    message('Pending message',pupils[0],f'{today} 11:00:00',status='Disiapkan')
+    message('Failed message',pupils[0],f'{today} 11:01:00',status='Gagal')
+    message('Peer message',pupils[1],f'{today} 11:02:00')
+    message('Shared family phone',None,f'{today} 11:03:00',phone='6281222000111')
+    message('Teacher reminder',None,f'{today} 11:04:00',category='Pengingat Guru Otomatis')
+    message('Foreign class message',None,f'{today} 11:05:00',klass=classes[1])
+    notifications=a.call(endpoint)['data']['notifikasi_whatsapp']
+    expected_messages=['Legacy own phone','Pesan <img src=x onerror=alert(1)>','Own message 4','Own message 3']
+    assert [x['isi_pesan'] for x in notifications]==expected_messages,notifications
+    assert not any('nomor_tujuan' in item for item in notifications)
+
     anonymous.call('api/kedisiplinan?kelas_id='+class_id,status=401)
     a.call('api/kedisiplinan?kelas_id='+class_id,status=403)
     a.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Unauthorized'},status=403)
@@ -83,6 +100,7 @@ try:
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies')
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"const cloneElement=Element.prototype.cloneNode;Element.prototype.cloneNode=function(deep){const copy=cloneElement.call(this,deep);if(this.matches('.summary-panel')&&this.isConnected&&!this.classList.contains('student-today-schedule')){window.__studentOriginalCardHeight=this.getBoundingClientRect().height;window.__studentOriginalCardTemplate=copy}return copy};"})
         c.call('Page.navigate',{'url':BASE});c.wait("typeof authRequest==='function' && !!window.AIWalasPages && window.render.toString().includes('var studentRoutes')")
         wali_credentials=json.dumps({'role':'walas','username':prefix+'_wali','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+wali_credentials+")}).then(function(d){return finishLogin(d.user)}).then(function(){return authRequest('api/bootstrap?kelas_id="+class_id+"')}).then(function(d){applyBootstrapData(d);window.page='discipline';window.render()})")
@@ -96,37 +114,56 @@ try:
         assert not c.js("!!document.querySelector('#storedDisciplineRows img')")
         credentials=json.dumps({'role':'student','username':prefix+'_0','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(function(d){return finishLogin(d.user)})")
-        c.wait("!!document.querySelector('.student-home .analytics-svg') && !!document.querySelector('.dashboard-absence-card')")
+        c.wait("!!document.querySelector('.student-home .student-today-schedule') && !!document.querySelector('.student-whatsapp-card')")
         assert c.js("document.querySelectorAll('.student-home .summary-panel').length")==1
         discipline_text=c.js("document.querySelector('.student-home').textContent")
         assert 'Etika UI <img src=x onerror=alert(1)>' in discipline_text and 'CATATAN SISWA LAIN' not in discipline_text
         assert 'Dalam Peringatan (Terlambat 2x)' in discipline_text and 'Lengkapi atribut' in discipline_text
-        assert 'Notifikasi' not in discipline_text and not c.js("!!document.querySelector('.student-discipline-note img')")
+        assert 'Notifikasi' in discipline_text and not c.js("!!document.querySelector('.student-discipline-note img')")
+        assert c.js("Array.from(document.querySelector('.student-home .dashboard-right-stack').children).map(el=>el.querySelector('h2').textContent)")==['Status Kedisiplinan','Notifikasi']
+        assert c.js("Array.from(document.querySelectorAll('.student-whatsapp-message p')).map(el=>el.textContent)")==expected_messages
+        assert not c.js("!!document.querySelector('.student-whatsapp-list img')")
+        assert 'Siswa Tidak Hadir Hari Ini' not in discipline_text
+        assert all(x not in discipline_text for x in ['Pending message','Failed message','Peer message','Shared family phone','Teacher reminder','Foreign class message','Own message 0','Own message 1','Own message 2'])
         for category in ['etika','atribut','terlambat']:
             wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':category,'jumlah_terlambat':0})
         assert not a.call('api/siswa/dashboard')['data']['kedisiplinan']['catatan']
         c.js("window.render()")
         c.wait("!!document.querySelector('.student-discipline-summary') && document.querySelector('.student-discipline-summary').textContent==='Tidak Ada Catatan Pelanggaran'")
-        c.wait("!!document.querySelector('.dashboard-absence-card')")
+        c.wait("!!document.querySelector('.student-whatsapp-card')")
         assert c.js("document.querySelector('.student-home .activity-list').textContent")=='Tidak Ada Catatan Pelanggaran'
 
         text=c.js("document.querySelector('.student-home').textContent")
-        for label in ['Waktu Kehadiran','Jumlah Keterlambatan','Rekap Absensi','Jadwal Ulangan Harian Minggu Ini','Daftar Tugas Yang Harus Diselesaikan','Status Kedisiplinan','Siswa Tidak Hadir Hari Ini']:
+        for label in ['Waktu Kehadiran','Jumlah Keterlambatan','Rekap Absensi','Jadwal Ulangan Harian Minggu Ini','Daftar Tugas Yang Harus Diselesaikan','Status Kedisiplinan','Notifikasi']:
             assert label in text,label
-        assert 'Test <img src=x onerror=alert(1)>' in c.js("document.querySelector('.dashboard-absence-list').textContent") and not c.js("!!document.querySelector('.dashboard-absence-list img')")
+        assert c.js("document.querySelectorAll('.student-whatsapp-message').length")==4
+        sql('DELETE FROM pesan_komunikasi WHERE kelas_id='+class_id)
+        c.js("window.render()")
+        c.wait("document.querySelector('.student-whatsapp-list')?.textContent==='Belum ada pesan WhatsApp terkirim.'")
         assert 'Foreign Peer' not in text and 'Inactive Peer' not in text
-        assert c.js("document.querySelector('.attendance-chart').studentSummaryData.status.Sakit")==1
-        c.js("document.querySelector('[data-summary-tab=\"schedule\"]').click()")
-        assert prefix+'_mapel' in c.js("document.querySelector('.summary-view.active').textContent")
-        c.js("document.querySelector('[data-summary-tab=\"waiting\"]').click()")
-        assert 'Test Belum Scan' in c.js("document.querySelector('.summary-view.active').textContent")
+        schedule_text=c.js("document.querySelector('.student-today-schedule').textContent")
+        assert prefix+'_mapel' in schedule_text and '08:00-09:00' in schedule_text and 'Test Guru' in schedule_text
+        assert not c.js("!!document.querySelector('.student-today-schedule [data-summary-tab]')")
+        assert not c.js("!!document.querySelector('.student-today-schedule .analytics-svg')")
+        assert c.js("Math.abs(document.querySelector('.student-today-schedule').getBoundingClientRect().height-window.__studentOriginalCardHeight)<1"),'Card height changed'
         c.js("window.page='attendance';window.render();window.page='dashboard';window.render()")
-        c.wait("!!document.querySelector('.student-home .analytics-svg') && !!document.querySelector('.dashboard-absence-card')")
-        assert c.js("document.querySelectorAll('.dashboard-absence-card').length")==1
+        c.wait("!!document.querySelector('.student-home .student-today-schedule') && !!document.querySelector('.student-whatsapp-card')")
+        assert c.js("document.querySelectorAll('.student-whatsapp-card').length")==1
         c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
         assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Mobile overflow'
+        c.js("new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve)})})")
+        assert c.js("(()=>{const card=document.querySelector('.student-today-schedule'),probe=window.__studentOriginalCardTemplate.cloneNode(true);probe.style.cssText='position:fixed;visibility:hidden;width:'+card.getBoundingClientRect().width+'px';document.body.appendChild(probe);const same=Math.abs(card.getBoundingClientRect().height-probe.getBoundingClientRect().height)<1;probe.remove();return same})()"),'Mobile card height changed'
         c.call('Emulation.clearDeviceMetricsOverride')
         errors=[e for e in c.events if e.get('method')=='Runtime.exceptionThrown'];assert not errors,errors
+        for hour in range(9,20):
+            sql(f"INSERT INTO jadwal_kelas(kelas_id,mata_pelajaran_id,guru_id,hari,jam_mulai,jam_selesai) VALUES({class_id},{subject},{teacher},'{weekday}','{hour:02d}:00:00','{hour:02d}:30:00');")
+        c.js("window.render()")
+        c.wait("document.querySelectorAll('.student-today-schedule .summary-schedule-row').length===12")
+        assert c.js("document.querySelector('.student-today-schedule .summary-content').scrollHeight>document.querySelector('.student-today-schedule .summary-content').clientHeight"),'Long schedule does not scroll'
+        assert c.js("Math.abs(document.querySelector('.student-today-schedule').getBoundingClientRect().height-window.__studentOriginalCardHeight)<1"),'Long schedule resized card'
+        sql('DELETE FROM jadwal_kelas WHERE kelas_id='+class_id)
+        c.js("window.render()")
+        c.wait("document.querySelector('.student-today-schedule')?.textContent.includes('Tidak ada jadwal mapel hari ini.')")
         c.js("window.page='attendance';window.render()")
         c.wait("document.getElementById('studentAttendanceStatus')?.textContent==='Hadir'")
         assert c.js("document.getElementById('studentAttendanceScan').textContent")=='06:12:34 WIB'
@@ -158,13 +195,13 @@ try:
         assert not [e for e in c.events if e.get('method')=='Runtime.exceptionThrown']
         c.js("logout()")
         print('PASS: Attendance cards show current student/day/semester, all recorded statuses, missing scan/data, QR scan results, automatic refresh and mobile layout.')
-        print('PASS: Student home chart, schedule/waiting tabs, absence card, existing personal/task cards retained, repeat navigation, escaped names and mobile layout.')
+        print('PASS: Student daily schedule with times/teachers, preserved desktop/mobile dimensions, scrolling/empty schedule, discipline above four latest sent WhatsApp notifications, existing personal/task cards retained, repeat navigation, escaped names and mobile layout.')
     print('PASS: Discipline API ownership/role isolation, shared saved notes, separate categories, validation and no-notes state.')
     print('PASS: Own-class student overview, semester/active-student filtering, real weekly counts and minimal classmate fields.')
 finally:
     if classes:
         ids=','.join(classes)
-        sql('DELETE FROM qr_absensi_aktif WHERE kelas_id IN ('+ids+');DELETE FROM absensi WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
+        sql('DELETE FROM pesan_komunikasi WHERE kelas_id IN ('+ids+');DELETE FROM qr_absensi_aktif WHERE kelas_id IN ('+ids+');DELETE FROM absensi WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
     if year:sql('DELETE FROM tahun_ajaran WHERE id='+year)
     if teacher:sql('DELETE FROM guru WHERE id='+teacher)
     if subject:sql('DELETE FROM mata_pelajaran WHERE id='+subject)

@@ -174,6 +174,9 @@ class InitialDataSeeder extends Seeder
             ['Selasa','06:30','09:00','Bahasa Indonesia','Erna Cahyani'], ['Selasa','09:00','10:45','Tata Kamera & Cahaya','Wahyu Lukman Hakim'],
             ['Rabu','06:30','09:00','Tata Kamera & Cahaya','Wahyu Lukman Hakim'], ['Kamis','06:30','08:15','PAI','Lutfi Faridil Aftros'], ['Kamis','08:15','10:45','Matematika','Robert Henry Hutapea'], ['Kamis','10:45','13:30','KIK','Nani Aminah'], ['Kamis','13:30','15:00','Kokurikuler','Englena Nastaria Purba'],
             ['Jumat','07:30','09:30','Naskah & Penyutradaraan','Sumantoro Kasdhani'],
+            ['Jumat','09:30','10:10','Bahasa Inggris','Ika Inayah'],
+            ['Jumat','10:25','11:45','Muatan Lokal','Englena Nastaria Purba'],
+            ['Jumat','13:00','15:00','Tata Kamera & Cahaya','Wahyu Lukman Hakim'],
         ];
         foreach ($schedule as [$hari, $mulai, $selesai, $subject, $teacherName]) {
             $guruId = $this->findGuru($guruMap, $teacherName);
@@ -187,6 +190,13 @@ class InitialDataSeeder extends Seeder
                 'hari' => $hari, 'jam_mulai' => $mulai, 'jam_selesai' => $selesai,
             ]);
         }
+
+        // School activity has no assigned teacher or grade components.
+        $this->db->table('mata_pelajaran')->insert(['nama_mata_pelajaran' => 'Jumat Pembiasaan', 'aktif' => 1]);
+        $this->db->table('jadwal_kelas')->insert([
+            'kelas_id' => $kelasId, 'mata_pelajaran_id' => $this->db->insertID(), 'guru_id' => null,
+            'hari' => 'Jumat', 'jam_mulai' => '06:30', 'jam_selesai' => '07:30', 'keterangan' => 'Aktivitas sekolah',
+        ]);
 
         foreach ($mapel as $mapelId) {
             foreach (['UH' => 4, 'Tugas' => 4] as $jenis => $jumlah) {

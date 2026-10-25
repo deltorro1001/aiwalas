@@ -1,12 +1,14 @@
 # Status kedisiplinan pada Beranda siswa
 
-Kartu Notifikasi pada Beranda siswa diganti dengan Status Kedisiplinan. Ringkasan dan rincian hanya memuat catatan siswa yang login. Jika tidak ada catatan, tampilkan **Tidak Ada Catatan Pelanggaran**. Grafik, jadwal mapel, daftar siswa tidak hadir, serta kartu pribadi/ulangan/tugas tetap tersedia.
+Kartu Notifikasi pada Beranda siswa diganti dengan Status Kedisiplinan. Ringkasan dan rincian hanya memuat catatan siswa yang login. Jika tidak ada catatan, tampilkan **Tidak Ada Catatan Pelanggaran**. Kartu jadwal mapel hari ini menampilkan waktu dan nama guru dengan ukuran yang sama seperti kartu Ringkasan Kelas sebelumnya. Di kolom kanan, Status Kedisiplinan berada di atas kartu Notifikasi. Kartu pribadi/ulangan/tugas tetap tersedia.
 
 Menu Status Kedisiplinan wali kelas dan kartu siswa menggunakan `DisciplineRecords`, dengan catatan tersimpan pada tabel `catatan_kedisiplinan`. Migration `BuatCatatanKedisiplinan` harus dijalankan sebelum menggunakan fitur ini. Setiap siswa memiliki satu catatan terbaru per kategori: etika, keterlambatan, dan pakaian/atribut. Menyimpan kategori lain tidak menimpa kategori sebelumnya. Mengosongkan rincian menghilangkan catatan kategori tersebut dari kartu siswa.
 
 Jumlah keterlambatan bersumber dari absensi; koreksi jumlah melalui menu kedisiplinan disimpan terpisah dan dipakai pada menu serta kartu yang sama. Koreksi ini tidak mengubah histori absensi. Catatan pada versi menu lama hanya berupa variabel browser dan tidak otomatis menjadi data database.
 
 API baca/tulis wali kelas memeriksa kepemilikan kelas. API Beranda siswa mengambil identitas dari sesi, sehingga parameter kelas/siswa tidak dapat dipakai untuk membaca catatan siswa lain. Kartu siswa bersifat baca saja. Notifikasi pribadi wali kelas tidak lagi dikirim melalui API Beranda siswa.
+
+Kartu Notifikasi menggantikan daftar siswa tidak hadir dan menampilkan maksimal empat pesan WhatsApp berstatus Terkirim, diurutkan menurut waktu kirim terbaru lalu ID terbaru. Pesan lebih lama tidak ditampilkan. Pesan dibatasi pada kelas dan siswa yang login. Untuk histori gateway lama tanpa `siswa_id`, pencocokan nomor siswa/orang tua hanya dipakai jika nomor tersebut unik dalam kelas; pesan guru otomatis dan nomor keluarga yang ambigu tidak ditampilkan melalui pencocokan ini. Nomor penerima tidak dikirim ke browser. Jika kosong, tampilkan “Belum ada pesan WhatsApp terkirim.”
 
 Pengujian lokal menggunakan fixture yang dibersihkan:
 

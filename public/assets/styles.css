@@ -563,3 +563,9 @@
 @media(max-width:650px){.student-attendance-overview{grid-template-columns:1fr;gap:12px}}
 
 .student-discipline-summary{font-size:16px;font-weight:400;margin-top:12px;line-height:1.4;overflow-wrap:anywhere}.student-discipline-note{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.student-discipline-note:last-child{border-bottom:0}.student-discipline-note p{font-size:12px;line-height:1.5;margin-top:6px;white-space:pre-wrap}
+
+.grid-stats .student-discipline-card{height:auto;min-height:146px}.student-discipline-types{display:grid;gap:4px;list-style:none;margin:8px 0 0;padding:0;font-size:12px;font-weight:400;line-height:1.4;overflow-wrap:anywhere}
+
+.summary-panel.student-today-schedule{display:flex;flex-direction:column}.student-today-schedule .summary-header{flex-shrink:0}.student-today-schedule .summary-content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid #d5e8ea}.student-today-schedule .summary-footer{flex-shrink:0}.student-today-schedule .summary-schedule-row{grid-template-columns:90px minmax(0,1fr)}.student-today-schedule .summary-schedule-row span,.student-today-schedule .summary-schedule-row small{overflow-wrap:anywhere}
+
+.student-whatsapp-card{min-height:305px}.student-whatsapp-message{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.student-whatsapp-message:first-child{padding-top:0}.student-whatsapp-message:last-child{border-bottom:0;padding-bottom:0}.student-whatsapp-message strong{font-size:12px}.student-whatsapp-message p{font-size:12px;line-height:1.5;margin:6px 0;white-space:pre-wrap}.student-whatsapp-message small{font-size:10px;color:var(--muted)}

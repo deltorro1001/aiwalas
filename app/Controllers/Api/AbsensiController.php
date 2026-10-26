@@ -47,7 +47,9 @@ class AbsensiController extends BaseApiController
    $recorder=db_connect()->table('pengguna')->select('id')->where('nis',$u['nis'])->where('aktif',1)->orderBy('id','ASC')->get()->getRowArray();
    if($recorder) $u['id']=(int)$recorder['id'];
    if(!$own||((int)$own['kelas_id']!==$kelasId))return $this->respond(['ok'=>false,'message'=>'Data siswa tidak sesuai dengan kelas.'],422);
-   $p['siswa_id']=(int)$own['id'];$p['tanggal']=date('Y-m-d');$p['waktu_scan']=date('H:i:s');$p['status']=date('H:i')>'06:30'?'Terlambat':'Hadir';$p['keterangan']='Scan QR siswa';
+   $p=array_replace($p,\App\Libraries\AttendanceScanPolicy::at(new \DateTimeImmutable('now')),['siswa_id'=>(int)$own['id'],'keterangan'=>'Scan QR siswa']);
+  }elseif(($p['metode']??'')==='scan_qr'){
+   $p=array_replace($p,\App\Libraries\AttendanceScanPolicy::at(new \DateTimeImmutable('now')),['keterangan'=>'Scan QR realtime']);
   }
   $errors=$this->validatePayload($p,['siswa_id'=>'required|is_natural_no_zero','kelas_id'=>'required|is_natural_no_zero','tanggal'=>'required|valid_date[Y-m-d]','semester'=>'required|in_list[Ganjil,Genap]','waktu_scan'=>'permit_empty|valid_date[H:i:s]','status'=>'required|in_list[Hadir,Terlambat,Sakit,Izin,Alpha,Menunggu keterangan]','keterangan'=>'permit_empty|max_length[2000]']);
   if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);

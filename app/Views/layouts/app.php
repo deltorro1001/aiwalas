@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261026-student-discipline') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261026-student-scan-button') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
@@ -20,10 +20,10 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261021-notifications') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261026-scan-card') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
-<script src='<?= base_url('assets/student-qr-attendance.js?v=20261022-status-scan') ?>'></script>
+<script src='<?= base_url('assets/student-qr-attendance.js?v=20261026-scan-card') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
@@ -42,7 +42,7 @@
 <script src='<?= base_url('assets/dashboard-summary.js?v=20261023-student-notifications') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
 <script src='<?= base_url('assets/attendance-ui.js?v=20261021-date-filter') ?>'></script>
-<script src='<?= base_url('assets/attendance-live.js?v=20261021-date-filter') ?>'></script>
+<script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
 <script src='<?= base_url('assets/attendance-recap-detail.js?v=20260914-september-data') ?>'></script>

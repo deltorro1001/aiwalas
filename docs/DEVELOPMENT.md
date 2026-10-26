@@ -145,6 +145,12 @@ AIWALAS_BROWSER_TEST=1 python3 tests/notifications-local.py
 
 Tes berjalan pada localhost:8080 dan hanya menggunakan akun/notifikasi fixture yang dibersihkan setelah selesai.
 
+## Toleransi scan absensi
+
+Scan QR siswa dan scanner wali kelas/sekretaris memakai `AttendanceScanPolicy` dengan satu waktu server dalam zona Asia/Jakarta. Status Hadir berlaku sampai **06.40.59 WIB**, dan Terlambat mulai **06.41.00 WIB** (toleransi 10 menit dari batas 06.30). Tanggal, waktu, dan status scan tidak diambil dari jam perangkat. Scanner wali kelas/sekretaris mengirim `metode: scan_qr`; koreksi manual tanpa penanda ini tetap memakai status yang dipilih wali kelas. Aturan ini berlaku untuk scan baru; histori tidak diubah otomatis.
+
+Uji batas waktu tanpa database: `php tests/attendance-scan-policy.php`. Tes browser `AIWALAS_BROWSER_TEST=1 python3 tests/student-home-local.py` memverifikasi scan siswa/scanner wali kelas, pengabaian waktu kiriman perangkat dan koreksi manual dengan fixture lokal.
+
 ## Tanggal dan filter Absensi Harian
 
 Wali Kelas dan Sekretaris dapat memilih tanggal pada tabel Absensi Harian. Dropdown **Pilih berdasarkan** berisi **Nama** (seluruh siswa secara alfabetis), **Terlambat**, **Sakit**, **Izin**, dan **Alpha** (siswa dengan status tersebut). Data diambil dari API menggunakan kelas, tanggal, dan semester terpilih; polling lima detik mempertahankan pilihan tersebut. Siswa tanpa catatan pada tanggal itu ditampilkan sebagai Menunggu keterangan, tanpa waktu scan buatan.

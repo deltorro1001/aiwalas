@@ -243,7 +243,7 @@ try:
         c.js("window.page='attendance';window.render()")
         c.wait("document.getElementById('studentAttendanceStatus')?.textContent==='Hadir'")
         assert c.js("document.getElementById('studentAttendanceScan').textContent")=='06:12:34 WIB'
-        assert c.js("document.getElementById('studentQrButton').textContent")=='Buka scanner QR'
+        assert c.js("document.getElementById('studentQrButton').textContent")=='Buka Scanner QR'
         for status,scan_time in [('Izin',None),('Sakit',None),('Alpha',None),('Terlambat','06:45:00'),('Menunggu keterangan',None)]:
             stamp="'"+scan_time+"'" if scan_time else 'NULL'
             sql(f"UPDATE absensi SET status='{status}',waktu_scan={stamp} WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
@@ -257,10 +257,19 @@ try:
         # A valid QR scan is submitted locally; the server supplies status and time.
         wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_wali','password':password})
         qr=wali.call('api/absensi/qr',{'kelas_id':int(class_id)})['data']['qr_code']
-        payload=json.dumps({'kelas_id':int(class_id),'semester':'Ganjil','qr_code':qr})
+        payload=json.dumps({'kelas_id':int(class_id),'semester':'Ganjil','qr_code':qr,'waktu_scan':'00:00:00','tanggal':'2000-01-01','status':'Hadir'})
         saved=c.js("authRequest('api/absensi',{method:'POST',body:JSON.stringify("+payload+")}).then(function(d){window.render();return d.data})")
         c.wait("document.getElementById('studentAttendanceScan').textContent==="+json.dumps(saved['waktu_scan']+' WIB'))
         assert c.js("document.getElementById('studentAttendanceStatus').textContent")==saved['status']
+        assert sql('SELECT tanggal FROM absensi WHERE id='+str(saved['id']))==str(today) and saved['waktu_scan']!='00:00:00'
+        assert saved['status']==('Terlambat' if saved['waktu_scan']>='06:41:00' else 'Hadir')
+        scan_result=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','metode':'scan_qr','waktu_scan':'00:00:00','tanggal':'2000-01-01','status':'Hadir'})['data']
+        assert sql('SELECT tanggal FROM absensi WHERE id='+str(scan_result['id']))==str(today) and scan_result['waktu_scan']!='00:00:00'
+        assert scan_result['status']==('Terlambat' if scan_result['waktu_scan']>='06:41:00' else 'Hadir')
+        manual_result=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','waktu_scan':None,'status':'Sakit','keterangan':'Manual correction'})['data']
+        assert manual_result['status']=='Sakit' and manual_result['waktu_scan'] is None
+        assert not c.js("!!document.querySelector('.student-attendance-rule')")
+
         sql(f"UPDATE absensi SET status='Alpha',waktu_scan=NULL WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
         time.sleep(16)
         assert c.js("document.getElementById('studentAttendanceStatus').textContent")=='Alpha','Status did not refresh automatically'

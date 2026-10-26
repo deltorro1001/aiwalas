@@ -20,7 +20,7 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261026-parent-attendance') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261027-pjj') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261026-parent-attendance') ?>'></script>
@@ -41,7 +41,7 @@
 <script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
 <script src='<?= base_url('assets/dashboard-summary.js?v=20261023-student-notifications') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20261021-date-filter') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261027-pjj') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>

@@ -153,6 +153,15 @@ try:
     assert len(own)==1 and str(own[0]['siswa_id'])==pupils[0] and own[0]['waktu_scan']=='06:12:34' and own[0]['status']=='Hadir'
     assert not a.call('api/absensi?kelas_id='+classes[1])['data']
     assert a.call('api/absensi?kelas_id='+class_id+'&semester=Genap')['data'][0]['waktu_scan'] is None
+    # Manual PJJ correction survives storage and is visible in the child's own views.
+    pjj_payload={'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','status':'PJJ','waktu_scan':None,'keterangan':'Pembelajaran jarak jauh'}
+    pjj=wali.call('api/absensi',pjj_payload)['data']
+    assert pjj['status']=='PJJ' and pjj['waktu_scan'] is None
+    assert a.call(attendance_endpoint)['data'][0]['status']=='PJJ'
+    assert a.call(endpoint)['data']['scan']['status']=='PJJ'
+    assert any(row['tanggal']==str(today) and row['status']=='PJJ' for row in a.call('api/siswa/rekap-absensi')['data'])
+    wali.call('api/absensi',dict(pjj_payload,status='PJJ typo'),status=422)
+    wali.call('api/absensi',dict(pjj_payload,status='Hadir',waktu_scan='06:12:34',keterangan='Private note'))
     yesterday=today-datetime.timedelta(days=1)
     sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,waktu_scan,semester,dicatat_oleh) VALUES({pupils[0]},{class_id},'{yesterday}','Hadir','05:55:55','Ganjil',{users[0]});")
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
@@ -162,6 +171,24 @@ try:
         c.call('Page.navigate',{'url':BASE});c.wait("typeof authRequest==='function' && !!window.AIWalasPages && window.render.toString().includes('var studentRoutes')")
         wali_credentials=json.dumps({'role':'walas','username':prefix+'_wali','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+wali_credentials+")}).then(function(d){return finishLogin(d.user)}).then(function(){return authRequest('api/bootstrap?kelas_id="+class_id+"')}).then(function(d){applyBootstrapData(d);window.page='discipline';window.render()})")
+        # Keep the legacy attendance renderer from executing the XSS fixture used by other views.
+        c.js("window.students.forEach(function(s){if(s[0].includes('<img'))s[0]='Test Sakit'});window.page='attendance';window.render()")
+        correction_selector=json.dumps('[data-student-id="'+pupils[4]+'"].attendance-correct')
+        c.wait("!!document.querySelector("+correction_selector+")")
+        c.js("document.querySelector("+correction_selector+").click()")
+        assert 'PJJ' in c.js("Array.from(document.querySelectorAll('#correctStatus option')).map(o=>o.value)")
+        c.js("document.getElementById('correctStatus').value='PJJ';document.getElementById('saveModal').click()")
+        c.wait("document.querySelector("+correction_selector+")?.dataset.status==='PJJ'")
+        c.js("window.render()")
+        c.wait("document.querySelector("+correction_selector+")?.dataset.status==='PJJ'")
+        c.js("document.querySelector("+correction_selector+").click()")
+        assert c.js("document.getElementById('correctStatus').value")=='PJJ'
+        c.js("document.getElementById('cancelModal').click();document.getElementById('attendanceSortFilter').value='PJJ';document.getElementById('attendanceSortFilter').dispatchEvent(new Event('change'))")
+        assert c.js("document.querySelectorAll('[data-attendance-status]').length")==1
+        assert c.js("document.querySelector('[data-attendance-status]').dataset.attendanceStatus")=='PJJ'
+        wali.call('api/absensi',{'siswa_id':int(pupils[4]),'kelas_id':int(class_id),'semester':'Ganjil','status':'Alpha','waktu_scan':None})
+        c.js("window.page='discipline';window.render()")
+        print('PASS: Wali PJJ correction saves, survives re-render, reopens selected and filters correctly.')
         c.wait("!!document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]')")
         c.js("document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]').click()")
         c.js("document.getElementById('storedDiscipline_pelanggaran').value='Etika UI <img src=x onerror=alert(1)>';document.getElementById('saveStoredDiscipline').click()")

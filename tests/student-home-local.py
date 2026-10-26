@@ -58,6 +58,36 @@ try:
     a.call('api/siswa/dashboard?semester=invalid',status=422)
     assert data['kedisiplinan']['catatan']==[] and 'notifikasi_wali' not in data
     assert data['notifikasi_whatsapp']==[]
+    anonymous.call('api/siswa/rekap-absensi',status=401)
+    for date,status,stamp,semester in [('2026-01-01','Alpha',None,'Genap'),('2026-01-31','Hadir','06:40:59','Genap'),('2026-01-31','Sakit',None,'Ganjil'),('2026-02-01','Sakit',None,'Genap'),('2026-12-31','Izin',None,'Ganjil'),('2027-01-01','Sakit',None,'Genap'),('2025-12-31','Alpha',None,'Ganjil')]:
+        scan_stamp="'"+stamp+"'" if stamp else 'NULL'
+        sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,waktu_scan,semester,dicatat_oleh) VALUES({pupils[0]},{class_id},'{date}','{status}',{scan_stamp},'{semester}',{users[0]});")
+    sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[1]},{class_id},'2026-01-15','Sakit','Genap',{users[0]});")
+    january=a.call('api/siswa/rekap-absensi?bulan=01&tahun=2026')
+    assert january['bulan']=='2026-01' and january['label_bulan']=='Januari 2026'
+    assert january['data']==[{'tanggal':'2026-01-01','waktu_scan':None,'status':'Alpha'},{'tanggal':'2026-01-31','waktu_scan':'06:40:59','status':'Hadir'}]
+    assert a.call('api/siswa/rekap-absensi?bulan=01&tahun=2026&siswa_id='+pupils[1]+'&kelas_id='+classes[1])['data']==january['data']
+    assert a.call('api/siswa/rekap-absensi?bulan=03&tahun=2026')['data']==[]
+    december=a.call('api/siswa/rekap-absensi?bulan=12&tahun=2026')['data']
+    assert len(december)==1 and december[0]['tanggal']=='2026-12-31'
+    current_month=a.call('api/siswa/rekap-absensi')
+    assert current_month['bulan']==today.strftime('%Y-%m') and all(row['tanggal'].startswith(today.strftime('%Y-%m')) for row in current_month['data'])
+    assert a.call('api/siswa/rekap-absensi?bulan=')['data']==current_month['data']
+    for invalid in ['00','13','-1','Jan','2026-01']:
+        a.call('api/siswa/rekap-absensi?bulan='+invalid,status=422)
+    a.call('api/siswa/rekap-absensi?bulan[]=01',status=422)
+    for invalid_year in ['2025','abc','10000','2026-01']:
+        a.call('api/siswa/rekap-absensi?bulan=01&tahun='+invalid_year,status=422)
+    a.call('api/siswa/rekap-absensi?tahun[]=2026',status=422)
+    next_year=a.call('api/siswa/rekap-absensi?bulan=01&tahun=2027')
+    assert next_year['tahun']==2027 and next_year['nomor_bulan']==1 and next_year['label_bulan']=='Januari 2027'
+    assert next_year['data']==[{'tanggal':'2027-01-01','waktu_scan':None,'status':'Sakit'}]
+    assert january['jumlah_hari']==31
+    assert a.call('api/siswa/rekap-absensi?bulan=02&tahun=2026')['jumlah_hari']==28
+    assert a.call('api/siswa/rekap-absensi?bulan=02&tahun=2028')['jumlah_hari']==29
+    assert a.call('api/siswa/rekap-absensi?bulan=04&tahun=2026')['jumlah_hari']==30
+
+
     anonymous.call('api/siswa/kedisiplinan',status=401)
     empty_discipline=a.call('api/siswa/kedisiplinan')['data']
     assert empty_discipline['kategori_bercatatan']==[] and empty_discipline['keterlambatan']['jumlah']==0
@@ -82,6 +112,7 @@ try:
     a.call('api/kedisiplinan?kelas_id='+class_id,status=403)
     a.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Unauthorized'},status=403)
     wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_wali','password':password})
+    wali.call('api/siswa/rekap-absensi',status=403)
     anonymous.call('api/jadwal',status=401)
     own_week=a.call('api/jadwal')['data'];assert all(str(row['kelas_id'])==class_id for row in own_week)
     assert a.call('api/jadwal?kelas_id='+classes[1])['data']==own_week
@@ -244,6 +275,34 @@ try:
         c.wait("document.getElementById('studentAttendanceStatus')?.textContent==='Hadir'")
         assert c.js("document.getElementById('studentAttendanceScan').textContent")=='06:12:34 WIB'
         assert c.js("document.getElementById('studentQrButton').textContent")=='Buka Scanner QR'
+        c.wait("document.getElementById('studentAttendanceRecapRows')?.textContent.includes('Hadir')")
+        assert c.js("Array.from(document.querySelector('#studentAttendanceRecap thead').querySelectorAll('th')).map(el=>el.textContent)")==['Hari','Tanggal','Waktu Scan','Status']
+        assert c.js("document.getElementById('studentAttendanceMonth').value")==today.strftime('%m')
+        assert c.js("document.getElementById('studentAttendanceYear').value")==str(today.year)
+        assert c.js("Array.from(document.getElementById('studentAttendanceMonth').options).map(option=>option.textContent)")==['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+        assert c.js("Array.from(document.getElementById('studentAttendanceYear').options).slice(0,3).map(option=>option.textContent)")==['2026','2027','2028']
+        assert c.js("document.getElementById('studentAttendanceYear').getBoundingClientRect().top>=document.getElementById('studentAttendanceMonth').getBoundingClientRect().bottom"),'Year selector not below month'
+        c.js("var monthChoice=document.getElementById('studentAttendanceMonth');monthChoice.value='01';monthChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Januari 2026'")
+        january_rows=c.js("Array.from(document.querySelectorAll('#studentAttendanceRecapRows tr')).map(row=>Array.from(row.children).map(cell=>cell.textContent))")
+        assert len(january_rows)==31 and january_rows[0]==['Kamis','01/01/2026','—','Alpha'] and january_rows[-1]==['Sabtu','31/01/2026','06:40:59 WIB','Hadir']
+        assert january_rows[1]==['Jumat','02/01/2026','—','Belum ada catatan']
+        c.js("var yearChoice=document.getElementById('studentAttendanceYear');yearChoice.value='2027';yearChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Januari 2027'")
+        assert c.js("document.getElementById('studentAttendanceRecapRows').textContent").startswith('Jumat01/01/2027')
+        c.js("yearChoice.value='2026';yearChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Januari 2026'")
+        c.js("monthChoice.value='03';monthChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Maret 2026'")
+        assert c.js("document.querySelectorAll('#studentAttendanceRecapRows tr').length")==31
+        assert c.js("document.querySelector('#studentAttendanceRecapRows tr').textContent")=='Minggu01/03/2026—Belum ada catatan'
+        c.js("monthChoice.value='12';monthChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Desember 2026'")
+        assert '31/12/2026' in c.js("document.getElementById('studentAttendanceRecapRows').textContent")
+        c.js("monthChoice.value="+json.dumps(today.strftime('%m'))+";yearChoice.value="+json.dumps(str(today.year))+";monthChoice.dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('studentAttendanceRecapRows').textContent.includes('06:12:34 WIB')")
+        assert c.js("document.querySelector('#studentAttendanceRecapRows tr td:nth-child(2)').textContent")==today.strftime('01/%m/%Y')
+
         for status,scan_time in [('Izin',None),('Sakit',None),('Alpha',None),('Terlambat','06:45:00'),('Menunggu keterangan',None)]:
             stamp="'"+scan_time+"'" if scan_time else 'NULL'
             sql(f"UPDATE absensi SET status='{status}',waktu_scan={stamp} WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
@@ -261,6 +320,7 @@ try:
         saved=c.js("authRequest('api/absensi',{method:'POST',body:JSON.stringify("+payload+")}).then(function(d){window.render();return d.data})")
         c.wait("document.getElementById('studentAttendanceScan').textContent==="+json.dumps(saved['waktu_scan']+' WIB'))
         assert c.js("document.getElementById('studentAttendanceStatus').textContent")==saved['status']
+        c.wait("document.getElementById('studentAttendanceRecapRows')?.textContent.includes("+json.dumps(saved['waktu_scan']+' WIB')+")")
         assert sql('SELECT tanggal FROM absensi WHERE id='+str(saved['id']))==str(today) and saved['waktu_scan']!='00:00:00'
         assert saved['status']==('Terlambat' if saved['waktu_scan']>='06:41:00' else 'Hadir')
         scan_result=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','metode':'scan_qr','waktu_scan':'00:00:00','tanggal':'2000-01-01','status':'Hadir'})['data']
@@ -279,6 +339,7 @@ try:
         c.call('Emulation.clearDeviceMetricsOverride')
         assert not [e for e in c.events if e.get('method')=='Runtime.exceptionThrown']
         c.js("logout()")
+        print('PASS: Monthly attendance recap defaults to current month, separate month/year selectors from 2026, cross-year selection, January/December boundaries, semester inference, own records, empty month, scan refresh and mobile layout.')
         print('PASS: Attendance cards show current student/day/semester, all recorded statuses, missing scan/data, QR scan results, automatic refresh and mobile layout.')
         print('PASS: Student daily schedule with times/teachers, preserved desktop/mobile dimensions, scrolling/empty schedule, discipline above four latest sent WhatsApp notifications, existing personal/task cards retained, repeat navigation, escaped names and mobile layout.')
     print('PASS: Discipline API ownership/role isolation, shared saved notes, separate categories, validation and no-notes state.')

@@ -151,6 +151,12 @@ Scan QR siswa dan scanner wali kelas/sekretaris memakai `AttendanceScanPolicy` d
 
 Uji batas waktu tanpa database: `php tests/attendance-scan-policy.php`. Tes browser `AIWALAS_BROWSER_TEST=1 python3 tests/student-home-local.py` memverifikasi scan siswa/scanner wali kelas, pengabaian waktu kiriman perangkat dan koreksi manual dengan fixture lokal.
 
+## Rekap Absen bulanan siswa
+
+Absensi Harian siswa menampilkan tabel Rekap Absen dengan kolom Hari, Tanggal, Waktu Scan, dan Status. Filter Bulan hanya berisi nama Januari–Desember. Filter Tahun berada di bawahnya, dimulai dari 2026 dan memuat tahun berjalan beserta sepuluh tahun berikutnya. Tanpa perubahan pilihan, bulan dan tahun berjalan mengikuti waktu server Asia/Jakarta. Tabel menampilkan tanggal 1 sampai akhir bulan secara berurutan, sesuai jumlah hari termasuk tahun kabisat. Tanggal tanpa catatan tersimpan ditampilkan dengan waktu “—” dan status “Belum ada catatan”; baris pelengkap ini tidak membuat atau mengubah data absensi. Tombol Muat ulang memperbarui status hari ini dan rekap bulan yang dipilih; setelah scan berhasil, halaman memuat ulang rekap dengan pilihan bulan tetap terjaga.
+
+`GET api/siswa/rekap-absensi?bulan=01&tahun=2026` hanya tersedia untuk siswa. Profil ditentukan oleh NIS sesi, bukan parameter siswa/kelas. Rentang memakai awal bulan hingga sebelum awal bulan berikutnya; Januari–Juni membaca semester Genap dan Juli–Desember semester Ganjil. Bulan dan tahun divalidasi terpisah; tahun mulai 2026. Riwayat hanya bisa dibaca; waktu scan tidak dibuat untuk hari tanpa catatan.
+
 ## Tanggal dan filter Absensi Harian
 
 Wali Kelas dan Sekretaris dapat memilih tanggal pada tabel Absensi Harian. Dropdown **Pilih berdasarkan** berisi **Nama** (seluruh siswa secara alfabetis), **Terlambat**, **Sakit**, **Izin**, dan **Alpha** (siswa dengan status tersebut). Data diambil dari API menggunakan kelas, tanggal, dan semester terpilih; polling lima detik mempertahankan pilihan tersebut. Siswa tanpa catatan pada tanggal itu ditampilkan sebagai Menunggu keterangan, tanpa waktu scan buatan.

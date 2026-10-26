@@ -571,3 +571,5 @@
 .student-whatsapp-card{min-height:305px}.student-whatsapp-message{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.student-whatsapp-message:first-child{padding-top:0}.student-whatsapp-message:last-child{border-bottom:0;padding-bottom:0}.student-whatsapp-message strong{font-size:12px}.student-whatsapp-message p{font-size:12px;line-height:1.5;margin:6px 0;white-space:pre-wrap}.student-whatsapp-message small{font-size:10px;color:var(--muted)}
 
 .student-discipline-table{min-width:650px;width:100%}.student-discipline-table td{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.student-attendance-recap{margin-top:20px}.student-attendance-filters{display:flex;flex-direction:column;gap:10px}.student-attendance-filter{display:grid;grid-template-columns:44px minmax(130px,1fr);align-items:center;gap:8px;font-size:12px;font-weight:600}.student-attendance-filter select{width:100%;min-width:0}.student-attendance-recap td:nth-child(-n+3){white-space:nowrap}@media(max-width:650px){.student-attendance-recap .panel-head{flex-wrap:wrap}}

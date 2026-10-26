@@ -12,6 +12,7 @@ class RoleFilter implements FilterInterface
     {
         $pengguna = session()->get('pengguna');
         $roles = $arguments ?? [];
+        if(($pengguna['peran']??'')==='orang_tua')$pengguna['peran']='siswa';
 
         if ($pengguna !== null && in_array($pengguna['peran'] ?? '', $roles, true)) {
             return null;

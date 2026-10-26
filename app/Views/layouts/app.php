@@ -20,10 +20,10 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261026-scan-card') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261026-parent-attendance') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
-<script src='<?= base_url('assets/student-qr-attendance.js?v=20261026-monthly-recap') ?>'></script>
+<script src='<?= base_url('assets/student-qr-attendance.js?v=20261026-parent-attendance') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
@@ -75,12 +75,12 @@
 
 
 <script src='<?= base_url('assets/teacher-journal-ui.js?v=20261018') ?>'></script>
-<script src='<?= base_url('assets/settings-page.js?v=20260926-password-form') ?>'></script>
-<script src='<?= base_url('assets/student-home.js?v=20261011-time-encoding') ?>'></script>
+<script src='<?= base_url('assets/settings-page.js?v=20261026-parent-login') ?>'></script>
+<script src='<?= base_url('assets/student-home.js?v=20261026-parent-login') ?>'></script>
 <script src='<?= base_url('assets/student-sidebar.js?v=20261026-discipline') ?>'></script>
 <script src='<?= base_url('assets/teacher-sidebar.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
-<script src='<?= base_url('assets/student-home-force.js?v=20261023-discipline-types') ?>'></script>
+<script src='<?= base_url('assets/student-home-force.js?v=20261026-parent-login') ?>'></script>
 <script src='<?= base_url('assets/student-grades-access.js?v=20260921-access') ?>'></script>
 <script src='<?= base_url('assets/student-grades-vertical.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/student-welcome-name.js?v=20260922-name') ?>'></script>

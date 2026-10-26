@@ -43,7 +43,7 @@ class SiswaController extends BaseApiController
         $payload=$this->payload();$errors=$this->validatePayload($payload,$this->rules());if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);
         if($this->model->where('nis',trim($payload['nis']))->first())return $this->respond(['ok'=>false,'message'=>'NIS sudah digunakan.'],409);
         if(!empty($payload['nisn'])&&$this->model->where('nisn',trim($payload['nisn']))->first())return $this->respond(['ok'=>false,'message'=>'NISN sudah digunakan.'],409);
-        $db=db_connect();$db->transStart();$id=$this->model->insert($this->clean($payload),true);(new PenggunaModel())->insert(['nama_pengguna'=>trim($payload['nis']),'kata_sandi'=>password_hash(trim($payload['nis']),PASSWORD_DEFAULT),'nama_lengkap'=>trim($payload['nama_lengkap']),'peran'=>'siswa','nis'=>trim($payload['nis']),'aktif'=>1]);$db->transComplete();
+        $db=db_connect();$db->transStart();$id=$this->model->insert($this->clean($payload),true);(new PenggunaModel())->insert(['nama_pengguna'=>trim($payload['nis']),'kata_sandi'=>password_hash(trim($payload['nis']),PASSWORD_DEFAULT),'nama_lengkap'=>trim($payload['nama_lengkap']),'peran'=>'siswa','nis'=>trim($payload['nis']),'aktif'=>1]);if((int)($payload['aktif']??1)===1)\App\Libraries\ParentAccounts::ensure(['id'=>$id,'nis'=>trim($payload['nis']),'nama_lengkap'=>trim($payload['nama_lengkap'])]);$db->transComplete();
         if(!$db->transStatus())return $this->respond(['ok'=>false,'message'=>'Data siswa gagal disimpan.'],500);
         return $this->respond(['ok'=>true,'data'=>$this->model->find($id)],201);
     }
@@ -54,7 +54,7 @@ class SiswaController extends BaseApiController
         $payload=$this->payload();$errors=$this->validatePayload($payload,$this->rules());if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);
         if($this->model->where('nis',trim($payload['nis']))->where('id !=',$id)->first())return $this->respond(['ok'=>false,'message'=>'NIS sudah digunakan.'],409);
         if(!empty($payload['nisn'])&&$this->model->where('nisn',trim($payload['nisn']))->where('id !=',$id)->first())return $this->respond(['ok'=>false,'message'=>'NISN sudah digunakan.'],409);
-        $db=db_connect();$db->transStart();$this->model->update($id,$this->clean($payload));$account=(new PenggunaModel())->where('nis',$existing->nis)->first();if($account)(new PenggunaModel())->update($account->id,['nama_pengguna'=>trim($payload['nis']),'nama_lengkap'=>trim($payload['nama_lengkap']),'nis'=>trim($payload['nis'])]);$db->transComplete();
+        $db=db_connect();$db->transStart();$this->model->update($id,$this->clean($payload));$account=(new PenggunaModel())->where('nis',$existing->nis)->first();if($account)(new PenggunaModel())->update($account->id,['nama_pengguna'=>trim($payload['nis']),'nama_lengkap'=>trim($payload['nama_lengkap']),'nis'=>trim($payload['nis'])]);$parentData=['nama_lengkap'=>trim($payload['nama_lengkap'])];if((int)($payload['aktif']??1)===0)$parentData['aktif']=0;$db->table('pengguna')->where(['peran'=>'orang_tua','siswa_id'=>$id])->update($parentData);if((int)($payload['aktif']??1)===1)\App\Libraries\ParentAccounts::ensure(['id'=>$id,'nis'=>trim($payload['nis']),'nama_lengkap'=>trim($payload['nama_lengkap'])]);$db->transComplete();
         if(!$db->transStatus())return $this->respond(['ok'=>false,'message'=>'Data siswa gagal diperbarui.'],500);
         return $this->respond(['ok'=>true,'data'=>$this->model->find($id)]);
     }
@@ -62,7 +62,7 @@ class SiswaController extends BaseApiController
     public function delete(int $id)
     {
         $student=$this->model->find($id);if(!$student)return $this->respond(['ok'=>false,'message'=>'Siswa tidak ditemukan.'],404);
-        $db=db_connect();$db->transStart();$this->model->update($id,['aktif'=>0]);$account=(new PenggunaModel())->where('nis',$student->nis)->first();if($account)(new PenggunaModel())->update($account->id,['aktif'=>0]);$db->transComplete();
+        $db=db_connect();$db->transStart();$this->model->update($id,['aktif'=>0]);$account=(new PenggunaModel())->where('nis',$student->nis)->first();if($account)(new PenggunaModel())->update($account->id,['aktif'=>0]);$db->table('pengguna')->where(['peran'=>'orang_tua','siswa_id'=>$id])->update(['aktif'=>0]);$db->transComplete();
         return $this->respond(['ok'=>$db->transStatus(),'message'=>'Siswa dan akun dinonaktifkan; histori tetap tersimpan.']);
     }
 

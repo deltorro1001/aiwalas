@@ -10,6 +10,7 @@
             <option value="walas">Wali Kelas</option>
             <option value="assistant">Sekretaris Kelas</option>
             <option value="student">Siswa</option>
+            <option value="parent">Orangtua/Wali Murid</option>
             <option value="teacher">Guru</option>
 
           </select>

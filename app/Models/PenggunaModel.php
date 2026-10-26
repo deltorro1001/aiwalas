@@ -18,6 +18,7 @@ class PenggunaModel extends Model
         'peran',
         'nis',
         'guru_id',
+        'siswa_id',
         'aktif',
         'dibuat_pada',
         'diperbarui_pada',

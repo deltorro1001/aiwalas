@@ -32,6 +32,7 @@ class AbsensiController extends BaseApiController
  }
 
  public function save(){
+  if((session()->get('pengguna')['peran']??'')==='orang_tua')return $this->respond(['ok'=>false,'message'=>'Akun orangtua hanya dapat melihat absensi anak.'],403);
   $p=$this->payload();$u=$this->currentUser();$isStudent=($u['peran']??'')==='siswa';
   $semester=(string)($p['semester']??'Ganjil');if(!in_array($semester,['Ganjil','Genap'],true))$semester='Ganjil';
   if(!$isStudent)$p['tanggal']=date('Y-m-d');$p['semester']=$semester;
@@ -44,8 +45,8 @@ class AbsensiController extends BaseApiController
    if(!$active||!hash_equals((string)$active['token'],(string)$parts[3]))
     return $this->respond(['ok'=>false,'message'=>'QR absensi sudah tidak berlaku. Minta QR terbaru dari wali kelas.'],422);
    $own=db_connect()->table('siswa')->where(['nis'=>$u['nis'],'aktif'=>1])->get()->getRowArray();
-   $recorder=db_connect()->table('pengguna')->select('id')->where('nis',$u['nis'])->where('aktif',1)->orderBy('id','ASC')->get()->getRowArray();
-   if($recorder) $u['id']=(int)$recorder['id'];
+   $recorder=db_connect()->table('pengguna')->select('id')->where('nis',$u['nis'])->whereIn('peran',['siswa','sekretaris'])->where('aktif',1)->orderBy('id','ASC')->get()->getRowArray();
+   if($recorder&&(int)($u['id']??0)<1) $u['id']=(int)$recorder['id'];
    if(!$own||((int)$own['kelas_id']!==$kelasId))return $this->respond(['ok'=>false,'message'=>'Data siswa tidak sesuai dengan kelas.'],422);
    $p=array_replace($p,\App\Libraries\AttendanceScanPolicy::at(new \DateTimeImmutable('now')),['siswa_id'=>(int)$own['id'],'keterangan'=>'Scan QR siswa']);
   }elseif(($p['metode']??'')==='scan_qr'){

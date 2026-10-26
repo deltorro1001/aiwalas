@@ -26,6 +26,9 @@ abstract class BaseApiController extends BaseController
 
     protected function currentUser(): array
     {
-        return session()->get('pengguna') ?? [];
+        $user=session()->get('pengguna')??[];
+        // Parents use exactly the child's student workspace and ownership checks.
+        if(($user['peran']??'')==='orang_tua')$user['peran']='siswa';
+        return $user;
     }
 }

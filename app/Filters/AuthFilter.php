@@ -14,6 +14,7 @@ class AuthFilter implements FilterInterface
         if (($user['peran']??'')==='guru' && ((int)($user['id']??0)<1 || !(int)($user['guru_id']??0))) {
             session()->remove('pengguna');
         }
+        if(($user['peran']??'')==='orang_tua'&&!\App\Libraries\ParentAccounts::sessionValid($user))session()->remove('pengguna');
         if (session()->has('pengguna')) {
             return null;
         }

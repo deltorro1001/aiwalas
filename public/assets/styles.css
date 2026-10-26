@@ -569,3 +569,5 @@
 .summary-panel.student-today-schedule{display:flex;flex-direction:column}.student-today-schedule .summary-header{flex-shrink:0}.student-today-schedule .summary-content{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;border-top:1px solid #d5e8ea}.student-today-schedule .summary-footer{flex-shrink:0}.student-today-schedule .summary-schedule-row{grid-template-columns:90px minmax(0,1fr)}.student-today-schedule .summary-schedule-row span,.student-today-schedule .summary-schedule-row small{overflow-wrap:anywhere}
 
 .student-whatsapp-card{min-height:305px}.student-whatsapp-message{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.student-whatsapp-message:first-child{padding-top:0}.student-whatsapp-message:last-child{border-bottom:0;padding-bottom:0}.student-whatsapp-message strong{font-size:12px}.student-whatsapp-message p{font-size:12px;line-height:1.5;margin:6px 0;white-space:pre-wrap}.student-whatsapp-message small{font-size:10px;color:var(--muted)}
+
+.student-discipline-table{min-width:650px;width:100%}.student-discipline-table td{white-space:pre-wrap;overflow-wrap:anywhere}

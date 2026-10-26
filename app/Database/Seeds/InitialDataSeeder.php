@@ -171,8 +171,11 @@ class InitialDataSeeder extends Seeder
         $schedule = [
             ['Senin','07:30','09:00','KIK','Nani Aminah'], ['Senin','09:00','10:45','Sejarah','Englena Nastaria Purba'],
             ['Senin','10:45','13:30','Editing Film','Ruby Eka Prawira'], ['Senin','13:30','15:00','Bahasa Inggris','Ika Inayah'],
-            ['Selasa','06:30','09:00','Bahasa Indonesia','Erna Cahyani'], ['Selasa','09:00','10:45','Tata Kamera & Cahaya','Wahyu Lukman Hakim'],
-            ['Rabu','06:30','09:00','Tata Kamera & Cahaya','Wahyu Lukman Hakim'], ['Kamis','06:30','08:15','PAI','Lutfi Faridil Aftros'], ['Kamis','08:15','10:45','Matematika','Robert Henry Hutapea'], ['Kamis','10:45','13:30','KIK','Nani Aminah'], ['Kamis','13:30','15:00','Kokurikuler','Englena Nastaria Purba'],
+            ['Selasa','06:30','08:15','Bahasa Indonesia','Erna Cahyani'], ['Selasa','09:00','10:45','Tata Kamera & Cahaya','Wahyu Lukman Hakim'],
+            ['Selasa','10:45','12:15','PPKN','Ngatman'], ['Selasa','12:45','15:00','Manajemen Produksi','Sumantoro Kasdhani'],
+            ['Rabu','06:30','08:15','Tata Kamera & Cahaya','Wahyu Lukman Hakim'], ['Rabu','09:00','10:45','Olahraga','Putu Arya Ranesda'],
+            ['Rabu','10:45','12:15','Tata Kamera & Cahaya','Wahyu Lukman Hakim'], ['Rabu','12:45','15:00','Editing Film','Ruby Eka Prawira'],
+            ['Kamis','06:30','08:15','PAI','Lutfi Faridil Aftros'], ['Kamis','08:15','10:45','Matematika','Robert Henry Hutapea'], ['Kamis','10:45','13:30','KIK','Nani Aminah'], ['Kamis','13:30','15:00','Kokurikuler','Englena Nastaria Purba'],
             ['Jumat','07:30','09:30','Naskah & Penyutradaraan','Sumantoro Kasdhani'],
             ['Jumat','09:30','10:10','Bahasa Inggris','Ika Inayah'],
             ['Jumat','10:25','11:45','Muatan Lokal','Englena Nastaria Purba'],

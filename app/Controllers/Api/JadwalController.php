@@ -4,7 +4,19 @@ use App\Models\JadwalKelasModel;
 class JadwalController extends BaseApiController
 {
  private JadwalKelasModel $model;public function __construct(){$this->model=new JadwalKelasModel();}
- public function index(){ $q=$this->model->select('jadwal_kelas.*,mata_pelajaran.nama_mata_pelajaran,guru.nama_lengkap AS nama_guru,kelas.nama_kelas')->join('mata_pelajaran','mata_pelajaran.id=jadwal_kelas.mata_pelajaran_id')->join('guru','guru.id=jadwal_kelas.guru_id','left')->join('kelas','kelas.id=jadwal_kelas.kelas_id');if($id=(int)$this->request->getGet('kelas_id'))$q->where('jadwal_kelas.kelas_id',$id);return $this->respond(['data'=>$q->orderBy("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')",'',false)->orderBy('jam_mulai')->findAll()]);}
+ public function index()
+ {
+  $classId=(int)$this->request->getGet('kelas_id');$user=$this->currentUser();
+  if(($user['peran']??'')==='siswa'){
+   $student=db_connect()->table('siswa')->select('kelas_id')->where(['nis'=>$user['nis']??'','aktif'=>1])->get()->getRowArray();
+   if(!$student)return $this->respond(['ok'=>false,'message'=>'Profil siswa tidak ditemukan.'],404);
+   $classId=(int)$student['kelas_id'];
+  }
+  $q=$this->model->select('jadwal_kelas.*,mata_pelajaran.nama_mata_pelajaran,guru.nama_lengkap AS nama_guru,kelas.nama_kelas')->join('mata_pelajaran','mata_pelajaran.id=jadwal_kelas.mata_pelajaran_id')->join('guru','guru.id=jadwal_kelas.guru_id','left')->join('kelas','kelas.id=jadwal_kelas.kelas_id');
+  if($classId)$q->where('jadwal_kelas.kelas_id',$classId);
+  $this->response->setHeader('Cache-Control','no-store');
+  return $this->respond(['data'=>$q->orderBy("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')",'',false)->orderBy('jam_mulai')->findAll()]);
+ }
  public function create(){return $this->persist();}
  public function update(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Jadwal tidak ditemukan.'],404);return $this->persist($id);}
  public function delete(int $id){if(!$this->model->find($id))return $this->respond(['ok'=>false,'message'=>'Jadwal tidak ditemukan.'],404);$this->model->delete($id);return $this->respond(['ok'=>true]);}

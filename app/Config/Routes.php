@@ -28,6 +28,7 @@ $routes->delete('api/kelas/(:num)', 'Api\KelasController::delete/$1', ['filter' 
 
 $routes->get('api/siswa/me', 'Api\SiswaController::me', ['filter' => ['auth', 'role:siswa']]);
 $routes->get('api/siswa/dashboard', 'Api\SiswaDashboardController::index', ['filter' => ['auth', 'role:siswa']]);
+$routes->get('api/siswa/kedisiplinan', 'Api\SiswaKedisiplinanController::index', ['filter' => ['auth', 'role:siswa']]);
 $routes->get('api/guru/siswa', 'Api\GuruSiswaController::index', ['filter' => ['auth', 'role:guru']]);
 $routes->get('api/siswa', 'Api\SiswaController::index', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/siswa/(:num)', 'Api\SiswaController::show/$1', ['filter' => ['auth', 'role:wali_kelas,siswa']]);

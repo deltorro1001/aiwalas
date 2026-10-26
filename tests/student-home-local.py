@@ -14,8 +14,8 @@ class Client:
     def __init__(self):
         self.op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         html=self.op.open(BASE).read().decode();self.token=re.search(r"name=['\"]csrf-token['\"] content=['\"]([^'\"]+)",html).group(1)
-    def call(self,path,data=None,status=200):
-        req=urllib.request.Request(BASE+path,data=None if data is None else json.dumps(data).encode(),headers={'Content-Type':'application/json','X-CSRF-TOKEN':self.token})
+    def call(self,path,data=None,status=200,method=None):
+        req=urllib.request.Request(BASE+path,data=None if data is None else json.dumps(data).encode(),headers={'Content-Type':'application/json','X-CSRF-TOKEN':self.token},method=method)
         try:r=self.op.open(req,timeout=10)
         except urllib.error.HTTPError as e:r=e
         result=json.load(r);assert r.code==status,(path,r.code,result);self.token=result.get('csrfHash',self.token);return result
@@ -37,6 +37,10 @@ try:
     subject=sql(f"INSERT INTO mata_pelajaran(nama_mata_pelajaran,aktif) VALUES('{prefix}_mapel',1);SELECT LAST_INSERT_ID();")
     weekday=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'][today.weekday()]
     sql(f"INSERT INTO jadwal_kelas(kelas_id,mata_pelajaran_id,guru_id,hari,jam_mulai,jam_selesai) VALUES({class_id},{subject},{teacher},'{weekday}','08:00:00','09:00:00');")
+    school_days=['Senin','Selasa','Rabu','Kamis','Jumat']
+    for school_day in school_days:
+        if school_day!=weekday:sql(f"INSERT INTO jadwal_kelas(kelas_id,mata_pelajaran_id,guru_id,hari,jam_mulai,jam_selesai) VALUES({class_id},{subject},{teacher},'{school_day}','08:00:00','09:00:00');")
+    sql(f"INSERT INTO jadwal_kelas(kelas_id,mata_pelajaran_id,guru_id,hari,jam_mulai,jam_selesai) VALUES({classes[1]},{subject},{teacher},'Senin','18:00:00','19:00:00');")
     endpoint='api/siswa/dashboard?semester=Ganjil&kelas_id='+classes[1]
     anonymous=Client();anonymous.call(endpoint,status=401)
     a=Client();a.call('api/auth/login',{'role':'student','username':prefix+'_0','password':password})
@@ -54,6 +58,10 @@ try:
     a.call('api/siswa/dashboard?semester=invalid',status=422)
     assert data['kedisiplinan']['catatan']==[] and 'notifikasi_wali' not in data
     assert data['notifikasi_whatsapp']==[]
+    anonymous.call('api/siswa/kedisiplinan',status=401)
+    empty_discipline=a.call('api/siswa/kedisiplinan')['data']
+    assert empty_discipline['kategori_bercatatan']==[] and empty_discipline['keterlambatan']['jumlah']==0
+
     sql(f"UPDATE siswa SET nomor_hp='081111000111',nomor_hp_orang_tua='081222000111' WHERE id={pupils[0]};UPDATE siswa SET nomor_hp_orang_tua='081222000111' WHERE id={pupils[1]};")
     def message(body,student_id,stamp,status='Terkirim',phone='6281111000111',klass=None,category='WhatsApp'):
         sql(f"INSERT INTO pesan_komunikasi(siswa_id,kelas_id,pengirim,penerima,nomor_tujuan,isi_pesan,kategori,status_pengiriman,dikirim_pada,dibuat_oleh) VALUES({student_id or 'NULL'},{klass or class_id},'Test Wali','Test Recipient','{phone}','{body}','{category}','{status}','{stamp}',{users[0]});")
@@ -74,6 +82,17 @@ try:
     a.call('api/kedisiplinan?kelas_id='+class_id,status=403)
     a.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Unauthorized'},status=403)
     wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_wali','password':password})
+    anonymous.call('api/jadwal',status=401)
+    own_week=a.call('api/jadwal')['data'];assert all(str(row['kelas_id'])==class_id for row in own_week)
+    assert a.call('api/jadwal?kelas_id='+classes[1])['data']==own_week
+    assert wali.call('api/jadwal?kelas_id='+class_id)['data']==own_week
+    a.call('api/jadwal',{'kelas_id':int(class_id)},status=403)
+    a.call('api/jadwal/'+str(own_week[0]['id']),{'kelas_id':int(class_id)},status=403,method='PUT')
+    changed_day='Jumat' if weekday!='Jumat' else 'Selasa'
+    change_row=next(row for row in own_week if row['hari']==changed_day)
+    change_payload={'kelas_id':int(class_id),'mata_pelajaran_id':int(subject),'guru_id':int(teacher),'hari':changed_day,'jam_mulai':'09:15','jam_selesai':'10:00'}
+    wali.call('api/jadwal/'+str(change_row['id']),change_payload,method='PUT')
+    assert next(row for row in a.call('api/jadwal')['data'] if row['hari']==changed_day)['jam_mulai']=='09:15:00'
     late_peer=next(x for x in wali.call('api/kedisiplinan?kelas_id='+class_id)['data'] if str(x['id'])==pupils[1])
     assert late_peer['keterlambatan']['jumlah']==1 and late_peer['catatan'][0]['kategori']=='terlambat'
     for category,values in [('etika',{'pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','alasan':'Alasan etika','tindakan':'Pembinaan'}),('atribut',{'pelanggaran':'Atribut kurang lengkap','perbaikan':'Lengkapi atribut'}),('terlambat',{'jumlah_terlambat':2,'tanggal':str(today),'alasan':'Alasan terlambat'})]:
@@ -82,6 +101,14 @@ try:
     own_notes=a.call('api/siswa/dashboard?kelas_id='+classes[1])['data']['kedisiplinan']['catatan']
     assert len(own_notes)==3 and 'CATATAN SISWA LAIN' not in json.dumps(own_notes)
     assert own_notes[1]['status']=='Dalam Peringatan (Terlambat 2x)'
+    own_discipline=a.call('api/siswa/kedisiplinan')['data']
+    assert own_discipline['records']['etika']=={'pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','tindakan':'Pembinaan'}
+    assert own_discipline['records']['atribut']['perbaikan']=='Lengkapi atribut'
+    assert own_discipline['keterlambatan']['jumlah']==2 and own_discipline['records']['terlambat']['alasan']=='Alasan terlambat'
+    assert a.call('api/siswa/kedisiplinan?siswa_id='+pupils[2]+'&kelas_id='+classes[1])['data']==own_discipline
+    assert 'dicatat_oleh' not in json.dumps(own_discipline) and 'CATATAN SISWA LAIN' not in json.dumps(own_discipline)
+    wali.call('api/siswa/kedisiplinan',status=403)
+
     wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','tanggal':'2026-02-31'},status=422)
     wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'terlambat','jumlah_terlambat':-1},status=422)
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran) VALUES('{prefix}_other','{hashed}','Other Wali','wali_kelas');SELECT LAST_INSERT_ID();"))
@@ -112,6 +139,7 @@ try:
         c.js("window.render()")
         c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes('Etika UI')")
         assert not c.js("!!document.querySelector('#storedDisciplineRows img')")
+        assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=studentSchedule]')).display")=='none'
         credentials=json.dumps({'role':'student','username':prefix+'_0','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(function(d){return finishLogin(d.user)})")
         c.wait("!!document.querySelector('.student-home .student-today-schedule') && !!document.querySelector('.student-whatsapp-card')")
@@ -125,9 +153,35 @@ try:
         assert not c.js("!!document.querySelector('.student-whatsapp-list img')")
         assert 'Siswa Tidak Hadir Hari Ini' not in discipline_text
         assert all(x not in discipline_text for x in ['Pending message','Failed message','Peer message','Shared family phone','Teacher reminder','Foreign class message','Own message 0','Own message 1','Own message 2'])
+        assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=studentDiscipline]')).display")!='none'
+        c.js("document.querySelector('.sidebar [data-page=studentDiscipline]').click()")
+        c.wait("document.getElementById('studentDiscipline_etika')?.textContent.includes('Etika UI')")
+        assert c.js("Array.from(document.querySelectorAll('.student-discipline-page h2')).map(el=>el.textContent)")==['Pelanggaran Etika','Keterlambatan','Pakaian & Atribut']
+        assert c.js("Array.from(document.querySelector('.student-discipline-page table').querySelectorAll('th')).map(el=>el.textContent)")==['Nomor','Pelanggaran Yang Dilakukan','Tanggal Dilakukan','Disaksikan Oleh','Tindakan']
+        ethics=c.js("document.getElementById('studentDiscipline_etika').textContent")
+        assert 'Etika UI <img src=x onerror=alert(1)>' in ethics and 'Test Wali' in ethics and 'Pembinaan' in ethics and 'Alasan etika' not in ethics
+        assert 'Alasan terlambat' in c.js("document.getElementById('studentDiscipline_terlambat').textContent")
+        assert 'Dalam Peringatan (Terlambat 2x)' in c.js("document.getElementById('studentDiscipline_terlambat').textContent")
+        assert 'Lengkapi atribut' in c.js("document.getElementById('studentDiscipline_atribut').textContent")
+        assert not c.js("!!document.querySelector('.student-discipline-page input,.student-discipline-page textarea,.student-discipline-page img')")
+        assert c.js("document.querySelectorAll('.student-discipline-page button').length")==1
+        assert 'CATATAN SISWA LAIN' not in c.js("document.querySelector('.student-discipline-page').textContent")
+        wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Perubahan Wali','tanggal':str(today),'saksi':'Test Wali','tindakan':'Pembinaan lanjutan'})
+        c.js("document.getElementById('refreshStudentDiscipline').click()")
+        c.wait("document.getElementById('studentDiscipline_etika')?.textContent.includes('Perubahan Wali')")
+        c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
+        assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Student discipline mobile overflow'
+        c.call('Emulation.clearDeviceMetricsOverride')
         for category in ['etika','atribut','terlambat']:
             wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':category,'jumlah_terlambat':0})
         assert not a.call('api/siswa/dashboard')['data']['kedisiplinan']['catatan']
+        c.js("document.getElementById('refreshStudentDiscipline').click()")
+        c.wait("document.getElementById('studentDiscipline_etika')?.textContent==='Tidak Ada Catatan Pelanggaran'")
+        assert c.js("document.getElementById('studentDiscipline_atribut').textContent")=='Tidak Ada Catatan Pelanggaran'
+        assert 'Baik' in c.js("document.getElementById('studentDiscipline_terlambat').textContent")
+        c.js("window.page='dashboard';window.render()")
+        print('PASS: Student discipline sidebar and three read-only tables, exact ethics columns, shared wali data, reload changes, empty state, escaping and mobile layout.')
+
         c.js("window.render()")
         c.wait("!!document.querySelector('.student-discipline-summary') && document.querySelector('.student-discipline-summary').textContent==='Tidak Ada Catatan Pelanggaran'")
         c.wait("!!document.querySelector('.student-whatsapp-card')")
@@ -155,6 +209,28 @@ try:
         assert c.js("(()=>{const card=document.querySelector('.student-today-schedule'),probe=window.__studentOriginalCardTemplate.cloneNode(true);probe.style.cssText='position:fixed;visibility:hidden;width:'+card.getBoundingClientRect().width+'px';document.body.appendChild(probe);const same=Math.abs(card.getBoundingClientRect().height-probe.getBoundingClientRect().height)<1;probe.remove();return same})()"),'Mobile card height changed'
         c.call('Emulation.clearDeviceMetricsOverride')
         errors=[e for e in c.events if e.get('method')=='Runtime.exceptionThrown'];assert not errors,errors
+        assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=studentSchedule]')).display")!='none'
+        c.js("document.querySelector('.sidebar [data-page=studentSchedule]').click()")
+        c.wait("document.querySelectorAll('[data-student-schedule-day] .schedule-item').length===5")
+        assert c.js("Array.from(document.querySelectorAll('[data-student-schedule-day] h2')).map(el=>el.textContent)")==school_days
+        assert c.js("document.querySelector('.sidebar [data-page=studentSchedule]').classList.contains('active')")
+        assert c.js("document.querySelector('.student-weekly-schedule').textContent").count('Test Guru')==5
+        assert c.js("document.querySelector('.student-weekly-schedule').textContent").count(prefix+'_mapel')==5
+        assert c.js("document.querySelector('.student-weekly-schedule').textContent").count('09:15–10:00')==1
+        assert c.js("document.querySelectorAll('.student-weekly-schedule button').length")==1
+        change_payload.update(jam_mulai='09:30',jam_selesai='10:15')
+        wali.call('api/jadwal/'+str(change_row['id']),change_payload,method='PUT')
+        c.js("document.getElementById('refreshStudentSchedule').click()")
+        c.wait("document.querySelector('.student-weekly-schedule')?.textContent.includes('09:30–10:15')")
+        c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
+        assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Weekly schedule mobile overflow'
+        c.call('Emulation.clearDeviceMetricsOverride')
+        sql(f"DELETE FROM jadwal_kelas WHERE kelas_id={class_id} AND hari='{changed_day}'")
+        c.js("document.getElementById('refreshStudentSchedule').click()")
+        c.wait("document.querySelector('.student-weekly-schedule')?.textContent.includes('Belum ada jadwal mapel untuk hari "+changed_day+".')")
+        c.js("window.page='dashboard';window.render()")
+        c.wait("!!document.querySelector('.student-today-schedule')")
+        print('PASS: Student sidebar weekly schedule Mon–Fri, own-class restriction, read-only access, wali changes reflected on refresh, empty day and mobile layout.')
         for hour in range(9,20):
             sql(f"INSERT INTO jadwal_kelas(kelas_id,mata_pelajaran_id,guru_id,hari,jam_mulai,jam_selesai) VALUES({class_id},{subject},{teacher},'{weekday}','{hour:02d}:00:00','{hour:02d}:30:00');")
         c.js("window.render()")

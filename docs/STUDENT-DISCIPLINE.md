@@ -10,6 +10,10 @@ API baca/tulis wali kelas memeriksa kepemilikan kelas. API Beranda siswa mengamb
 
 Kartu Notifikasi menggantikan daftar siswa tidak hadir dan menampilkan maksimal empat pesan WhatsApp berstatus Terkirim, diurutkan menurut waktu kirim terbaru lalu ID terbaru. Pesan lebih lama tidak ditampilkan. Pesan dibatasi pada kelas dan siswa yang login. Untuk histori gateway lama tanpa `siswa_id`, pencocokan nomor siswa/orang tua hanya dipakai jika nomor tersebut unik dalam kelas; pesan guru otomatis dan nomor keluarga yang ambigu tidak ditampilkan melalui pencocokan ini. Nomor penerima tidak dikirim ke browser. Jika kosong, tampilkan “Belum ada pesan WhatsApp terkirim.”
 
+Menu **Status Kedisiplinan** pada sidebar siswa menampilkan tiga tabel baca saja dari sumber wali kelas yang sama. Pelanggaran Etika memuat Nomor, Pelanggaran Yang Dilakukan, Tanggal Dilakukan, Disaksikan Oleh, dan Tindakan. Keterlambatan serta Pakaian & Atribut mengikuti data dan status pada tabel wali kelas, tanpa kolom aksi edit. Keterlambatan tetap menampilkan jumlah 0 dan status Baik jika belum ada keterlambatan. Kategori pelanggaran yang kosong menampilkan “Tidak Ada Catatan Pelanggaran”. Tombol Muat ulang mengambil perubahan wali kelas terbaru.
+
+Endpoint `GET api/siswa/kedisiplinan` hanya menerima sesi siswa dan mengambil profil dari NIS sesi; parameter siswa/kelas tidak menentukan akses. Respons berisi hanya identitas siswa sendiri, kolom tabel yang diperlukan, dan ringkasan keterlambatan, tanpa metadata pencatat.
+
 Pengujian lokal menggunakan fixture yang dibersihkan:
 
 ```bash

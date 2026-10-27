@@ -573,3 +573,21 @@
 .student-discipline-table{min-width:650px;width:100%}.student-discipline-table td{white-space:pre-wrap;overflow-wrap:anywhere}
 
 .student-attendance-recap{margin-top:20px}.student-attendance-filters{display:flex;flex-direction:column;gap:10px}.student-attendance-filter{display:grid;grid-template-columns:44px minmax(130px,1fr);align-items:center;gap:8px;font-size:12px;font-weight:600}.student-attendance-filter select{width:100%;min-width:0}.student-attendance-recap td:nth-child(-n+3){white-space:nowrap}@media(max-width:650px){.student-attendance-recap .panel-head{flex-wrap:wrap}}
+
+/* Parent sick-leave requests and the wali review list. */
+.sick-request-card{margin-top:20px;min-width:0}
+.sick-request-card .panel-head p{margin-top:6px}
+.sick-request-guide{background:#eefaf8;border:1px solid #cae9e5;border-radius:12px;padding:16px;margin:16px 0;color:#285b57}
+.sick-request-guide p{margin:8px 0 0;line-height:1.6}
+.sick-request-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin:20px 0}
+.sick-request-card label{display:block;font-weight:600;min-width:0}
+.sick-request-card input,.sick-request-card textarea{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:8px;padding:12px;border:1px solid #ccdce2;border-radius:10px;font:inherit;background:#fff;color:#172a3a}
+.sick-request-card small{display:block;font-size:13px;font-weight:400;line-height:1.5;color:#617686;margin-top:8px}
+.sick-request-days{display:flex;align-items:center;gap:10px}.sick-request-days input{flex:1;width:90px}.sick-request-days span{font-weight:400}
+.sick-request-summary{background:#f3f8fa;padding:14px;border-radius:10px;color:#285b57;line-height:1.5}
+.sick-request-file{margin:20px 0}.sick-request-file input{border-style:dashed;padding:16px}.sick-request-file input::file-selector-button{padding:10px 14px;border:1px solid #b6ded8;border-radius:8px;background:#e5f7f4;color:#007f78;font:inherit;cursor:pointer;margin-right:12px}
+.sick-request-note-field{margin:20px 0}.sick-request-card textarea{resize:vertical}
+.sick-request-actions{display:flex;justify-content:flex-end;margin-top:14px}.sick-request-actions button{min-height:46px}
+.sick-request-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e0e9ed;margin-top:24px;padding-top:20px}.sick-request-history-head h3{margin:0}
+.sick-request-entry{border:1px solid #dce8ec;border-radius:12px;padding:16px;margin-top:14px;overflow-wrap:anywhere}.sick-request-entry-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.sick-request-entry p{line-height:1.5;margin:10px 0}.sick-request-note{white-space:pre-wrap}.sick-request-entry a{display:inline-block;overflow-wrap:anywhere}.sick-request-success{color:#15803d;line-height:1.5}
+@media(max-width:700px){.sick-request-fields{grid-template-columns:1fr}.sick-request-actions button{width:100%}.sick-request-entry-head{align-items:flex-start;flex-wrap:wrap}.sick-request-history-head{flex-wrap:wrap}.sick-request-card input[type=file]{font-size:13px}}

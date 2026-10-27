@@ -19,6 +19,17 @@ class Client:
         try:r=self.op.open(req,timeout=10)
         except urllib.error.HTTPError as e:r=e
         result=json.load(r);assert r.code==status,(path,r.code,result);self.token=result.get('csrfHash',self.token);return result
+def multipart(client,fields,file=None,status=201):
+    boundary='aiwalas'+secrets.token_hex(12);chunks=[]
+    for key,value in fields.items():chunks.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="'+key+'"\r\n\r\n'+str(value)+'\r\n').encode())
+    if file:
+        name,mime,data=file
+        chunks.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="lampiran"; filename="'+name+'"\r\nContent-Type: '+mime+'\r\n\r\n').encode()+data+b'\r\n')
+    chunks.append(('--'+boundary+'--\r\n').encode())
+    req=urllib.request.Request(BASE+'api/pengajuan-sakit',data=b''.join(chunks),headers={'Content-Type':'multipart/form-data; boundary='+boundary,'X-CSRF-TOKEN':client.token})
+    try:r=client.op.open(req)
+    except urllib.error.HTTPError as error:r=error
+    result=json.load(r);client.token=result.get('csrfHash',client.token);assert r.code==status,(r.code,result);return result
 try:
     nis_a='9'+''.join(str(secrets.randbelow(10)) for _ in range(12));nis_b='8'+nis_a[1:]
     student_password='Student-'+secrets.token_hex(8);parent_password='Parent-'+secrets.token_hex(8)
@@ -71,6 +82,38 @@ try:
     fresh.call('api/auth/login',{'role':'parent','username':nis_a,'password':parent_password})
     student.call('api/auth/login',{'role':'student','username':nis_a,'password':student_password})
     b_parent=Client();b_login=b_parent.call('api/auth/login',{'role':'parent','username':nis_b,'password':nis_b})['user']
+    fields={'jumlah_hari':2,'tanggal_mulai':str(today),'tanggal_selesai':str(today+datetime.timedelta(days=1)),'keterangan':'Istirahat <img src=x onerror=alert(1)>','siswa_id':pupils[1],'kelas_id':classes[1]}
+    student.call('api/pengajuan-sakit',status=403)
+    multipart(student,fields,status=403);multipart(wali,fields,status=403)
+    multipart(parent,dict(fields,tanggal_selesai=str(today-datetime.timedelta(days=1))),status=422)
+    multipart(parent,dict(fields,jumlah_hari=3),status=422)
+    multipart(parent,dict(fields,tanggal_mulai='2026-02-30'),status=422)
+    multipart(parent,fields,('fake.jpg','image/jpeg',b'<?php echo "invalid";'),status=422)
+    multipart(parent,fields,('large.pdf','application/pdf',b'%PDF-'+b'0'*(2*1024*1024)),status=422)
+    pdf=b'%PDF-1.4\n1 0 obj<</Type /Catalog>>endobj\n%%EOF'
+    request_id=multipart(parent,fields,('surat-sakit.pdf','application/pdf',pdf))['id']
+    multipart(parent,fields,status=409)
+    requests=parent.call('api/pengajuan-sakit?siswa_id='+pupils[1])['data']
+    assert len(requests)==1 and str(requests[0]['id'])==str(request_id) and requests[0]['nama_lengkap']=='Anak Uji' and requests[0]['status']=='Terkirim'
+    assert b_parent.call('api/pengajuan-sakit')['data']==[]
+    assert len(wali.call('api/pengajuan-sakit?kelas_id='+class_id)['data'])==1
+    assert wali.call('api/pengajuan-sakit?kelas_id='+classes[1])['data']==[]
+    url='api/pengajuan-sakit/'+str(request_id)+'/lampiran'
+    assert parent.op.open(BASE+url).read()==pdf
+    assert wali.op.open(BASE+url).read()==pdf
+    b_parent.call(url,status=404);student.call(url,status=403)
+    anonymous=Client();anonymous.call('api/pengajuan-sakit',status=401)
+    users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran) VALUES('{prefix}_outsider','{hashed}','Other Wali','wali_kelas');SELECT LAST_INSERT_ID();"))
+    outsider=Client();outsider.call('api/auth/login',{'role':'walas','username':prefix+'_outsider','password':password})
+    assert outsider.call('api/pengajuan-sakit?kelas_id='+class_id)['data']==[]
+    outsider.call(url,status=404)
+    multipart(parent,dict(fields,jumlah_hari=61,tanggal_selesai=str(today+datetime.timedelta(days=60))),status=422)
+    import base64
+    png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l3sAAAAASUVORK5CYII=')
+    png_id=multipart(parent,dict(fields,jumlah_hari=1,tanggal_mulai='2028-02-29',tanggal_selesai='2028-02-29'),('surat.png','image/png',png))['id']
+    assert parent.op.open(BASE+'api/pengajuan-sakit/'+str(png_id)+'/lampiran').read()==png
+    assert sql(f"SELECT status FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{today}'")=='Hadir'
+    print('PASS: Parent sick requests, multipart PDF upload, invalid MIME/size/dates, overlap protection, child identity, class ownership, private attachment access and unchanged attendance.')
     b_student=Client();b_student.call('api/auth/login',{'role':'student','username':nis_b,'password':nis_b})
     assert b_student.call('api/auth/session')['user']['isParent'] is False
     sql('UPDATE pengguna SET aktif=0 WHERE id='+str(b_login['id']))
@@ -110,6 +153,24 @@ try:
         c.wait("document.querySelector('.student-attendance-page h1')?.textContent==='Halo, Orangtua/Wali Murid Anak Uji'")
         assert c.js("!document.getElementById('studentQrButton') && !document.querySelector('.student-attendance-card') && !!document.getElementById('studentAttendanceMonth') && !!document.getElementById('studentAttendanceStatus') && !!document.getElementById('studentAttendanceScan')")
         assert 'Izinkan kamera' not in c.js("document.querySelector('.student-attendance-page').textContent")
+        c.wait("!!document.getElementById('sickRequestForm') && document.querySelector('.sick-request-history').textContent.includes('Istirahat <img')")
+        assert not c.js("!!document.querySelector('.sick-request-history img')")
+        c.js("document.getElementById('sickRequestStart').value='2027-01-31';document.getElementById('sickRequestDays').value='3';document.getElementById('sickRequestDays').dispatchEvent(new Event('input'))")
+        assert c.js("document.getElementById('sickRequestEnd').value")=='2027-02-02'
+        c.js("document.getElementById('sickRequestEnd').value='2027-02-03';document.getElementById('sickRequestEnd').dispatchEvent(new Event('change'))")
+        assert c.js("document.getElementById('sickRequestDays').value")=='4'
+        c.js("document.getElementById('sickRequestNote').value='Pengajuan melalui formulir';document.getElementById('sickRequestForm').requestSubmit()")
+        c.wait("document.getElementById('sickRequestMessage')?.textContent.includes('berhasil dikirim')")
+        c.wait("document.querySelector('.sick-request-history').textContent.includes('Pengajuan melalui formulir')")
+        c.js("window.render()")
+        c.wait("document.querySelector('.sick-request-history')?.textContent.includes('Pengajuan melalui formulir')")
+        c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
+        assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Parent sick form mobile overflow'
+        if os.environ.get('AIWALAS_SICK_SCREENSHOT'):
+            import base64
+            c.js("document.getElementById('sickRequestCard').scrollIntoView()")
+            Path(os.environ['AIWALAS_SICK_SCREENSHOT']).write_bytes(base64.b64decode(c.call('Page.captureScreenshot',{'format':'png'})['data']))
+        c.call('Emulation.clearDeviceMetricsOverride')
         c.js("window.page='settings';window.render()")
         c.wait("!!document.querySelector('.settings-profile h2')")
         assert c.js("document.querySelector('.settings-profile h2').textContent")=='Orangtua/Wali Murid Anak Uji'
@@ -120,6 +181,14 @@ try:
         student_menu=c.js("Array.from(document.querySelectorAll('.sidebar .nav-item[data-page]')).filter(el=>el.getClientRects().length).map(el=>el.dataset.page)")
         assert student_menu==parent_menu,(student_menu,parent_menu)
         assert c.js("currentUser.isParent") is False
+        c.js("window.page='attendance';window.render()")
+        assert not c.js("!!document.getElementById('sickRequestCard')")
+        wali_creds=json.dumps({'role':'walas','username':prefix+'_wali','password':password})
+        c.js("authRequest('api/auth/logout',{method:'POST',body:'{}'}).then(function(){return authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+wali_creds+")})}).then(function(d){return finishLogin(d.user)}).then(function(){return authRequest('api/bootstrap?kelas_id="+class_id+"')}).then(function(d){applyBootstrapData(d);window.page='attendance';window.render()})")
+        c.wait("document.querySelector('#sickRequestCard .sick-request-history')?.textContent.includes('Pengajuan melalui formulir')")
+        assert not c.js("!!document.getElementById('sickRequestForm')")
+        assert not c.js("!!document.querySelector('.sick-request-history img')")
+        print('PASS: Parent sick card date/day sync, multipart form submission, history persistence, mobile layout, student hidden card and wali read-only review.')
         assert not [e for e in c.events if e.get('method')=='Runtime.exceptionThrown'],c.events
         c.js("logout()")
         print('PASS: Parent login choice, identical student menus/content, parent prefix on home/attendance/settings, student greetings unchanged; no runtime errors.')
@@ -127,6 +196,10 @@ try:
 finally:
     if classes:
         ids=','.join(classes)
+        for filename in sql('SELECT berkas_lampiran FROM pengajuan_sakit WHERE kelas_id IN ('+ids+') AND berkas_lampiran IS NOT NULL').splitlines():
+            path=ROOT/'writable'/'pengajuan-sakit'/filename
+            if path.is_file():path.unlink()
+        sql('DELETE FROM pengajuan_sakit WHERE kelas_id IN ('+ids+')')
         sql('DELETE FROM nilai_siswa WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ('+ids+'));DELETE FROM catatan_kedisiplinan WHERE kelas_id IN ('+ids+');DELETE FROM pesan_komunikasi WHERE kelas_id IN ('+ids+');DELETE FROM qr_absensi_aktif WHERE kelas_id IN ('+ids+');DELETE FROM absensi WHERE kelas_id IN ('+ids+');DELETE FROM komponen_nilai WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');')
         if pupils:sql('DELETE FROM pengguna WHERE siswa_id IN ('+','.join(pupils)+') OR nis IN (SELECT nis FROM siswa WHERE id IN ('+','.join(pupils)+'));')
         sql('DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')

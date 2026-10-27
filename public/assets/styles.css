@@ -602,3 +602,4 @@
 .discipline-date-entry .discipline-event-reason{width:100%;box-sizing:border-box;min-height:72px;resize:vertical}.discipline-date-entry label{display:block;margin-top:10px}
 .discipline-page td.discipline-event-reason-cell{white-space:pre-wrap;overflow-wrap:anywhere;min-width:180px;max-width:360px;line-height:1.8;vertical-align:top}
 .discipline-page td.discipline-event-dates{vertical-align:top}
+.managed-accounts-table{margin-top:18px}.managed-accounts-table .panel-head{gap:18px;flex-wrap:wrap}.managed-accounts-table label{display:block;min-width:0}.managed-accounts-table input,.managed-accounts-table select{display:block;box-sizing:border-box;margin-top:8px;max-width:100%;padding:10px;border:1px solid #dce6eb;border-radius:8px;font:inherit}.managed-accounts-table #managedAccountCount,.managed-accounts-table #managedAccountError{padding:0 20px}

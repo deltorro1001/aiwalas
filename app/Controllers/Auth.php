@@ -90,7 +90,7 @@ class Auth extends BaseController
                 })->groupEnd()->get()->getRowArray();
             if ($student) {
                 $linked = $model->where('nis', $student['nis'])->where('aktif', 1)->first();
-                if (hash_equals((string) $student['nis'], (string) $payload['password']) || ($linked && password_verify((string) $payload['password'], $linked->kata_sandi))) {
+                if ($linked && password_verify((string) $payload['password'], $linked->kata_sandi)) {
                     $sessionUser = ['id' => 0, 'nama_pengguna' => $student['nis'], 'nama_lengkap' => $student['nama_lengkap'], 'peran' => 'siswa', 'nis' => $student['nis']];
                     session()->regenerate(); session()->set('pengguna', $sessionUser);
                     return $this->json(['ok' => true, 'user' => $this->frontendUser($sessionUser)]);

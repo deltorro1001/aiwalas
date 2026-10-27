@@ -8,6 +8,7 @@
     <button class="nav-item" data-page="students"><span></span> Daftar Siswa</button>
     <button class="nav-item" data-page="teachers"><span></span> Guru Mapel</button>
     <button class="nav-item" data-page="schoolTeachers"><span></span> Daftar Guru SMKN 19 Jakarta</button>
+    <button class="nav-item" data-page="accountManagement"><span></span> Kelola Akun</button>
     <button class="nav-item" data-page="teacherAccounts"><span></span> Akun Guru</button>
     <button class="nav-item" data-page="assessment"><span>P</span> Penilaian</button>
     <button class="nav-item" data-page="studentGrades"><span></span> Nilai dan Capaian</button>

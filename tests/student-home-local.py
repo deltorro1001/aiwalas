@@ -485,10 +485,10 @@ try:
         assert c.js("document.getElementById('studentAttendanceStatus').textContent")==saved['status']
         c.wait("document.getElementById('studentAttendanceRecapRows')?.textContent.includes("+json.dumps(saved['waktu_scan']+' WIB')+")")
         assert sql('SELECT tanggal FROM absensi WHERE id='+str(saved['id']))==str(today) and saved['waktu_scan']!='00:00:00'
-        assert saved['status']==('Terlambat' if saved['waktu_scan']>='06:41:00' else 'Hadir')
+        assert saved['status']==('Terlambat' if saved['waktu_scan']>='06:36:00' else 'Hadir')
         scan_result=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','metode':'scan_qr','waktu_scan':'00:00:00','tanggal':'2000-01-01','status':'Hadir'})['data']
         assert sql('SELECT tanggal FROM absensi WHERE id='+str(scan_result['id']))==str(today) and scan_result['waktu_scan']!='00:00:00'
-        assert scan_result['status']==('Terlambat' if scan_result['waktu_scan']>='06:41:00' else 'Hadir')
+        assert scan_result['status']==('Terlambat' if scan_result['waktu_scan']>='06:36:00' else 'Hadir')
         manual_result=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(class_id),'semester':'Ganjil','waktu_scan':None,'status':'Sakit','keterangan':'Manual correction'})['data']
         assert manual_result['status']=='Sakit' and manual_result['waktu_scan'] is None
         assert not c.js("!!document.querySelector('.student-attendance-rule')")

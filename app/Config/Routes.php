@@ -105,3 +105,6 @@ $routes->get('api/whatsapp/teacher-schedule', 'Api\TeacherScheduleAutomationCont
 
 $routes->get('api/kedisiplinan', 'Api\\KedisiplinanController::index', ['filter'=>['auth','role:wali_kelas']]);
 $routes->post('api/kedisiplinan', 'Api\\KedisiplinanController::save', ['filter'=>['auth','role:wali_kelas']]);
+
+$routes->get('api/kelola-akun', 'Api\KelolaAkunController::index', ['filter'=>['auth','role:wali_kelas']]);
+$routes->post('api/kelola-akun/reset', 'Api\KelolaAkunController::resetPassword', ['filter'=>['auth','role:wali_kelas']]);

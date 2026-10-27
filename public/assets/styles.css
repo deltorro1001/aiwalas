@@ -591,3 +591,14 @@
 .sick-request-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e0e9ed;margin-top:24px;padding-top:20px}.sick-request-history-head h3{margin:0}
 .sick-request-entry{border:1px solid #dce8ec;border-radius:12px;padding:16px;margin-top:14px;overflow-wrap:anywhere}.sick-request-entry-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.sick-request-entry p{line-height:1.5;margin:10px 0}.sick-request-note{white-space:pre-wrap}.sick-request-entry a{display:inline-block;overflow-wrap:anywhere}.sick-request-success{color:#15803d;line-height:1.5}
 @media(max-width:700px){.sick-request-fields{grid-template-columns:1fr}.sick-request-actions button{width:100%}.sick-request-entry-head{align-items:flex-start;flex-wrap:wrap}.sick-request-history-head{flex-wrap:wrap}.sick-request-card input[type=file]{font-size:13px}}
+
+.discipline-event-dates{white-space:nowrap;line-height:1.8}
+.discipline-date-editor{margin:16px 0}.discipline-date-editor p{line-height:1.5;margin:8px 0}
+.discipline-date-input-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}.discipline-date-input-row input{min-width:0;flex:1}.discipline-date-input-row .stat-note{white-space:nowrap}
+@media(max-width:500px){.discipline-date-input-row{flex-wrap:wrap}.discipline-date-input-row input{flex-basis:55%}}
+.discipline-delete-button{border:1px solid #fecaca;border-radius:8px;padding:10px 14px;background:#fff1f2;color:#b91c1c;font:inherit;cursor:pointer}
+.discipline-delete-confirm{background:#fff7f7;border:1px solid #fecaca;border-radius:10px;padding:14px;margin:18px 0}.discipline-delete-confirm p{line-height:1.5}.discipline-delete-confirm button{margin:4px}
+.discipline-date-entry:has(.discipline-event-reason){padding:14px;border:1px solid #dce6eb;border-radius:10px;margin:14px 0;background:#fafcfd}
+.discipline-date-entry .discipline-event-reason{width:100%;box-sizing:border-box;min-height:72px;resize:vertical}.discipline-date-entry label{display:block;margin-top:10px}
+.discipline-page td.discipline-event-reason-cell{white-space:pre-wrap;overflow-wrap:anywhere;min-width:180px;max-width:360px;line-height:1.8;vertical-align:top}
+.discipline-page td.discipline-event-dates{vertical-align:top}

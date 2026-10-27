@@ -140,6 +140,64 @@ try:
     assert 'dicatat_oleh' not in json.dumps(own_discipline) and 'CATATAN SISWA LAIN' not in json.dumps(own_discipline)
     wali.call('api/siswa/kedisiplinan',status=403)
 
+    # All recorded dates are retained, sorted and deduplicated for each category.
+    earlier=today-datetime.timedelta(days=2);previous=today-datetime.timedelta(days=1)
+    for date in [earlier,previous]:
+        sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[1]},{class_id},'{date}','Terlambat','Ganjil',{users[0]});")
+    dates_payload=[str(today),str(earlier),str(today)]
+    for category,values in [('etika',{'pelanggaran':'Catatan Etika Awal','saksi':'Test Wali','alasan':'Alasan etika','tindakan':'Pembinaan'}),('atribut',{'pelanggaran':'Atribut kurang lengkap','perbaikan':'Lengkapi atribut'})]:
+        wali.call('api/kedisiplinan',dict(siswa_id=int(pupils[0]),kategori=category,tanggal_kejadian=dates_payload,**values))
+    repeated=wali.call('api/kedisiplinan?kelas_id='+class_id)['data']
+    own_repeat=next(row for row in repeated if str(row['id'])==pupils[0])
+    late_repeat=next(row for row in repeated if str(row['id'])==pupils[1])
+    assert own_repeat['tanggal_pelanggaran']['etika']==[str(earlier),str(today)]
+    assert own_repeat['tanggal_pelanggaran']['atribut']==[str(earlier),str(today)]
+    assert late_repeat['tanggal_pelanggaran']['terlambat']==[str(earlier),str(previous),str(today)]
+    # Removing a late status removes that automatic date, without keeping a stale copy.
+    sql(f"UPDATE absensi SET status='Hadir' WHERE siswa_id={pupils[1]} AND tanggal='{earlier}';")
+    changed=next(row for row in wali.call('api/kedisiplinan?kelas_id='+class_id)['data'] if str(row['id'])==pupils[1])
+    assert changed['tanggal_pelanggaran']['terlambat']==[str(previous),str(today)]
+    sql(f"UPDATE absensi SET status='Terlambat' WHERE siswa_id={pupils[1]} AND tanggal='{earlier}';")
+    for bad in ['2026-02-31',{'date':str(today)},str(today)+'junk']:
+        wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','tanggal_kejadian':[bad]},status=422)
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','tanggal_kejadian':'invalid'},status=422)
+    # Old clients editing only notes must preserve all earlier dates.
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','tindakan':'Pembinaan'})
+    retained=next(row for row in wali.call('api/kedisiplinan?kelas_id='+class_id)['data'] if str(row['id'])==pupils[0])
+    assert retained['tanggal_pelanggaran']['etika']==[str(earlier),str(today)]
+    def peer_discipline():return next(row for row in wali.call('api/kedisiplinan?kelas_id='+class_id)['data'] if str(row['id'])==pupils[1])
+    corrected_day=earlier-datetime.timedelta(days=1)
+    peer_payload={'siswa_id':int(pupils[1]),'kategori':'terlambat','koreksi_keterlambatan':True,'jumlah_terlambat':2,'tanggal_kejadian':[str(corrected_day),str(today)],'alasan':'Alasan telah dikoreksi','status_notifikasi_orangtua':'Sudah diberitahu','notifikasi_orangtua':'Sudah menghubungi orangtua <img src=x onerror=alert(1)>'}
+    peer_payload['alasan_per_tanggal']={str(corrected_day):'Macet di jalan',str(today):'Kendaraan bermasalah <img src=x onerror=alert(1)>'}
+    message_count=sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id={class_id}")
+    wali.call('api/kedisiplinan',peer_payload)
+    edited=peer_discipline()
+    assert edited['keterlambatan']['jumlah']==2 and edited['tanggal_pelanggaran']['terlambat']==[str(corrected_day),str(today)]
+    assert edited['records']['terlambat']['status_notifikasi_orangtua']=='Sudah diberitahu'
+    wali.call('api/kedisiplinan',dict(peer_payload,status_notifikasi_orangtua='Terkirim Palsu'),status=422)
+    wali.call('api/kedisiplinan',dict(peer_payload,notifikasi_orangtua=['invalid']),status=422)
+    assert edited['alasan_keterlambatan']==peer_payload['alasan_per_tanggal']
+    wali.call('api/kedisiplinan',dict(peer_payload,alasan_per_tanggal={str(previous):'Tanggal tidak dipilih'}),status=422)
+    wali.call('api/kedisiplinan',dict(peer_payload,alasan_per_tanggal={str(today):'x'*2001}),status=422)
+    wali.call('api/kedisiplinan',dict(peer_payload,alasan_per_tanggal={str(today):['invalid']}),status=422)
+    wali.call('api/kedisiplinan',dict(peer_payload,jumlah_terlambat=1,tanggal_kejadian=[str(today)],alasan_per_tanggal={str(today):'Alasan diperbarui'}))
+    single=peer_discipline()
+    assert single['alasan_keterlambatan']=={str(today):'Alasan diperbarui'}
+    empty_peer=dict(peer_payload,jumlah_terlambat=0,tanggal_kejadian=[],alasan_per_tanggal={},alasan='',status_notifikasi_orangtua='',notifikasi_orangtua='')
+    wali.call('api/kedisiplinan',empty_peer)
+    deleted=peer_discipline()
+    assert deleted['keterlambatan']['jumlah']==0 and deleted['keterlambatan']['status']=='Baik'
+    assert deleted['alasan_keterlambatan']==[] and deleted['tanggal_pelanggaran']['terlambat']==[] and deleted['catatan']==[] and deleted['keterlambatan']['tanggal'] is None
+    assert sql(f"SELECT COUNT(*) FROM absensi WHERE siswa_id={pupils[1]} AND status='Terlambat'")=='3'
+    sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[1]},{class_id},'{corrected_day}','Terlambat','Ganjil',{users[0]});")
+    fresh_late=peer_discipline()
+    assert fresh_late['keterlambatan']['jumlah']==1 and fresh_late['tanggal_pelanggaran']['terlambat']==[str(corrected_day)]
+    sql(f"DELETE FROM absensi WHERE siswa_id={pupils[1]} AND tanggal='{corrected_day}';")
+    assert peer_discipline()['keterlambatan']['jumlah']==0
+    peer_restore=dict(empty_peer,jumlah_terlambat=3,tanggal_kejadian=[str(earlier),str(previous),str(today)])
+    wali.call('api/kedisiplinan',peer_restore)
+    assert peer_discipline()['keterlambatan']['jumlah']==3
+    assert sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id={class_id}")==message_count
     wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'etika','tanggal':'2026-02-31'},status=422)
     wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'terlambat','jumlah_terlambat':-1},status=422)
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran) VALUES('{prefix}_other','{hashed}','Other Wali','wali_kelas');SELECT LAST_INSERT_ID();"))
@@ -214,13 +272,67 @@ try:
         c.js("window.page='discipline';window.render()")
         print('PASS: Wali PJJ correction saves, survives re-render, reopens selected and filters correctly.')
         c.wait("!!document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]')")
+        for category,pupil,expected in [('etika',pupils[0],[earlier,today]),('terlambat',pupils[1],[earlier,previous,today]),('atribut',pupils[0],[earlier,today])]:
+            c.js("document.getElementById('storedDisciplineCategory').value="+json.dumps(category)+";document.getElementById('storedDisciplineCategory').dispatchEvent(new Event('change'))")
+            selector=json.dumps('[data-stored-discipline="'+pupil+'"]')
+            if category=='terlambat':text=c.js("Array.from(document.querySelectorAll('[data-discipline-student=\""+pupil+"\"] .discipline-event-dates')).map(cell=>cell.textContent).join(' ')")
+            else:text=c.js("document.querySelector("+selector+").closest('tr').querySelector('.discipline-event-dates').textContent")
+            for date in expected:assert date.strftime('%d-%m-%Y') in text,(category,text)
+        c.js("document.getElementById('storedDisciplineCategory').value='terlambat';document.getElementById('storedDisciplineCategory').dispatchEvent(new Event('change'))")
+        peer_selector=json.dumps('[data-stored-discipline="'+pupils[1]+'"]')
+        c.js("document.querySelector("+peer_selector+").click()")
+        assert c.js("document.querySelectorAll('#storedDisciplineDates input').length")==3
+        c.js("document.querySelector('#storedDisciplineDates .discipline-date-input-row button').click()")
+        assert c.js("document.getElementById('storedDiscipline_jumlah_terlambat').value")=='2'
+        c.js("document.querySelector('#storedDisciplineDates input').value="+json.dumps(str(corrected_day))+";document.querySelector('#storedDisciplineDates input').dispatchEvent(new Event('change'));document.querySelector('#storedDisciplineDates textarea').value='Alasan UI';Array.from(document.querySelectorAll('#storedDisciplineDates textarea')).pop().value='Ban bocor UI';document.getElementById('saveStoredDiscipline').click()")
+        c.wait("document.querySelector("+peer_selector+")?.closest('tr').textContent.includes('Alasan UI')")
+        assert not c.js("!!document.querySelector('#storedDisciplineRows img')")
+        c.js("window.render()")
+        c.wait("document.querySelector("+peer_selector+")?.closest('tr').textContent.includes('Alasan UI')")
+        text=c.js("document.querySelector("+peer_selector+").closest('tr').textContent")
+        assert corrected_day.strftime('%d-%m-%Y') in text
+        pair_selector=json.dumps('[data-discipline-student="'+pupils[1]+'"]')
+        assert c.js("Array.from(document.querySelectorAll("+pair_selector+"+' .discipline-event-reason-cell')).map(cell=>cell.textContent)")==['Alasan UI','Ban bocor UI']
+        assert c.js("document.querySelector("+peer_selector+").closest('td').rowSpan")==2
+        c.js("document.querySelector("+pair_selector+"+' .discipline-event-reason-cell').textContent='Alasan UI yang panjang dengan banyak keterangan agar teks membungkus ke beberapa baris. '.repeat(8)")
+        sizes=c.js("Array.from(document.querySelectorAll("+pair_selector+")).map(row=>{const d=row.querySelector('.discipline-event-dates'),r=row.querySelector('.discipline-event-reason-cell');return {dateY:d.getBoundingClientRect().y,reasonY:r.getBoundingClientRect().y,dateHeight:d.getBoundingClientRect().height,reasonHeight:r.getBoundingClientRect().height,lineHeight:parseFloat(getComputedStyle(r).lineHeight)}})")
+        assert sizes[0]['reasonHeight']>2*sizes[0]['lineHeight'],sizes
+        assert all(abs(row['dateY']-row['reasonY'])<1 and abs(row['dateHeight']-row['reasonHeight'])<1 for row in sizes),sizes
+        c.js("document.querySelector("+pair_selector+"+' .discipline-event-reason-cell').textContent='Alasan UI'")
+        assert earlier.strftime('%d-%m-%Y') not in text and previous.strftime('%d-%m-%Y') not in text
+        c.js("document.querySelector("+peer_selector+").click()")
+        assert c.js("document.getElementById('storedDiscipline_jumlah_terlambat').value")=='2'
+        assert c.js("Array.from(document.querySelectorAll('#storedDisciplineDates textarea')).map(input=>input.value)")==['Alasan UI','Ban bocor UI']
+        c.js("document.getElementById('deleteStoredDiscipline').click();document.getElementById('cancelDeleteDiscipline').click()")
+        assert c.js("document.getElementById('disciplineDeleteConfirm').hidden")
+        c.js("document.getElementById('deleteStoredDiscipline').click();document.getElementById('confirmDeleteDiscipline').click()")
+        c.wait("document.querySelector("+peer_selector+")?.closest('tr').textContent.includes('Baik')")
+        c.js("window.render()")
+        c.wait("document.querySelector("+peer_selector+")?.closest('tr').textContent.includes('Baik')")
+        c.js("document.querySelector("+peer_selector+").click()")
+        assert c.js("document.getElementById('storedDiscipline_jumlah_terlambat').value")=='0'
+        assert c.js("Array.from(document.querySelectorAll('#storedDisciplineDates input')).every(input=>!input.value)")
+        assert c.js("Array.from(document.querySelectorAll('#storedDisciplineDates textarea')).every(input=>!input.value)")
+        c.js("document.getElementById('cancelModal').click()")
+        wali.call('api/kedisiplinan',peer_restore)
+        c.js("window.render()")
+        c.wait("!!document.querySelector("+peer_selector+")")
+        print('PASS: Edit/delete lateness amount, automatic dates, separate reasons per date; durable deletion, future late records, no attendance/message mutation, reload and cancel-delete flow.')
+        c.js("document.getElementById('storedDisciplineCategory').value='etika';document.getElementById('storedDisciplineCategory').dispatchEvent(new Event('change'))")
         c.js("document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]').click()")
+        assert c.js("document.querySelectorAll('#storedDisciplineDates input').length")==2
+        c.js("document.getElementById('addDisciplineDate').click()")
+        c.js("Array.from(document.querySelectorAll('#storedDisciplineDates input')).pop().value="+json.dumps(str(previous))+";Array.from(document.querySelectorAll('#storedDisciplineDates input')).pop().dispatchEvent(new Event('change'))")
         c.js("document.getElementById('storedDiscipline_pelanggaran').value='Etika UI <img src=x onerror=alert(1)>';document.getElementById('saveStoredDiscipline').click()")
         c.wait("!document.getElementById('modalBackdrop').classList.contains('show')")
         c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes('Etika UI')")
         c.js("window.render()")
         c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes('Etika UI')")
         assert not c.js("!!document.querySelector('#storedDisciplineRows img')")
+        selector=json.dumps('[data-stored-discipline="'+pupils[0]+'"]')
+        text=c.js("document.querySelector("+selector+").closest('tr').querySelector('.discipline-event-dates').textContent")
+        for date in [earlier,previous,today]:assert date.strftime('%d-%m-%Y') in text
+        print('PASS: Multiple discipline dates in all categories, automatic lateness history, dd-mm-yyyy display, editable dates, reload persistence and invalid-date validation.')
         assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=studentSchedule]')).display")=='none'
         credentials=json.dumps({'role':'student','username':prefix+'_0','password':password})
         c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(function(d){return finishLogin(d.user)})")
@@ -255,7 +367,7 @@ try:
         assert c.js("document.documentElement.scrollWidth<=window.innerWidth"),'Student discipline mobile overflow'
         c.call('Emulation.clearDeviceMetricsOverride')
         for category in ['etika','atribut','terlambat']:
-            wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':category,'jumlah_terlambat':0})
+            wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':category,'jumlah_terlambat':0,'tanggal_kejadian':[]})
         assert not a.call('api/siswa/dashboard')['data']['kedisiplinan']['catatan']
         c.js("document.getElementById('refreshStudentDiscipline').click()")
         c.wait("document.getElementById('studentDiscipline_etika')?.textContent==='Tidak Ada Catatan Pelanggaran'")

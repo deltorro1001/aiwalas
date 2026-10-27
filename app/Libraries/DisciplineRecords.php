@@ -21,12 +21,47 @@ class DisciplineRecords
         if(!$students)return [];
         $ids=array_column($students,'id');$records=[];$late=[];
         foreach($db->table('catatan_kedisiplinan')->where('kelas_id',$classId)->whereIn('siswa_id',$ids)->get()->getResultArray() as $row)$records[$row['siswa_id']][$row['kategori']]=$row;
-        foreach($db->table('absensi')->select('siswa_id,COUNT(*) jumlah,MAX(tanggal) tanggal')->where(['kelas_id'=>$classId,'status'=>'Terlambat'])->where('tanggal <=',date('Y-m-d'))->whereIn('siswa_id',$ids)->groupBy('siswa_id')->get()->getResultArray() as $row)$late[$row['siswa_id']]=$row;
+        foreach($db->table('absensi')->select('siswa_id,tanggal')->where(['kelas_id'=>$classId,'status'=>'Terlambat'])->where('tanggal <=',date('Y-m-d'))->whereIn('siswa_id',$ids)->orderBy('tanggal')->get()->getResultArray() as $row){
+            $id=$row['siswa_id'];
+            $late[$id]['jumlah']=($late[$id]['jumlah']??0)+1;
+            $late[$id]['tanggal']=$row['tanggal'];
+            $late[$id]['tanggal_kejadian'][]=$row['tanggal'];
+        }
         foreach($students as &$student){
             $saved=$records[$student['id']]??[];$auto=$late[$student['id']]??[];
             $count=(int)($saved['terlambat']['jumlah_terlambat']??$auto['jumlah']??0);
+            if(isset($saved['terlambat']['jumlah_dasar_absensi'])){
+                $excluded=json_decode($saved['terlambat']['tanggal_dikecualikan']??'[]',true)?:[];
+                $included=count(array_diff($auto['tanggal_kejadian']??[],$excluded));
+                $count=max(0,$count+$included-(int)$saved['terlambat']['jumlah_dasar_absensi']);
+            }
+            $student['tanggal_pelanggaran']=[];
+            foreach(self::CATEGORIES as $kind=>$title){
+                $dates=json_decode($saved[$kind]['tanggal_kejadian']??'[]',true);
+                if(!is_array($dates))$dates=[];
+                $corrected=$kind==='terlambat'&&isset($saved[$kind]['tanggal_dikecualikan']);
+                if(!$corrected&&!empty($saved[$kind]['tanggal']))$dates[]=$saved[$kind]['tanggal'];
+                if($kind==='terlambat'){
+                    $excluded=json_decode($saved[$kind]['tanggal_dikecualikan']??'[]',true)?:[];
+                    $dates=array_merge($dates,array_diff($auto['tanggal_kejadian']??[],$excluded));
+                }
+                $dates=array_values(array_unique($dates));sort($dates);
+                $student['tanggal_pelanggaran'][$kind]=$dates;
+            }
+            if(isset($saved['terlambat']['tanggal_dikecualikan'])){
+                $dates=$student['tanggal_pelanggaran']['terlambat'];
+                $saved['terlambat']['tanggal']=$dates?end($dates):null;
+            }
+            $reasons=json_decode($saved['terlambat']['alasan_per_tanggal']??'null',true);
+            $student['alasan_keterlambatan']=[];
+            foreach($student['tanggal_pelanggaran']['terlambat'] as $date)$student['alasan_keterlambatan'][$date]=is_array($reasons)?($reasons[$date]??''):($saved['terlambat']['alasan']??'');
+            if(is_array($reasons)&&isset($saved['terlambat'])){
+                $last=$student['tanggal_pelanggaran']['terlambat'];$date=$last?end($last):null;
+                $saved['terlambat']['alasan']=$date?($reasons[$date]??null):null;
+            }
             $student['records']=$saved;
-            $student['keterlambatan']=['jumlah'=>$count,'tanggal'=>$saved['terlambat']['tanggal']??$auto['tanggal']??null,'status'=>self::status($count)];
+            $lastDate=isset($saved['terlambat']['tanggal_dikecualikan'])?$saved['terlambat']['tanggal']:($saved['terlambat']['tanggal']??$auto['tanggal']??null);
+            $student['keterlambatan']=['jumlah'=>$count,'tanggal'=>$lastDate,'status'=>self::status($count)];
             $notes=[];
             foreach(self::CATEGORIES as $kind=>$title){
                 $record=$saved[$kind]??[];

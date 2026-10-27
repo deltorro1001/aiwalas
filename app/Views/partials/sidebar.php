@@ -16,6 +16,7 @@
   <nav class="nav-group second">
     <span class="nav-label">ACTIVITY</span>
     <button class="nav-item" data-page="attendance"><span></span> Absensi Harian</button>
+    <button class="nav-item" data-page="attendanceRecapPage"><span></span> Rekap Absen</button>
     <button class="nav-item" data-page="studentSchedule" style="display:none"><span></span> Jadwal Mapel</button>
     <button class="nav-item" data-page="studentDiscipline" style="display:none"><span>&#128737;</span> Status Kedisiplinan</button>
     <button class="nav-item" data-page="journal"><span></span> Jurnal Kelas</button>

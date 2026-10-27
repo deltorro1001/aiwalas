@@ -5,7 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261027-account-management') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261027-recap-labels') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
@@ -45,7 +45,7 @@
 <script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
-<script src='<?= base_url('assets/attendance-recap-detail.js?v=20260914-september-data') ?>'></script>
+<script src='<?= base_url('assets/attendance-recap-detail.js?v=20261027-live-recap') ?>'></script>
 <script src='<?= base_url('assets/reports-tabs.js?v=20260914c') ?>'></script>
 <script src='<?= base_url('assets/reports-teacher-share.js?v=20261011-two-reports') ?>'></script>
 <script src='<?= base_url('assets/schedule-actions.js?v=20260918-observer-fix') ?>'></script>
@@ -121,6 +121,7 @@
   setTimeout(ensureWalasAssessment,1500);
 })();
 </script>
+<script src='<?= base_url('assets/class-attendance-recap.js?v=20261027-recap-labels') ?>'></script>
 <script src='<?= base_url('assets/account-management.js?v=20261027') ?>'></script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>

@@ -35,7 +35,11 @@ class AbsensiController extends BaseApiController
   if((session()->get('pengguna')['peran']??'')==='orang_tua')return $this->respond(['ok'=>false,'message'=>'Akun orangtua hanya dapat melihat absensi anak.'],403);
   $p=$this->payload();$u=$this->currentUser();$isStudent=($u['peran']??'')==='siswa';
   $semester=(string)($p['semester']??'Ganjil');if(!in_array($semester,['Ganjil','Genap'],true))$semester='Ganjil';
-  if(!$isStudent)$p['tanggal']=date('Y-m-d');$p['semester']=$semester;
+  if(!$isStudent){
+   // Wali corrections use the selected date; other manual recording stays on today.
+   $p['tanggal']=($u['peran']??'')==='wali_kelas'?($p['tanggal']??date('Y-m-d')):date('Y-m-d');
+  }
+  $p['semester']=$semester;
   if($isStudent){
    $parts=explode('|',(string)($p['qr_code']??''));
    $kelasId=(int)($p['kelas_id']??0);

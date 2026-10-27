@@ -164,6 +164,14 @@ try:
     wali.call('api/absensi',dict(pjj_payload,status='Hadir',waktu_scan='06:12:34',keterangan='Private note'))
     yesterday=today-datetime.timedelta(days=1)
     sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,waktu_scan,semester,dicatat_oleh) VALUES({pupils[0]},{class_id},'{yesterday}','Hadir','05:55:55','Ganjil',{users[0]});")
+    # Historical corrections must update that day's row without touching today's record.
+    historical=wali.call('api/absensi',dict(pjj_payload,tanggal=str(yesterday)))['data']
+    assert sql('SELECT tanggal FROM absensi WHERE id='+str(historical['id']))==str(yesterday) and historical['status']=='PJJ'
+    assert a.call('api/absensi?kelas_id='+class_id+'&semester=Ganjil&tanggal='+str(yesterday))['data'][0]['status']=='PJJ'
+    assert a.call(attendance_endpoint)['data'][0]['status']=='Hadir'
+    assert sql(f"SELECT COUNT(*) FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{yesterday}' AND semester='Ganjil'")=='1'
+    wali.call('api/absensi',dict(pjj_payload,tanggal='invalid'),status=422)
+    wali.call('api/absensi',dict(pjj_payload,tanggal=str(yesterday),status='Hadir',waktu_scan='05:55:55'))
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies')
@@ -187,6 +195,22 @@ try:
         assert c.js("document.querySelectorAll('[data-attendance-status]').length")==1
         assert c.js("document.querySelector('[data-attendance-status]').dataset.attendanceStatus")=='PJJ'
         wali.call('api/absensi',{'siswa_id':int(pupils[4]),'kelas_id':int(class_id),'semester':'Ganjil','status':'Alpha','waktu_scan':None})
+        c.js("document.getElementById('attendanceSortFilter').value='Nama';document.getElementById('attendanceSortFilter').dispatchEvent(new Event('change'));document.getElementById('attendanceViewDate').value="+json.dumps(str(yesterday))+";document.getElementById('attendanceViewDate').dispatchEvent(new Event('change'))")
+        history_selector=json.dumps('[data-student-id="'+pupils[0]+'"].attendance-correct')
+        c.wait("document.querySelector("+history_selector+")?.dataset.time==='05:55:55'")
+        assert c.js("document.getElementById('scanQr').disabled")
+        c.js("document.querySelector("+history_selector+").click()")
+        c.js("document.getElementById('correctStatus').value='PJJ';document.getElementById('correctTime').value='';document.getElementById('correctNote').value='Koreksi riwayat';document.getElementById('saveModal').click()")
+        c.wait("document.querySelector("+history_selector+")?.dataset.status==='PJJ'")
+        c.js("window.render()")
+        c.wait("document.querySelector("+history_selector+")?.dataset.status==='PJJ'")
+        assert c.js("window.students.find(s=>String(s[7])==="+json.dumps(pupils[0])+")[2]")=='Hadir'
+        assert a.call(attendance_endpoint)['data'][0]['status']=='Hadir'
+        assert sql(f"SELECT status FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{yesterday}' AND semester='Ganjil'")=='PJJ'
+        wali.call('api/absensi',dict(pjj_payload,tanggal=str(yesterday),status='Hadir',waktu_scan='05:55:55'))
+        c.js("document.getElementById('attendanceViewDate').value="+json.dumps(str(today))+";document.getElementById('attendanceViewDate').dispatchEvent(new Event('change'))")
+        c.wait("document.querySelector("+history_selector+")?.dataset.time==='06:12:34'")
+        print('PASS: Historical wali correction persists on selected date, keeps today unchanged, retains button on reload and leaves historical scan disabled.')
         c.js("window.page='discipline';window.render()")
         print('PASS: Wali PJJ correction saves, survives re-render, reopens selected and filters correctly.')
         c.wait("!!document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]')")

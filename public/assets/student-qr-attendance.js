@@ -29,8 +29,9 @@
   authRequest('api/absensi?kelas_id='+encodeURIComponent(classId)+'&semester='+encodeURIComponent(semester),{cache:'no-store'}).then(function(result){
    if(!active())return;
    var row=(result.data||[])[0],status=document.getElementById('studentAttendanceStatus'),time=document.getElementById('studentAttendanceScan');
-   status.textContent=row?row.status:'Belum tercatat';
-   status.dataset.status=row?row.status:'';
+   var holiday=result.kalender&&result.kalender.hari_libur;
+   status.textContent=row?row.status:holiday?'Libur':'Belum tercatat';
+   status.dataset.status=row?row.status:holiday?'Libur':'';
    time.textContent=row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan';
    document.getElementById('studentAttendanceDate').textContent='Absensi '+(row?row.tanggal:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()));
    document.getElementById('studentAttendanceError').textContent='';

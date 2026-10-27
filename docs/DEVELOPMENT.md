@@ -170,3 +170,13 @@ AIWALAS_BROWSER_TEST=1 python3 tests/attendance-filters-local.py
 ```
 
 Tes menggunakan fixture pada localhost:8080 dan membersihkannya setelah selesai. Pemanggilan gateway WhatsApp pada tes browser diganti stub, sehingga tidak mengirim pesan sungguhan.
+
+## Libur akhir pekan
+
+Sabtu dan Minggu dihitung sebagai **Libur** menurut kalender Asia/Jakarta. Semua peran (wali kelas, sekretaris, siswa, orangtua, guru, guest) mendapat keterangan Libur pada halaman aplikasi; saat wali/sekretaris melihat riwayat Absensi Harian, keterangan mengikuti tanggal yang dipilih.
+
+Status untuk hari tanpa catatan pada akhir pekan ditampilkan sebagai Libur di Absensi Harian, ringkasan kelas, dan kalender rekap siswa/orangtua. Jadwal harian siswa yang kosong menampilkan keterangan libur. Riwayat absensi yang sudah tersimpan tetap tampil sesuai status aslinya. Libur merupakan status tampilan kalender, bukan baris absensi baru; tidak menambah Alpha/keterlambatan atau mengubah rekap Excel. Koreksi manual untuk aktivitas khusus tetap tersedia.
+
+`SchoolCalendar` menjadi sumber kalender server dan `school-calendar.js` mengatur tampilan bersama, termasuk pembaruan pada pergantian tanggal/ketika tab dibuka kembali. Tanggal Libur tanpa catatan tidak menawarkan tombol pemberitahuan ketidakhadiran WhatsApp.
+
+Verifikasi: `php tests/school-calendar.php` dan `python3 tests/school-calendar-browser.py` (Chrome DevTools localhost:9222, server localhost:8080). Tes browser memakai simulasi waktu/API tanpa perubahan akun atau data asli.

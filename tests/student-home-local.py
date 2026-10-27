@@ -207,6 +207,8 @@ try:
 
     sql(f"UPDATE absensi SET waktu_scan='06:12:34' WHERE siswa_id={pupils[0]} AND tanggal='{today}' AND semester='Ganjil';")
     attendance_endpoint='api/absensi?kelas_id='+class_id+'&semester=Ganjil'
+    assert wali.call('api/absensi?kelas_id='+class_id+'&tanggal=2026-10-31')['kalender']['hari_libur'] is True
+    assert wali.call('api/absensi?kelas_id='+class_id+'&tanggal=2026-11-02')['kalender']['hari_libur'] is False
     own=a.call(attendance_endpoint)['data']
     assert len(own)==1 and str(own[0]['siswa_id'])==pupils[0] and own[0]['waktu_scan']=='06:12:34' and own[0]['status']=='Hadir'
     assert not a.call('api/absensi?kelas_id='+classes[1])['data']
@@ -458,7 +460,7 @@ try:
         c.js("monthChoice.value='03';monthChoice.dispatchEvent(new Event('change'))")
         c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Maret 2026'")
         assert c.js("document.querySelectorAll('#studentAttendanceRecapRows tr').length")==31
-        assert c.js("document.querySelector('#studentAttendanceRecapRows tr').textContent")=='Minggu01/03/2026—Belum ada catatan'
+        assert c.js("document.querySelector('#studentAttendanceRecapRows tr').textContent")=='Minggu01/03/2026—Libur'
         c.js("monthChoice.value='12';monthChoice.dispatchEvent(new Event('change'))")
         c.wait("document.getElementById('studentAttendanceRecapMonthLabel').textContent==='Desember 2026'")
         assert '31/12/2026' in c.js("document.getElementById('studentAttendanceRecapRows').textContent")

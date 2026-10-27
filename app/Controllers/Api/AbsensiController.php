@@ -14,7 +14,7 @@ class AbsensiController extends BaseApiController
   $q=(new AbsensiModel())->select('absensi.*,siswa.nis,siswa.nama_lengkap')->join('siswa','siswa.id=absensi.siswa_id')->where('absensi.kelas_id',$kelas)->where('absensi.tanggal',$tanggal)->where('absensi.semester',$semester)->orderBy('siswa.nama_lengkap');
   $u=$this->currentUser();
   if(($u['peran']??'')==='siswa')$q->where('siswa.nis',$u['nis']);
-  return $this->respond(['data'=>$q->findAll()]);
+  return $this->respond(['data'=>$q->findAll(),'kalender'=>\App\Libraries\SchoolCalendar::info($date)]);
  }
 
  public function createQr(){

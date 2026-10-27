@@ -8,7 +8,7 @@
     ['scanQr','makeLiveQr','manualAttendance','attendanceManual','createStudentQr'].forEach(function(id){var b=document.getElementById(id);if(b){b.disabled=!isToday();b.title=isToday()?'':'Pilih tanggal hari ini untuk mencatat absensi.'}});
   }
   function rows(){
-    return (window.students||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]),'id')}).map(function(student){var record=records[String(student[7])];return {student:student,record:record,status:record?record.status:'Menunggu keterangan'}});
+    return (window.students||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]),'id')}).map(function(student){var record=records[String(student[7])];return {student:student,record:record,status:record?record.status:(window.AIWalasCalendar&&window.AIWalasCalendar.isWeekend(selectedDate||today())?'Libur':'Menunggu keterangan')}});
   }
   function paint(){
     if(window.page!=='attendance'||window.currentRole==='student')return;
@@ -54,7 +54,7 @@
   function updateHeading(){
     var root=document.getElementById('pageContent'),heading=root.querySelector('.page-heading p'),title=root.querySelector('.table-panel .panel-head h2');
     if(heading)heading.textContent='Tanggal '+selectedDate+' · '+(isToday()?'Absensi hari ini':'Riwayat absensi');
-    if(title)title.textContent=isToday()?'Status absensi hari ini':'Status absensi '+selectedDate;
+    if(title)title.textContent=(isToday()?'Status absensi hari ini':'Status absensi '+selectedDate)+(window.AIWalasCalendar&&window.AIWalasCalendar.isWeekend(selectedDate)?' · Libur':'');
   }
   function openCorrection(btn){
     if(window.currentRole!=='walas')return;

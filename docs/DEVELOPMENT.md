@@ -186,3 +186,11 @@ Verifikasi: `php tests/school-calendar.php` dan `python3 tests/school-calendar-b
 `TeacherAssignments` menggabungkan penugasan dari `jadwal_kelas` dan `pengampu_mapel`, dengan deduplikasi kelas/mapel/guru. Data ini dipakai untuk kelas dan dropdown mapel guru, penilaian, jurnal, daftar siswa guru, serta kontak pengajar wali kelas. Slot jadwal dan otomatisasi WhatsApp tetap mengikuti `jadwal_kelas`.
 
 Migrasi `TambahMapelAnimasi3d` menambahkan **Animasi 3D**, menautkannya kepada **Sumantoro Kasdhani, S.Kom., M.I.Kom.** pada kelas aktif yang sudah diampunya, serta melengkapi nama guru dan akun gurunya. Penugasan mapel tidak membuat hari/jam pelajaran baru. Pengujian lokal: `AIWALAS_BROWSER_TEST=1 python3 tests/teacher-assignments-local.py`.
+
+## PKK menjadi KIK
+
+Migrasi `SatukanPkkMenjadiKik` memakai satu master **KIK** untuk nama PKK/KIK. Penugasan guru, jadwal, jurnal, remedial dan komponen nilai merujuk ID KIK yang sama, sehingga input nilai guru menjadi sumber kolom KIK pada Ledger Nilai. Komponen UH 1–UH 6 dengan spasi dinormalisasi ke UH1–UH6 untuk menghindari duplikasi dengan formulir penilaian. ATS/ASS tetap dipertahankan.
+
+Jika dua nilai memiliki siswa, komponen dan semester yang sama, nilai dengan waktu perubahan terbaru dipakai; jika waktunya sama, nilai target KIK dipertahankan. Kedua nilai asli beserta metadata komponennya diarsipkan ke `arsip_penggabungan_pkk` sebelum digabung. Semester berbeda tetap terpisah, dan angka 0 tetap valid. Arsip hanya untuk pemulihan internal, tidak diekspos sebagai API.
+
+Input master mapel dan impor jadwal bernama PKK dinormalisasi menjadi KIK agar tidak membuat master terpisah lagi. Dropdown guru, penilaian, nilai siswa/orangtua dan ledger menerima alias PKK sebagai KIK. Pengujian lokal: `AIWALAS_BROWSER_TEST=1 python3 tests/pkk-kik-local.py`.

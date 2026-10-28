@@ -1,13 +1,13 @@
 (function(){
   var fallback=window.render, ledger={}, requestVersion=0;
-  window.ledgerTeacherAssessment=function(subject){return ledger[String(subject).toLowerCase().replace(/[^a-z0-9]/g,'')]||{}};
+  window.ledgerTeacherAssessment=function(subject){return ledger[String(subject).toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^pkk$/,'kik')]||{}};
   function loadLedger(){
     var version=++requestVersion, page=window.page;
     document.getElementById('pageContent').innerHTML='<p class="stat-note">Memuat nilai...</p>';
     authRequest('api/akademik?kelas_id='+window.activeClassId+'&semester='+encodeURIComponent(window.activeSemester||'Ganjil')).then(function(data){
       if(version!==requestVersion||window.page!==page)return;
       ledger={};var names={};(data.subjects||[]).forEach(function(s){names[s.id]=s.nama_mata_pelajaran});
-      (data.data||[]).forEach(function(row){var name=String(names[row.mata_pelajaran_id]||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(!ledger[name])ledger[name]={};if(!ledger[name][row.nis])ledger[name][row.nis]={};ledger[name][row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
+      (data.data||[]).forEach(function(row){var name=String(names[row.mata_pelajaran_id]||'').toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^pkk$/,'kik');if(!ledger[name])ledger[name]={};if(!ledger[name][row.nis])ledger[name][row.nis]={};ledger[name][row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
       if(ledger.olahraga)ledger.pjok=ledger.olahraga;
       if(page==='grades')document.getElementById('pageContent').innerHTML=window.grades();
       else fallback();

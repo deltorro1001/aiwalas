@@ -13,7 +13,13 @@ class RekapAbsenKelasController extends BaseApiController
         if(!is_string($class)||!preg_match('/^[1-9][0-9]*$/D',$class))return $this->respond(['message'=>'Kelas wajib dipilih.'],422);
         if(!in_array($semester,['Ganjil','Genap'],true))return $this->respond(['message'=>'Semester tidak valid.'],422);
         $db=db_connect();
-        $klass=$db->table('kelas')->select('id,nama_kelas')->where(['id'=>(int)$class,'wali_kelas_id'=>(int)$this->currentUser()['id']])->get()->getRowArray();
+        $user=$this->currentUser();
+        $query=$db->table('kelas')->select('id,nama_kelas')->where('id',(int)$class);
+        if(($user['peran']??'')==='sekretaris'){
+            $own=$db->table('siswa')->where(['nis'=>$user['nis']??'','kelas_id'=>(int)$class,'aktif'=>1])->countAllResults();
+            if(!$own)return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);
+        }else $query->where('wali_kelas_id',(int)$user['id']);
+        $klass=$query->get()->getRowArray();
         if(!$klass)return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);
         $empty=static fn()=>['sakit'=>0,'izin'=>0,'alpha'=>0,'terlambat'=>0];
         $months=[];for($month=1;$month<=12;$month++)$months[$month]=['bulan'=>$month]+$empty();

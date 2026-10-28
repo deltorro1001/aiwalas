@@ -8,8 +8,8 @@
   }
   function install(){
     var select=document.getElementById('semesterSelect');if(!select)return;
-    if(window.currentRole==='assistant'||window.currentRole==='student'){var row=select.closest('.academic-year-row');if(row)row.style.display='none';window.activeSemester='Ganjil';return}
-    if(select.dataset.bound==='1')return;
+    if(window.currentRole==='student'){var row=select.closest('.academic-year-row');if(row)row.style.display='none';window.activeSemester='Ganjil';return}
+    if(select.dataset.bound==='1'){window.activeSemester=select.value;return;}
     select.dataset.bound='1';select.value=current();window.activeSemester=select.value;
     select.onchange=function(){var value=allowed.indexOf(this.value)>=0?this.value:'Ganjil';localStorage.setItem(key,value);window.activeSemester=value;load(value)};
   }

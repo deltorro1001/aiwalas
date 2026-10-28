@@ -21,7 +21,7 @@
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/school-calendar.js?v=20261028') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261028-weekend') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
@@ -45,8 +45,8 @@
 <script src='<?= base_url('assets/attendance-ui.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
-<script src='<?= base_url('assets/assistant-sidebar.js?v=20260924-initials-rollout') ?>'></script>
-<script src='<?= base_url('assets/attendance-recap-detail.js?v=20261027-live-recap') ?>'></script>
+<script src='<?= base_url('assets/assistant-sidebar.js?v=20261028-secretary-menus') ?>'></script>
+<script src='<?= base_url('assets/attendance-recap-detail.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/reports-tabs.js?v=20260914c') ?>'></script>
 <script src='<?= base_url('assets/reports-teacher-share.js?v=20261011-two-reports') ?>'></script>
 <script src='<?= base_url('assets/schedule-actions.js?v=20260918-observer-fix') ?>'></script>
@@ -106,7 +106,7 @@
   },true);
 })();
 </script><script src='<?= base_url('assets/assessment-redesign.js?v=20261018') ?>'></script>
-<script src='<?= base_url('assets/semester-context.js?v=20261008-semester') ?>'></script>
+<script src='<?= base_url('assets/semester-context.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261021-date-filter') ?>'></script>
 <script src='<?= base_url('assets/attendance-whatsapp.js?v=20261028-weekend') ?>'></script>
@@ -122,7 +122,7 @@
   setTimeout(ensureWalasAssessment,1500);
 })();
 </script>
-<script src='<?= base_url('assets/class-attendance-recap.js?v=20261027-recap-labels') ?>'></script>
+<script src='<?= base_url('assets/class-attendance-recap.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/account-management.js?v=20261028-student-alias') ?>'></script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>

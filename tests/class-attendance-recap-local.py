@@ -26,6 +26,7 @@ try:
     for i,name in enumerate(['Siswa <b>Uji</b>','=FORMULA','Siswa Nonaktif','Siswa Kelas Lain']):
         pupils.append(sql(f"INSERT INTO siswa(nis,nama_lengkap,jenis_kelamin,kelas_id,aktif) VALUES('{prefix}_{i}','{name}','L',{classes[1] if i==3 else classes[0]},{0 if i==2 else 1});SELECT LAST_INSERT_ID();"))
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_student','{hashed}','Siswa Uji','siswa','{prefix}_0');SELECT LAST_INSERT_ID();"))
+    users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_secretary','{hashed}','Sekretaris Rekap','sekretaris','{prefix}_1');SELECT LAST_INSERT_ID();"))
     records=[(0,'2026-01-01','Sakit','Genap'),(0,'2026-01-31','Izin','Genap'),(0,'2026-02-01','Alpha','Genap'),(0,'2026-07-01','Terlambat','Ganjil'),(0,'2026-12-31','Sakit','Ganjil'),(0,'2027-01-01','Alpha','Genap'),(0,'2026-01-01','Sakit','Ganjil'),(1,'2026-01-01','Izin','Genap'),(1,'2026-10-02','Alpha','Ganjil'),(1,'2026-10-03','PJJ','Ganjil'),(1,'2026-10-04','Menunggu keterangan','Ganjil'),(1,'2026-10-05','Hadir','Ganjil'),(2,'2026-10-01','Sakit','Ganjil'),(3,'2026-10-01','Terlambat','Ganjil')]
     for i,date,status,semester in records:sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[i]},{classes[1] if i==3 else classes[0]},'{date}','{status}','{semester}',{users[0]});")
     wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_0','password':password})
@@ -33,6 +34,9 @@ try:
     student=Client();student.call('api/auth/login',{'role':'student','username':prefix+'_student','password':password})
     parent=Client();parent.call('api/auth/login',{'role':'parent','username':prefix+'_0','password':prefix+'_0'})
     endpoint='api/absensi/rekap-kelas?kelas_id='+classes[0]+'&tahun=2026&semester='
+    secretary=Client();secretary.call('api/auth/login',{'role':'assistant','username':prefix+'_secretary','password':password})
+    bootstrap=secretary.call('api/bootstrap?kelas_id='+classes[1])
+    assert str(bootstrap['selectedClassId'])==classes[0] and len(bootstrap['classes'])==1
     anonymous=Client();anonymous.call(endpoint+'Ganjil',status=401)
     student.call(endpoint+'Ganjil',status=403);parent.call(endpoint+'Ganjil',status=403);other.call(endpoint+'Ganjil',status=404)
     wali.call('api/absensi/rekap-kelas?kelas_id='+classes[1],status=404)
@@ -40,6 +44,10 @@ try:
     ganjil=wali.call(endpoint+'Ganjil');assert ganjil['total']==expected and len(ganjil['bulanan'])==12 and len(ganjil['siswa'])==2,ganjil
     assert ganjil['bulanan'][0]['sakit']==1 and ganjil['bulanan'][11]['sakit']==1 and ganjil['bulanan'][6]['terlambat']==1
     assert ganjil['bulanan'][9]['alpha']==1 and ganjil['bulanan'][9]['sakit']==0
+    secretary_recap=secretary.call(endpoint+'Ganjil')
+    assert secretary_recap['total']==ganjil['total'] and secretary_recap['bulanan']==ganjil['bulanan'] and secretary_recap['siswa']==ganjil['siswa']
+    secretary.call('api/absensi/rekap-kelas?kelas_id='+classes[1],status=404)
+    secretary.call('api/absensi/rekap-kelas?kelas_id='+classes[2],status=404)
     genap=wali.call(endpoint+'Genap');assert genap['total']=={'sakit':1,'izin':2,'alpha':1,'terlambat':0}
     assert genap['bulanan'][0]['izin']==2 and genap['bulanan'][1]['alpha']==1
     assert wali.call('api/absensi/rekap-kelas?kelas_id='+classes[0]+'&tahun=2027&semester=Genap')['total']['alpha']==1
@@ -112,6 +120,31 @@ try:
         assert c.js('window.page')=='attendanceRecapPage'
         c.js("window.page='attendance';window.render();document.getElementById('attendanceRecap').click()")
         c.wait("document.getElementById('classRecapStudentLabel')?.hidden===false")
+        c.js("window.page='settings';window.render()")
+        wali_settings=c.js("Array.from(document.querySelectorAll('.settings-card .panel-head h2')).map(el=>el.textContent)")
+        secretary_creds=json.dumps({'role':'assistant','username':prefix+'_secretary','password':password})
+        c.js("authRequest('api/auth/logout',{method:'POST',body:'{}'}).then(()=>authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+secretary_creds+")})).then(d=>finishLogin(d.user))")
+        c.wait("window.currentRole==='assistant' && !!document.querySelector('.sidebar [data-page=attendanceRecapPage]')")
+        assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=attendanceRecapPage]')).display")!='none'
+        assert c.js("getComputedStyle(document.querySelector('.sidebar-bottom [data-page=settings]')).display")!='none'
+        assert c.js("getComputedStyle(document.getElementById('semesterSelect').closest('.academic-year-row')).display")!='none'
+        c.js("document.querySelector('.sidebar [data-page=attendanceRecapPage]').click()")
+        c.wait("!!document.querySelector('#classRecapMonthlyRows .class-recap-total')")
+        assert c.js("document.querySelectorAll('#classRecapMonthlyRows tr').length")==13
+        c.js("document.querySelector('[data-recap-mode=kelas]').click();document.getElementById('exportClassRecap').click()")
+        assert c.js('window.__recapBook.SheetNames')==['Rekap Kelas','Rincian Bulan','Data Bulanan Siswa']
+        c.js("document.getElementById('semesterSelect').value='Genap';document.getElementById('semesterSelect').dispatchEvent(new Event('change'))")
+        c.wait("document.getElementById('classRecapIdentity')?.textContent.includes('Semester Genap')")
+        assert c.js("Array.from(document.querySelectorAll('#classRecapStats .stat-number')).map(el=>el.textContent)")==['1','2','1','0']
+        c.js("document.querySelector('.sidebar-bottom [data-page=settings]').click()")
+        assert c.js("Array.from(document.querySelectorAll('.settings-card .panel-head h2')).map(el=>el.textContent)")==wali_settings
+        assert c.js("document.querySelectorAll('.settings-card').length")==4
+        assert 'Sekretaris Kelas' in c.js("document.querySelector('.settings-profile').textContent")
+        c.js("document.getElementById('newPassword').value='Secretary-Test-New';document.getElementById('confirmPassword').value='Secretary-Test-New';document.getElementById('savePassword').click()")
+        c.wait("window.currentRole===null")
+        changed=Client();changed.call('api/auth/login',{'role':'assistant','username':prefix+'_secretary','password':'Secretary-Test-New'})
+        same_student=Client();same_student.call('api/auth/login',{'role':'student','username':prefix+'_1','password':password})
+        print('PASS: Secretary own-class recap matches wali, Excel export and semester switch work, Settings has identical cards and can change the secretary password independently.')
         c.js('logout()')
         print('PASS: Class/individual tabs, monthly roster, 12-month student recap, real XLSX export, separate sheets, numeric counts, text NIS, filters, SUM formulas, year filter, refresh after corrections, daily-page links and mobile layout.')
 finally:

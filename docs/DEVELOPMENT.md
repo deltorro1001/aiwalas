@@ -194,3 +194,11 @@ Migrasi `SatukanPkkMenjadiKik` memakai satu master **KIK** untuk nama PKK/KIK. P
 Jika dua nilai memiliki siswa, komponen dan semester yang sama, nilai dengan waktu perubahan terbaru dipakai; jika waktunya sama, nilai target KIK dipertahankan. Kedua nilai asli beserta metadata komponennya diarsipkan ke `arsip_penggabungan_pkk` sebelum digabung. Semester berbeda tetap terpisah, dan angka 0 tetap valid. Arsip hanya untuk pemulihan internal, tidak diekspos sebagai API.
 
 Input master mapel dan impor jadwal bernama PKK dinormalisasi menjadi KIK agar tidak membuat master terpisah lagi. Dropdown guru, penilaian, nilai siswa/orangtua dan ledger menerima alias PKK sebagai KIK. Pengujian lokal: `AIWALAS_BROWSER_TEST=1 python3 tests/pkk-kik-local.py`.
+
+## Pemulihan token CSRF pada permintaan API
+
+Error **The action you requested is not allowed.** berasal dari validasi CSRF sebelum controller API dijalankan. Token berubah setiap penyimpanan; halaman yang lama terbuka, tab lain, dan respons polling yang terlambat dapat membuat token pada meta halaman tidak sesuai cookie terbaru.
+
+`ApiCsrf` tetap memverifikasi seluruh permintaan tulis dan memberi respons JSON 403 dengan kode `csrf_expired` bila token ditolak. `authRequest` menyegarkan token melalui `api/auth/csrf` sebelum menulis, mengantrekan penulisan pada halaman yang sama, serta mengabaikan token polling yang sudah usang. Hanya respons 403 berkode tersebut yang dicoba ulang sekali setelah refresh token; controller belum dijalankan saat penolakan ini terjadi. Gateway 502/504, kegagalan jaringan dan penolakan hak akses tidak dicoba ulang otomatis, sehingga hasil pengiriman yang belum pasti tidak digandakan. Regenerasi token dan perlindungan CSRF tetap aktif.
+
+Pengujian lokal: `python3 tests/csrf-gateway-local.py` dengan Chrome DevTools localhost:9222. Gateway memakai payload kosong yang ditolak validasi atau respons tiruan; tidak ada pesan WhatsApp yang dikirim.

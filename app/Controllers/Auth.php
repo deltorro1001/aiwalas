@@ -8,6 +8,7 @@ class Auth extends BaseController
 {
     public function csrf()
     {
+        $this->response->setHeader('Cache-Control','private, no-store');
         return $this->json(['ok' => true]);
     }
 

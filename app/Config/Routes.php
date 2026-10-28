@@ -109,3 +109,12 @@ $routes->post('api/kedisiplinan', 'Api\\KedisiplinanController::save', ['filter'
 
 $routes->get('api/kelola-akun', 'Api\KelolaAkunController::index', ['filter'=>['auth','role:wali_kelas']]);
 $routes->post('api/kelola-akun/reset', 'Api\KelolaAkunController::resetPassword', ['filter'=>['auth','role:wali_kelas']]);
+
+// Student photos stay private; only the temporary collage token is fetched by the gateway.
+$routes->get('api/upload-foto', 'Api\UploadFotoController::index', ['filter' => 'auth']);
+$routes->post('api/upload-foto', 'Api\UploadFotoController::create', ['filter' => ['auth','role:siswa']]);
+$routes->get('api/upload-foto/(:num)/gambar', 'Api\UploadFotoController::image/$1', ['filter' => 'auth']);
+$routes->post('api/upload-foto/kolase', 'Api\UploadFotoController::build', ['filter' => ['auth','role:wali_kelas']]);
+$routes->get('api/upload-foto/kolase/halaman/(:num)', 'Api\UploadFotoController::collageImage/$1', ['filter' => ['auth','role:wali_kelas']]);
+$routes->post('api/upload-foto/kolase/halaman/(:num)/kirim', 'Api\UploadFotoController::send/$1', ['filter' => ['auth','role:wali_kelas']]);
+$routes->get('media/kolase/(:segment)', 'Api\UploadFotoController::media/$1');

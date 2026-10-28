@@ -4,7 +4,7 @@ AIWalas adalah sistem informasi wali kelas berbasis CodeIgniter 4.7, PHP 8.2, My
 
 ## Kebutuhan
 
-- PHP 8.2+ dengan ekstensi `mysqli`, `intl`, dan `mbstring`
+- PHP 8.2+ dengan ekstensi `mysqli`, `intl`, `mbstring`, dan `gd` (pengolahan foto dan kolase)
 - MySQL/MariaDB, Composer, dan Apache dengan `mod_rewrite`
 
 ## Instalasi
@@ -81,3 +81,8 @@ Scheduler server menyiapkan pengingat 10 menit sebelum jadwal mengajar dan ucapa
 ## Notifikasi nilai siswa otomatis
 
 Nilai komponen baru atau berubah di bawah 80 masuk antrean WhatsApp siswa setelah penyimpanan berhasil. Orangtua tetap menerima pesan melalui konfirmasi dan pengiriman manual wali kelas. Petunjuk antrean, cron, dan penanganan status tersedia di [docs/STUDENT-GRADE-AUTOMATION.md](docs/STUDENT-GRADE-AUTOMATION.md).
+
+
+## Upload foto siswa dan kolase
+
+Siswa dapat mengunggah foto disertai keterangan pada Absensi Harian, setelah Rekap Absen. Foto diunggah tanpa timestamp tambahan. Kolase memuat maksimal 35 foto per kelas/tanggal dalam satu halaman, dengan teks “created by aiwalas” dan tanggal/waktu pembuatan di kanan bawah. Wali kelas melihat galeri pada **Upload Foto**, tepat di atas Pengaturan, memilih tanggal, membuat kolase seluruh foto hari tersebut, dan mengirimnya ke nomor guru dari Data Guru. Petunjuk penyimpanan, pengiriman, dan pengujian ada di [docs/STUDENT-PHOTOS.md](docs/STUDENT-PHOTOS.md).

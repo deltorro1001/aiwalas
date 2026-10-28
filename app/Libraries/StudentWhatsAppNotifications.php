@@ -21,7 +21,7 @@ class StudentWhatsAppNotifications
             ->where(['kelas_id'=>$student['kelas_id'],'status_pengiriman'=>'Terkirim'])->groupStart()->where('siswa_id',$student['id']);
         if($phones){
             $query->orGroupStart()->where('siswa_id',null)->whereIn('nomor_tujuan',$phones)
-                ->groupStart()->where('kategori',null)->orWhereNotIn('kategori',['Pengingat Guru Otomatis','Terima Kasih Guru Otomatis'])->groupEnd()->groupEnd();
+                ->groupStart()->where('kategori',null)->orWhereNotIn('kategori',['Pengingat Guru Otomatis','Terima Kasih Guru Otomatis','Kolase Foto Siswa'])->groupEnd()->groupEnd();
         }
         return $query->groupEnd()->orderBy('dikirim_pada','DESC')->orderBy('id','DESC')->limit(4)->get()->getResultArray();
     }

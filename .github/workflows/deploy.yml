@@ -27,6 +27,7 @@ jobs:
             git reset --hard origin/main
             php scripts/configure-whatsapp-gateway.php --apply
             php spark migrate --all
+            php -r 'echo "Photo processing GD (CLI): ".(extension_loaded("gd") ? "available" : "unavailable").PHP_EOL;'
             systemctl is-active --quiet cron
             php scripts/configure-teacher-scheduler.php --apply
             php spark whatsapp:teacher-schedule

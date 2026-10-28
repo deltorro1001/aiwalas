@@ -5,6 +5,7 @@
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
+  <link rel='stylesheet' href='<?= base_url('assets/photo-uploads.css?v=20261028-single-page') ?>'>
   <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261028-weekend') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
@@ -133,6 +134,7 @@
 <script src='<?= base_url('assets/student-discipline.js?v=20261026') ?>'></script>
 <script src='<?= base_url('assets/student-attendance-recap.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/parent-sick-request.js?v=20261027') ?>'></script>
+<script src='<?= base_url('assets/photo-uploads.js?v=20261028-single-page') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261028-all-grade-logins') ?>'></script>
 </body>
 </html>

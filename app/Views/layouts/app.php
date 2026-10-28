@@ -22,7 +22,7 @@
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/school-calendar.js?v=20261028') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20261028-csrf-gateway') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261018') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261028-message-wording') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>

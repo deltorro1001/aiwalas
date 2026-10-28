@@ -9,6 +9,9 @@
     naskahdanpenyutradaraan: 'naskahpenyutradaraan',
     manajemenproduksifilm: 'manajemenproduksi',
     mulok: 'muatanlokal',
+    // Existing VPS grades entered by Wahyu use this legacy subject name.
+    // Tata Kamera is a separate assignment and must not be merged into this key.
+    tatacahaya: 'tatakameracahaya',
     tatakameradancahaya: 'tatakameracahaya',
     tatakameradantatacahaya: 'tatakameracahaya',
     tatakameratatacahaya: 'tatakameracahaya'

@@ -49,7 +49,7 @@
     return subjects.filter(function(subject){var key=subjectKey(subject.nama_mata_pelajaran);return key.indexOf('kokurikuler')<0&&key.indexOf('upacara')<0&&key.indexOf('pembiasaanharijumat')<0&&key.indexOf('pembiasaanjumat')<0}).sort(function(a,b){var ar=rank[subjectKey(a.nama_mata_pelajaran)],br=rank[subjectKey(b.nama_mata_pelajaran)];ar=ar==null?999:ar;br=br==null?999:br;return ar===br?String(a.nama_mata_pelajaran).localeCompare(String(b.nama_mata_pelajaran),'id'):ar-br});
   }
   function normalizeData(result){
-    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='pjok')subject.nama_mata_pelajaran='PJOK';});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
+    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='pjok')subject.nama_mata_pelajaran='PJOK';else subject.nama_mata_pelajaran=window.academicSubjectLabel(subject.nama_mata_pelajaran);});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
     scores.forEach(function(row){scoreMap[String(row.siswa_id)+'-'+String(row.komponen_nilai_id)]=Number(row.nilai)});
     return {subjects:subjects,components:components,scoreMap:scoreMap};
   }

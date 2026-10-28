@@ -9,7 +9,7 @@ MYSQL=shutil.which('mysql') or '/opt/homebrew/bin/mysql';PHP='/opt/homebrew/opt/
 def sql(q):return subprocess.check_output([MYSQL,'-h','127.0.0.1','-u','root','aiwalas','-N','-B','-e',q],text=True).strip()
 prefix='camera_'+secrets.token_hex(5);password=secrets.token_hex(16)
 hashed=subprocess.check_output([PHP,'-r','echo password_hash($argv[1],PASSWORD_DEFAULT);',password],text=True)
-users=[];classes=[];year=None;subject=None;created_subject=False;browser=None;pupil=None;teacher=None
+users=[];classes=[];year=None;subject=None;created_subject=False;browser=None;pupil=None;teacher=None;decoy_subject=None;decoy_teacher=None;created_decoy=False
 try:
     original=sql("SELECT id FROM guru WHERE nama_lengkap LIKE 'Wahyu Lukman Hakim%' AND aktif=1 LIMIT 1");assert original
     assert int(sql(f"SELECT COUNT(*) FROM jadwal_kelas j JOIN mata_pelajaran m ON m.id=j.mata_pelajaran_id WHERE j.guru_id={original} AND m.nama_mata_pelajaran='Tata Kamera & Cahaya'"))>0
@@ -17,14 +17,20 @@ try:
     for role in ['wali_kelas','guru']:
         users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,guru_id) VALUES('{prefix}_{role}','{hashed}','Fixture {role}','{role}',{teacher if role=='guru' else 'NULL'});SELECT LAST_INSERT_ID();"))
     year=sql(f"INSERT INTO tahun_ajaran(nama_tahun_ajaran,semester,aktif) VALUES('{prefix}','Ganjil',1);SELECT LAST_INSERT_ID();")
-    subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='Tata Kamera & Cahaya' AND aktif=1")
+    subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='Tata Cahaya' AND aktif=1")
     if not subject:
-        subject=sql("INSERT INTO mata_pelajaran(nama_mata_pelajaran,aktif) VALUES('Tata Kamera dan Cahaya',1);SELECT LAST_INSERT_ID();");created_subject=True
+        subject=sql("INSERT INTO mata_pelajaran(nama_mata_pelajaran,aktif) VALUES('Tata Cahaya',1);SELECT LAST_INSERT_ID();");created_subject=True
     other_subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='PAI' AND aktif=1")
+    decoy_subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='Tata Kamera' AND aktif=1")
+    if not decoy_subject:
+        decoy_subject=sql("INSERT INTO mata_pelajaran(nama_mata_pelajaran,aktif) VALUES('Tata Kamera',1);SELECT LAST_INSERT_ID();");created_decoy=True
+    decoy_teacher=sql(f"INSERT INTO guru(nama_lengkap,jenis_kelamin,aktif) VALUES('{prefix} Guru Kamera Lain','L',1);SELECT LAST_INSERT_ID();")
     for i in range(2):
         cls=sql(f"INSERT INTO kelas(nama_kelas,tingkat,jurusan,tahun_ajaran_id,wali_kelas_id) VALUES('{prefix}_{i}',11,'Test',{year},{users[0]});SELECT LAST_INSERT_ID();");classes.append(cls)
-        sql(f"INSERT INTO pengampu_mapel(guru_id,kelas_id,mata_pelajaran_id) VALUES({teacher},{cls},{subject}),({teacher},{cls},{other_subject})")
+        sql(f"INSERT INTO pengampu_mapel(guru_id,kelas_id,mata_pelajaran_id) VALUES({teacher},{cls},{subject}),({teacher},{cls},{other_subject}),({decoy_teacher},{cls},{decoy_subject})")
     pupil=sql(f"INSERT INTO siswa(nis,nama_lengkap,jenis_kelamin,kelas_id,aktif) VALUES('{prefix}','Siswa Fixture Kamera','L',{classes[0]},1);SELECT LAST_INSERT_ID();")
+    decoy_component=sql(f"INSERT INTO komponen_nilai(kelas_id,mata_pelajaran_id,nama_komponen,jenis_komponen) VALUES({classes[0]},{decoy_subject},'ATS','Tugas');SELECT LAST_INSERT_ID();")
+    sql(f"INSERT INTO nilai_siswa(siswa_id,komponen_nilai_id,semester,nilai,dinilai_oleh) VALUES({pupil},{decoy_component},'Ganjil',97,{users[0]}),({pupil},{decoy_component},'Genap',99,{users[0]})")
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_siswa','{hashed}','Siswa Fixture Kamera','siswa','{prefix}');SELECT LAST_INSERT_ID();"))
     other_pupil=sql(f"INSERT INTO siswa(nis,nama_lengkap,jenis_kelamin,kelas_id,aktif) VALUES('{prefix}_other','Siswa Lain','L',{classes[1]},1);SELECT LAST_INSERT_ID();")
     sql(f"UPDATE siswa SET nomor_hp_orang_tua='081234567890' WHERE id={pupil}")
@@ -52,6 +58,14 @@ try:
         browser.wait("!!document.querySelector('#pageContent table tbody tr')" if cls==classes[0] else "!!document.querySelector('#pageContent table thead')")
     def camera_value():return browser.js("(()=>{const table=document.querySelector('#pageContent table'),index=Array.from(table.querySelectorAll('thead th')).findIndex(th=>th.textContent.trim()==='Tata Kamera & Cahaya');return table.querySelector('tbody tr')?.children[index]?.textContent.trim()})()")
     open_ledger(classes[0],'Ganjil');assert camera_value()=='81',camera_value()
+    browser.js("window.page='teachers';window.render()")
+    browser.wait("!!document.querySelector('.teacher-directory tbody tr')")
+    source_rows=browser.js("Array.from(document.querySelectorAll('.teacher-directory tbody tr')).filter(row=>academicSubjectKey(row.children[1].textContent)===academicSubjectKey('Tata Kamera & Cahaya')).map(row=>Array.from(row.children).map(td=>td.textContent.trim()))")
+    assert len(source_rows)==1 and 'Wahyu Lukman Hakim' in source_rows[0][0] and source_rows[0][3]=='Rata-rata 80',source_rows
+    browser.js("Array.from(document.querySelectorAll('.teacher-directory tbody tr')).find(row=>academicSubjectKey(row.children[1].textContent)===academicSubjectKey('Tata Kamera & Cahaya')).querySelector('[data-teacher-score]').click()")
+    detail=browser.js("Array.from(document.querySelector('.score-summary-table tbody tr').children).slice(1).map(td=>td.textContent.trim())")
+    assert detail==['90','60','75','82','88','81'],detail
+    browser.js('closeModal()')
     assert browser.js("ledgerTeacherAssessment('Tata Kamera dan Tata Cahaya')["+json.dumps(prefix)+"].UH1")==90
     open_ledger(classes[0],'Genap');assert camera_value()=='-',camera_value()
     open_ledger(classes[1],'Ganjil');assert browser.js("Object.keys(ledgerTeacherAssessment('Tata Kamera & Cahaya')).length")==0
@@ -83,11 +97,12 @@ try:
         assert family_scores('Ganjil')==['90','60','—','—','—','—','82','88']
         browser.js("window.page='dashboard';window.render()")
         browser.wait("!!document.querySelector('.student-home')")
-        assert browser.js("authRequest('api/siswa/dashboard?semester=Genap').then(r=>r.data.capaian_nilai.length)")==0
+        assert browser.js("authRequest('api/siswa/dashboard?semester=Genap').then(r=>r.data.capaian_nilai.filter(row=>academicSubjectKey(row.nama_mata_pelajaran)===academicSubjectKey('Tata Kamera & Cahaya')).length)")==0
     login('parent',prefix+'_other',prefix+'_other')
     assert family_scores('Ganjil')==['—']*8
     print('PASS: Wali assessment and report, accurate Wahyu parent-message preview without sending, student/parent saved grades and semester/child isolation.')
     assert sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id IN ({','.join(classes)})")=='0'
+    print('PASS: Real VPS structure: legacy Tata Cahaya grades populate the single Wahyu directory row and detail; separate Tata Kamera grades cannot override or fill missing semesters.')
     print('PASS: Wahyu-linked teacher input UH1/ATS/ASS stored under camera subject, label aliases never select PAI, wali Ledger camera report=81, class/semester isolation, no real credentials changed or WhatsApp sent.')
 finally:
     if browser:
@@ -96,6 +111,8 @@ finally:
     if classes:
         ids=','.join(classes);sql(f"DELETE FROM pengguna WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ({ids}));DELETE FROM pesan_komunikasi WHERE kelas_id IN ({ids});DELETE FROM nilai_siswa WHERE komponen_nilai_id IN (SELECT id FROM komponen_nilai WHERE kelas_id IN ({ids}));DELETE FROM komponen_nilai WHERE kelas_id IN ({ids});DELETE FROM pengampu_mapel WHERE kelas_id IN ({ids});DELETE FROM siswa WHERE kelas_id IN ({ids});DELETE FROM kelas WHERE id IN ({ids});")
     if created_subject:sql('DELETE FROM mata_pelajaran WHERE id='+subject)
+    if created_decoy:sql('DELETE FROM mata_pelajaran WHERE id='+decoy_subject)
+    if decoy_teacher:sql('DELETE FROM guru WHERE id='+decoy_teacher)
     if year:sql('DELETE FROM tahun_ajaran WHERE id='+year)
     if users:sql('DELETE FROM pengguna WHERE id IN ('+','.join(users)+')')
     if teacher:sql('DELETE FROM guru WHERE id='+teacher)

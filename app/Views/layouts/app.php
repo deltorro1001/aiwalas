@@ -21,9 +21,9 @@
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/school-calendar.js?v=20261028') ?>'></script>
-<script src='<?= base_url('assets/academic-subjects.js?v=20261028-camera-label') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261028-live-directory') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261028-all-grade-logins') ?>'></script>
+<script src='<?= base_url('assets/academic-subjects.js?v=20261028-wahyu-grade-source') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261028-wahyu-grade-source') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>

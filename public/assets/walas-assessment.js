@@ -6,7 +6,7 @@
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function phone(value){var number=String(value||'').replace(/\D/g,'');if(number.indexOf('0')===0)number='62'+number.slice(1);return /^62\d{8,15}$/.test(number)?number:''}
   function semester(){return window.activeSemester||localStorage.getItem('aiwalas.semester')||'Ganjil'}
-  function teacherFor(subject){var contacts=window.teacherContacts||{},contact=contacts[subject]||contacts[subject==='PJOK'?'Olahraga':'PJOK']||{},name=contact.name||'guru mata pelajaran',record=(window.schoolTeachers||[]).find(function(item){return String(item.name||'').trim()===String(name).trim()})||{},gender=String(record.gender||record.jenis_kelamin||'').toLowerCase(),prefix=(gender==='l'||gender.indexOf('pria')>=0||gender.indexOf('laki')>=0)?'Bpk':'Ibu';return prefix+' '+name}
+  function teacherFor(subject){var contacts=window.teacherContacts||{},matching=Object.keys(contacts).find(function(name){return subjectKey(name)===subjectKey(subject)}),contact=contacts[subject]||contacts[matching]||{},name=contact.name||'guru mata pelajaran',record=(window.schoolTeachers||[]).find(function(item){return String(item.name||'').trim()===String(name).trim()})||{},gender=String(record.gender||record.jenis_kelamin||'').toLowerCase(),prefix=(gender==='l'||gender.indexOf('pria')>=0||gender.indexOf('laki')>=0)?'Bpk':'Ibu';return prefix+' '+name}
   function dynamicGreeting(){var parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jakarta',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()),hour=Number((parts.find(function(part){return part.type==='hour'})||{}).value||0);return hour<11?'Selamat pagi':hour<15?'Selamat siang':hour<18?'Selamat sore':'Selamat malam'}
   function isTimothy(student){return /^timothy\s+frans(?:\s|$)/i.test(String(student&&student[0]||'').trim())}
   function studentGreeting(student){return isTimothy(student)?dynamicGreeting():'Assalamualaikum'}
@@ -42,14 +42,14 @@
       };
     });
   }
-  function subjectKey(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+  function subjectKey(value){return window.academicSubjectKey(value)}
   function orderedSubjects(subjects){
     var order=[['pai'],['ppkn'],['bahasaindonesia'],['olahraga','pjok','pendidikanjasmaniolahragadankesehatan'],['sejarah'],['muatanlokal','mulok'],['matematika'],['bahasainggris'],['manajemenproduksi','manajemenproduksifilm'],['naskahpenyutradaraan'],['tatakamera','tatacahaya','tatakameradancahaya'],['editingvideo','tataartistik','editingfilm'],['kik','pkk','kreativitasinovasidankewirausahaan'],['mapelpilihananimasi3d','animasi3d']];
-    var rank={};order.forEach(function(group,index){group.forEach(function(name){rank[name]=index})});
+    var rank={};order.forEach(function(group,index){group.forEach(function(name){rank[subjectKey(name)]=index})});
     return subjects.filter(function(subject){var key=subjectKey(subject.nama_mata_pelajaran);return key.indexOf('kokurikuler')<0&&key.indexOf('upacara')<0&&key.indexOf('pembiasaanharijumat')<0&&key.indexOf('pembiasaanjumat')<0}).sort(function(a,b){var ar=rank[subjectKey(a.nama_mata_pelajaran)],br=rank[subjectKey(b.nama_mata_pelajaran)];ar=ar==null?999:ar;br=br==null?999:br;return ar===br?String(a.nama_mata_pelajaran).localeCompare(String(b.nama_mata_pelajaran),'id'):ar-br});
   }
   function normalizeData(result){
-    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='olahraga')subject.nama_mata_pelajaran='PJOK';});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
+    var subjects=orderedSubjects((result[0].data||[]).filter(function(row){return Number(row.aktif)!==0}));subjects.forEach(function(subject){if(subjectKey(subject.nama_mata_pelajaran)==='pjok')subject.nama_mata_pelajaran='PJOK';});var components=(result[1].data||[]).filter(function(row){return Number(row.aktif)!==0}),scores=result[2].data||[],scoreMap={};
     scores.forEach(function(row){scoreMap[String(row.siswa_id)+'-'+String(row.komponen_nilai_id)]=Number(row.nilai)});
     return {subjects:subjects,components:components,scoreMap:scoreMap};
   }

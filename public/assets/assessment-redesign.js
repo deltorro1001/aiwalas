@@ -228,7 +228,7 @@
     document.getElementById('pageContent').innerHTML='<p class="stat-note">Memuat nilai dari database...</p>';
     authRequest('api/akademik?kelas_id='+classId+'&semester='+encodeURIComponent(semester)).then(function(data){
       if(version!==requestVersion||window.page!=='assessment')return;
-      var selected=subjectName(), token=function(v){return String(v).toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^pjok$/,'olahraga').replace(/^pkk$/,'kik')};
+      var selected=subjectName(), token=window.academicSubjectKey;
       remoteSubject=(data.subjects||[]).find(function(s){return token(s.nama_mata_pelajaran)===token(selected)})||(data.subjects||[])[0];
       remoteValues={};(data.data||[]).filter(function(row){return remoteSubject&&Number(row.mata_pelajaran_id)===Number(remoteSubject.id)}).forEach(function(row){if(!remoteValues[row.nis])remoteValues[row.nis]={};remoteValues[row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
       drawAssessment();

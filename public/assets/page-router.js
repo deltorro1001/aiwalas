@@ -1,7 +1,7 @@
 (function(){
   var fallback=window.render, ledger={}, ledgerContext='', requestVersion=0;
   function context(){return String((window.currentUser||{}).id)+':'+window.activeClassId+':'+(window.activeSemester||'Ganjil')}
-  function subjectKey(subject){var key=String(subject||'').toLowerCase().replace(/[^a-z0-9]/g,'');return ({pkk:'kik',olahraga:'pjok',pendidikanjasmaniolahragadankesehatan:'pjok',pendidikanjasmanidanolahragakesehatan:'pjok',mapelpilihananimasi3d:'animasi3d'})[key]||key}
+  var subjectKey=window.academicSubjectKey;
   window.ledgerTeacherAssessment=function(subject){return ledgerContext===context()?(ledger[subjectKey(subject)]||{}):{}};
   function loadLedger(){
     var version=++requestVersion, page=window.page, requestedContext=context();

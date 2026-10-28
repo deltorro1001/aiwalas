@@ -21,8 +21,9 @@
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/school-calendar.js?v=20261028') ?>'></script>
+<script src='<?= base_url('assets/academic-subjects.js?v=20261028-all-grade-logins') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20261028-live-directory') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261028-student-auto') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261028-all-grade-logins') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
@@ -79,11 +80,11 @@
 <script src='<?= base_url('assets/settings-page.js?v=20261026-parent-login') ?>'></script>
 <script src='<?= base_url('assets/student-home.js?v=20261026-parent-login') ?>'></script>
 <script src='<?= base_url('assets/student-sidebar.js?v=20261026-discipline') ?>'></script>
-<script src='<?= base_url('assets/teacher-sidebar.js?v=20261028-kik') ?>'></script>
+<script src='<?= base_url('assets/teacher-sidebar.js?v=20261028-all-grade-logins') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-card.js?v=20260923-weekly-subject') ?>'></script>
 <script src='<?= base_url('assets/student-home-force.js?v=20261026-parent-login') ?>'></script>
 <script src='<?= base_url('assets/student-grades-access.js?v=20260921-access') ?>'></script>
-<script src='<?= base_url('assets/student-grades-vertical.js?v=20261028-kik') ?>'></script>
+<script src='<?= base_url('assets/student-grades-vertical.js?v=20261028-all-grade-logins') ?>'></script>
 <script src='<?= base_url('assets/student-welcome-name.js?v=20260922-name') ?>'></script>
 <script>
 (function(){
@@ -105,7 +106,7 @@
       .finally(function(){if(button){button.disabled=false;button.textContent='Masuk ke AIWalas'}});
   },true);
 })();
-</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261028-kik') ?>'></script>
+</script><script src='<?= base_url('assets/assessment-redesign.js?v=20261028-all-grade-logins') ?>'></script>
 <script src='<?= base_url('assets/semester-context.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261021-date-filter') ?>'></script>
@@ -132,7 +133,7 @@
 <script src='<?= base_url('assets/student-discipline.js?v=20261026') ?>'></script>
 <script src='<?= base_url('assets/student-attendance-recap.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/parent-sick-request.js?v=20261027') ?>'></script>
-<script src='<?= base_url('assets/page-router.js?v=20261028-live-directory') ?>'></script>
+<script src='<?= base_url('assets/page-router.js?v=20261028-all-grade-logins') ?>'></script>
 </body>
 </html>
 

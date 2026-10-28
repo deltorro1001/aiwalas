@@ -21,7 +21,7 @@
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
 <script src='<?= base_url('assets/school-calendar.js?v=20261028') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261028-csrf-gateway') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261028-live-directory') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261028-student-auto') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
@@ -132,7 +132,7 @@
 <script src='<?= base_url('assets/student-discipline.js?v=20261026') ?>'></script>
 <script src='<?= base_url('assets/student-attendance-recap.js?v=20261028-weekend') ?>'></script>
 <script src='<?= base_url('assets/parent-sick-request.js?v=20261027') ?>'></script>
-<script src='<?= base_url('assets/page-router.js?v=20261028-kik') ?>'></script>
+<script src='<?= base_url('assets/page-router.js?v=20261028-live-directory') ?>'></script>
 </body>
 </html>
 

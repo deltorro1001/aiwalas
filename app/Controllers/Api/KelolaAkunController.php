@@ -14,6 +14,7 @@ class KelolaAkunController extends BaseApiController
             $role=$row['peran'];$parent=$role==='orang_tua';$teacher=$role==='guru';
             $active=(bool)$row['aktif']&&($teacher?(bool)$row['guru_aktif']:(bool)$row['anak_aktif']);
             $result[]=['key'=>'akun:'.$row['id'],'name'=>$parent?'Orangtua/Wali Murid '.$row['nama_anak']:$row['nama_lengkap'],'role'=>$role,'username'=>$parent?$row['nis_anak']:$row['nama_pengguna'],'class'=>$teacher?'Guru mata pelajaran':$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>$role==='sekretaris'];
+            if($role==='sekretaris'&&$row['anak_id'])$result[]=['key'=>'siswa:'.$row['anak_id'],'name'=>$row['nama_anak'],'role'=>'siswa','username'=>$row['nis_anak'],'class'=>$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>true];
             if($row['anak_id'])$linked[$row['anak_id']][$parent?'orang_tua':'siswa']=true;
         }
         // Legacy student accounts are created on first login; list their NIS too.
@@ -48,6 +49,7 @@ class KelolaAkunController extends BaseApiController
                         $account=$db->table('pengguna')->where('id',$id)->get()->getRowArray();
                     }else{
                         $account=$db->table('pengguna')->where('nis',$child['nis'])->get()->getRowArray();
+                        $username=$child['nis'];
                         if($account&&!in_array($account['peran'],['siswa','sekretaris'],true))throw new \RuntimeException('Invalid linked role');
                         if(!$account){
                             $db->table('pengguna')->insert(['nama_pengguna'=>$child['nis'],'nis'=>$child['nis'],'nama_lengkap'=>$child['nama_lengkap'],'peran'=>'siswa','aktif'=>1,'kata_sandi'=>password_hash($password,PASSWORD_DEFAULT)]);
@@ -71,7 +73,7 @@ class KelolaAkunController extends BaseApiController
             if($db->transStatus()===false)throw new \RuntimeException('Reset failed');
             $db->transCommit();
             $this->response->setHeader('Cache-Control','private, no-store');
-            return $this->respond(['ok'=>true,'username'=>$username??$account['nama_pengguna'],'password'=>$password,'role'=>$account['peran']]);
+            return $this->respond(['ok'=>true,'username'=>$username??$account['nama_pengguna'],'password'=>$password,'role'=>$parts[1]==='siswa'?'siswa':$account['peran']]);
         }catch(\Throwable $error){
             $db->transRollback();return $this->respond(['message'=>'Password belum dapat direset. Muat ulang daftar akun dan coba kembali.'],409);
         }

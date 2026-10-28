@@ -123,7 +123,7 @@
 })();
 </script>
 <script src='<?= base_url('assets/class-attendance-recap.js?v=20261027-recap-labels') ?>'></script>
-<script src='<?= base_url('assets/account-management.js?v=20261027') ?>'></script>
+<script src='<?= base_url('assets/account-management.js?v=20261028-student-alias') ?>'></script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
 <script src='<?= base_url('assets/communication-history.js?v=20261022') ?>'></script>

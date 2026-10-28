@@ -43,6 +43,8 @@ try:
     guest=login('guest',prefix+'_2',password)
     parent=login('parent',nises[1],nises[1]);parent_id=sql("SELECT id FROM pengguna WHERE siswa_id="+pupils[1])
     rows=wali.call('api/kelola-akun')['data']
+    alias=next(row for row in rows if row['key']=='siswa:'+pupils[0])
+    assert alias['role']=='siswa' and alias['username']==nises[0] and alias['name']=='Sekretaris Uji' and alias['status']=='Aktif' and alias['shared_student'] is True
     assert not any(row['key']=='akun:'+foreign_id for row in rows)
     assert all(row['role'] in ['sekretaris','siswa','orang_tua','guru'] for row in rows)
     assert any(row['key']=='siswa:'+pupils[2] and row['username']==nises[2] for row in rows)
@@ -69,6 +71,10 @@ try:
             login('student',nises[0],reset['password'])
             Client().call('api/auth/login',{'role':'student','username':nises[0],'password':nises[0]},status=401)
             Client().call('api/auth/login',{'role':'student','username':nises[0],'password':password},status=401)
+    alias_reset=wali.call('api/kelola-akun/reset',{'akun':'siswa:'+pupils[0],'konfirmasi':True})
+    assert alias_reset['username']==nises[0] and alias_reset['role']=='siswa'
+    login('student',nises[0],alias_reset['password']);login('assistant',prefix+'_sekretaris',alias_reset['password'])
+    assert sql('SELECT nama_pengguna FROM pengguna WHERE id='+secretary_id)==prefix+'_sekretaris'
     for role,key in [('student','siswa:'),('parent','orang_tua:')]:
         reset=wali.call('api/kelola-akun/reset',{'akun':key+pupils[2],'konfirmasi':True})
         assert reset['username']==nises[2]
@@ -89,6 +95,9 @@ try:
         c.js("document.querySelector('.sidebar [data-page=accountManagement]').click()")
         c.wait("!!document.querySelector('[data-managed-account=\"akun:"+secretary_id+"\"]')")
         assert not c.js("!!document.querySelector('#managedAccountRows img')")
+        c.js("document.getElementById('managedAccountRole').value='siswa';document.getElementById('managedAccountRole').dispatchEvent(new Event('change'))")
+        assert c.js("!!document.querySelector('[data-managed-account=\"siswa:"+pupils[0]+"\"]')")
+
         c.js("document.getElementById('managedAccountRole').value='sekretaris';document.getElementById('managedAccountRole').dispatchEvent(new Event('change'))")
         assert c.js("document.querySelectorAll('#managedAccountRows tr').length")==1
         c.js("document.querySelector('[data-managed-account]').click();document.getElementById('cancelModal').click()")

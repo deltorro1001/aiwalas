@@ -14,6 +14,7 @@ class PenggunaModel extends Model
     protected $allowedFields = [
         'nama_pengguna',
         'kata_sandi',
+        'kata_sandi_siswa',
         'nama_lengkap',
         'peran',
         'nis',

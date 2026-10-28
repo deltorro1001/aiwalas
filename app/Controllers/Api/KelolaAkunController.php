@@ -13,8 +13,8 @@ class KelolaAkunController extends BaseApiController
         foreach($rows as $row){
             $role=$row['peran'];$parent=$role==='orang_tua';$teacher=$role==='guru';
             $active=(bool)$row['aktif']&&($teacher?(bool)$row['guru_aktif']:(bool)$row['anak_aktif']);
-            $result[]=['key'=>'akun:'.$row['id'],'name'=>$parent?'Orangtua/Wali Murid '.$row['nama_anak']:$row['nama_lengkap'],'role'=>$role,'username'=>$parent?$row['nis_anak']:$row['nama_pengguna'],'class'=>$teacher?'Guru mata pelajaran':$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>$role==='sekretaris'];
-            if($role==='sekretaris'&&$row['anak_id'])$result[]=['key'=>'siswa:'.$row['anak_id'],'name'=>$row['nama_anak'],'role'=>'siswa','username'=>$row['nis_anak'],'class'=>$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>true];
+            $result[]=['key'=>'akun:'.$row['id'],'name'=>$parent?'Orangtua/Wali Murid '.$row['nama_anak']:$row['nama_lengkap'],'role'=>$role,'username'=>$parent?$row['nis_anak']:$row['nama_pengguna'],'class'=>$teacher?'Guru mata pelajaran':$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>false];
+            if($role==='sekretaris'&&$row['anak_id'])$result[]=['key'=>'siswa:'.$row['anak_id'],'name'=>$row['nama_anak'],'role'=>'siswa','username'=>$row['nis_anak'],'class'=>$row['nama_kelas'],'status'=>$active?'Aktif':'Nonaktif','can_reset'=>$active,'shared_student'=>false];
             if($row['anak_id'])$linked[$row['anak_id']][$parent?'orang_tua':'siswa']=true;
         }
         // Legacy student accounts are created on first login; list their NIS too.
@@ -69,7 +69,10 @@ class KelolaAkunController extends BaseApiController
                 }
             }
             if(!$allowed){$db->transRollback();return $this->respond(['message'=>'Akun aktif tidak ditemukan atau tidak dapat dikelola.'],404);}
-            $db->table('pengguna')->where('id',$account['id'])->update(['kata_sandi'=>password_hash($password,PASSWORD_DEFAULT)]);
+            $field=$account['peran']==='sekretaris'&&$parts[1]==='siswa'?'kata_sandi_siswa':'kata_sandi';
+            $updates=[$field=>password_hash($password,PASSWORD_DEFAULT)];
+            if($account['peran']==='sekretaris'&&$field==='kata_sandi'&&empty($account['kata_sandi_siswa']))$updates['kata_sandi_siswa']=$account['kata_sandi'];
+            $db->table('pengguna')->where('id',$account['id'])->update($updates);
             if($db->transStatus()===false)throw new \RuntimeException('Reset failed');
             $db->transCommit();
             $this->response->setHeader('Cache-Control','private, no-store');

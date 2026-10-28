@@ -90,8 +90,8 @@ class Auth extends BaseController
                 })->groupEnd()->get()->getRowArray();
             if ($student) {
                 $linked = $model->where('nis', $student['nis'])->where('aktif', 1)->first();
-                if ($linked && password_verify((string) $payload['password'], $linked->kata_sandi)) {
-                    $sessionUser = ['id' => 0, 'nama_pengguna' => $student['nis'], 'nama_lengkap' => $student['nama_lengkap'], 'peran' => 'siswa', 'nis' => $student['nis']];
+                if ($linked && in_array($linked->peran,['siswa','sekretaris'],true) && password_verify((string) $payload['password'], $linked->peran==='sekretaris'?($linked->kata_sandi_siswa??$linked->kata_sandi):$linked->kata_sandi)) {
+                    $sessionUser = ['id' => (int)$linked->id, 'nama_pengguna' => $student['nis'], 'nama_lengkap' => $student['nama_lengkap'], 'peran' => 'siswa', 'nis' => $student['nis']];
                     session()->regenerate(); session()->set('pengguna', $sessionUser);
                     return $this->json(['ok' => true, 'user' => $this->frontendUser($sessionUser)]);
                 }
@@ -134,7 +134,12 @@ class Auth extends BaseController
         if (! $user || (int) ($user['id'] ?? 0) < 1) return $this->json(['ok' => false, 'message' => 'Akun ini tidak dapat mengubah password melalui halaman ini.'], 422);
         if (strlen($password) < 8 || $password !== $confirmation) return $this->json(['ok' => false, 'message' => 'Password minimal 8 karakter dan konfirmasi harus sama.'], 422);
         $model = new PenggunaModel();
-        $model->update((int) $user['id'], ['kata_sandi' => password_hash($password, PASSWORD_DEFAULT)]);
+        $account=$model->find((int)$user['id']);
+        if(!$account||!(int)$account->aktif)return $this->json(['ok'=>false,'message'=>'Akun tidak aktif.'],403);
+        $field=($user['peran']??'')==='siswa'&&$account->peran==='sekretaris'?'kata_sandi_siswa':'kata_sandi';
+        $updates=[$field=>password_hash($password,PASSWORD_DEFAULT)];
+        if($account->peran==='sekretaris'&&$field==='kata_sandi'&&empty($account->kata_sandi_siswa))$updates['kata_sandi_siswa']=$account->kata_sandi;
+        $model->update((int)$user['id'],$updates);
         return $this->json(['ok' => true, 'message' => 'Password berhasil diubah.']);
     }
     private function frontendUser(array $pengguna): array

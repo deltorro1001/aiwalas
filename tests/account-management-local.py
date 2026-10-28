@@ -44,7 +44,7 @@ try:
     parent=login('parent',nises[1],nises[1]);parent_id=sql("SELECT id FROM pengguna WHERE siswa_id="+pupils[1])
     rows=wali.call('api/kelola-akun')['data']
     alias=next(row for row in rows if row['key']=='siswa:'+pupils[0])
-    assert alias['role']=='siswa' and alias['username']==nises[0] and alias['name']=='Sekretaris Uji' and alias['status']=='Aktif' and alias['shared_student'] is True
+    assert alias['role']=='siswa' and alias['username']==nises[0] and alias['name']=='Sekretaris Uji' and alias['status']=='Aktif' and alias['shared_student'] is False
     assert not any(row['key']=='akun:'+foreign_id for row in rows)
     assert all(row['role'] in ['sekretaris','siswa','orang_tua','guru'] for row in rows)
     assert any(row['key']=='siswa:'+pupils[2] and row['username']==nises[2] for row in rows)
@@ -68,12 +68,18 @@ try:
         stored=sql('SELECT kata_sandi FROM pengguna WHERE id='+ident)
         assert reset['password'] not in stored and stored.startswith('$2')
         if role=='assistant':
-            login('student',nises[0],reset['password'])
+            secretary_password=reset['password']
+            login('student',nises[0],password)
             Client().call('api/auth/login',{'role':'student','username':nises[0],'password':nises[0]},status=401)
-            Client().call('api/auth/login',{'role':'student','username':nises[0],'password':password},status=401)
+            Client().call('api/auth/login',{'role':'student','username':nises[0],'password':secretary_password},status=401)
     alias_reset=wali.call('api/kelola-akun/reset',{'akun':'siswa:'+pupils[0],'konfirmasi':True})
     assert alias_reset['username']==nises[0] and alias_reset['role']=='siswa'
-    login('student',nises[0],alias_reset['password']);login('assistant',prefix+'_sekretaris',alias_reset['password'])
+    linked_student=login('student',nises[0],alias_reset['password']);login('assistant',prefix+'_sekretaris',secretary_password)
+    linked_student.call('api/auth/password',{'password':'Student-Only-Secret','confirmation':'Student-Only-Secret'})
+    login('student',nises[0],'Student-Only-Secret');login('assistant',prefix+'_sekretaris',secretary_password)
+    linked_secretary=login('assistant',prefix+'_sekretaris',secretary_password)
+    linked_secretary.call('api/auth/password',{'password':'Secretary-Only-Secret','confirmation':'Secretary-Only-Secret'})
+    login('assistant',prefix+'_sekretaris','Secretary-Only-Secret');login('student',nises[0],'Student-Only-Secret')
     assert sql('SELECT nama_pengguna FROM pengguna WHERE id='+secretary_id)==prefix+'_sekretaris'
     for role,key in [('student','siswa:'),('parent','orang_tua:')]:
         reset=wali.call('api/kelola-akun/reset',{'akun':key+pupils[2],'konfirmasi':True})
@@ -83,7 +89,7 @@ try:
     sql('UPDATE pengguna SET aktif=0 WHERE id='+student_id)
     wali.call('api/kelola-akun/reset',{'akun':'akun:'+student_id,'konfirmasi':True},status=404)
     sql('UPDATE pengguna SET aktif=1 WHERE id='+student_id)
-    print('PASS: Four account roles, class ownership, hash-only storage, explicit confirmation, inactive/privileged protection, lazy provisioning and old-password rejection including secretary student login.')
+    print('PASS: Four account roles, class ownership, hash-only storage, explicit confirmation, inactive/privileged protection, lazy provisioning and old-password rejection and independent secretary/student reset and self-service password changes.')
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies');c.call('Page.navigate',{'url':BASE})
@@ -105,6 +111,7 @@ try:
         c.wait("!!document.getElementById('managedAccountResultPassword')")
         new_password=c.js("document.getElementById('managedAccountResultPassword').value")
         login('assistant',prefix+'_sekretaris',new_password)
+        login('student',nises[0],'Student-Only-Secret')
         assert new_password not in c.js("document.getElementById('pageContent').textContent")
         c.js("document.getElementById('cancelModal').click()")
         assert not c.js("document.getElementById('managedAccountResultPassword')?.value")

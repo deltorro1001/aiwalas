@@ -47,6 +47,35 @@ try:
     payload={'kelas_id':int(classes[0]),'mata_pelajaran_id':int(subject),'semester':'Ganjil','komponen':'UH1','values':{prefix:88}}
     a.call('api/akademik',payload)
     assert float(a.call('api/akademik?kelas_id='+classes[0])['data'][0]['nilai'])==88
+    # Grade alerts are queued transactionally by both input endpoints, never sent in HTTP requests.
+    def dispatch_count():return int(sql(f"SELECT COUNT(*) FROM student_grade_dispatches WHERE siswa_id={pupil}"))
+    assert dispatch_count()==0
+    payload['values'][prefix]=79.99
+    a.call('api/akademik',payload);a.call('api/akademik',payload)
+    assert dispatch_count()==1
+    component=sql(f"SELECT id FROM komponen_nilai WHERE kelas_id={classes[0]} AND mata_pelajaran_id={subject} AND nama_komponen='UH1'")
+    legacy={'siswa_id':int(pupil),'komponen_nilai_id':int(component),'semester':'Ganjil','nilai':79.99}
+    wali.call('api/nilai',legacy);assert dispatch_count()==1
+    legacy['nilai']=0;wali.call('api/nilai',legacy);assert dispatch_count()==2
+    legacy['nilai']=79.999;wali.call('api/nilai',legacy);assert dispatch_count()==2
+    assert sql(f"SELECT COUNT(*) FROM student_grade_dispatches WHERE siswa_id={pupil} AND status='pending'")=='0'
+    payload['values'][prefix]=79.999;a.call('api/akademik',payload);assert dispatch_count()==2
+    for index,comp in enumerate(['UH2','UH3','UH4','UH5','UH6','ATS','ASS']):
+        other=dict(payload,komponen=comp,values={prefix:70})
+        a.call('api/akademik',other);assert dispatch_count()==3+index
+    other=dict(payload,semester='Genap',values={prefix:60});a.call('api/akademik',other)
+    assert dispatch_count()==10
+    assert sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id={classes[0]}")=='0'
+    payload['values'][prefix]=88;a.call('api/akademik',payload)
+    assert wali.call('api/pesan?kelas_id='+classes[0])['data']==[]
+    message=sql(f"INSERT INTO pesan_komunikasi(siswa_id,kelas_id,pengirim,penerima,nomor_tujuan,isi_pesan,kategori,status_pengiriman,dibuat_oleh) VALUES({pupil},{classes[0]},'Fixture','Fixture','6281234567890','Test only','Nilai Siswa Otomatis','Disiapkan',{users[0]});SELECT LAST_INSERT_ID();")
+    sql(f"UPDATE student_grade_dispatches SET message_id={message},result_note='Nomor WhatsApp siswa belum tersedia atau tidak valid.' WHERE siswa_id={pupil} AND status='pending' ORDER BY id LIMIT 1")
+    history=wali.call('api/pesan?kelas_id='+classes[0]+'&status=pending')['data']
+    assert len(history)==1 and history[0]['delivery_status']=='Pending' and 'Nomor WhatsApp siswa' in history[0]['delivery_note']
+    sql(f"UPDATE pesan_komunikasi SET status_pengiriman='Terkirim' WHERE id={message}")
+    assert wali.call('api/pesan?kelas_id='+classes[0]+'&status=sent')['data'][0]['delivery_status']=='Terkirim'
+    sql(f"DELETE FROM pesan_komunikasi WHERE id={message}")
+    print('PASS: Teacher/Wali grade-input hooks, both endpoints, all eight components, semester isolation, threshold rounding, zero, unchanged saves and superseded jobs; no HTTP-triggered sends.')
     b.call('api/akademik',payload,status=422)
     assignments=a.call('api/jurnal?kelas_id='+classes[0])['assignments'];assert len(assignments)==1 and 'nomor_hp' not in assignments[0]
     journal={'kelas_id':int(classes[0]),'mata_pelajaran_id':int(subject),'guru_id':int(teacher),'tanggal':'2026-10-28','materi':'Uji Animasi 3D','status':'Terbit'}
@@ -71,10 +100,30 @@ try:
         c.wait("window.currentRole==='teacher' && document.getElementById('teacherSubjectSelect')?.value==='Animasi 3D'")
         c.js('logout()')
         print('PASS: Animasi 3D appears/selects in the teacher dropdown, loads assessment data and persists after reload.')
+        sql(f"UPDATE siswa SET nomor_hp='081234567890',nomor_hp_orang_tua='089876543210' WHERE id={pupil}")
+        c.wait('window.currentRole===null')
+        c.js('window.activeClassId='+classes[0])
+        credentials=json.dumps({'role':'walas','username':prefix+'_wali','password':password})
+        c.js("authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(d=>finishLogin(d.user))")
+        c.js("authRequest('api/bootstrap?kelas_id="+classes[0]+"').then(applyBootstrapData)")
+        c.wait("window.currentRole==='walas' && window.students?.[0]?.[1]==="+json.dumps(prefix))
+        c.js("window.page='walasAssessment';window.render()")
+        c.wait("!!document.querySelector('[data-walas-grade-subject=\""+subject+"\"]')")
+        c.js("document.querySelector('[data-walas-grade-subject=\""+subject+"\"]').click()")
+        c.wait("!!document.querySelector('.gateway-grade-action[data-gateway-label=Orangtua]')")
+        assert c.js("document.querySelectorAll('.gateway-grade-action[data-gateway-label=Siswa]').length")==0
+        assert 'Notifikasi siswa otomatis' in c.js("document.getElementById('walasGradeTableWrap').textContent")
+        c.js("document.querySelector('.gateway-grade-action[data-gateway-label=Orangtua]').click()")
+        c.wait("!!document.getElementById('confirmGatewayGrade')")
+        assert 'Ulangan Harian 2' in c.js("document.getElementById('gatewayGradeMessage').value")
+        c.js('closeModal()');c.js('logout()')
+        assert sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id={classes[0]}")=='0'
+        print('PASS: Wali sees automatic student notice, only parent has a manual gateway button and confirmation modal; opening the modal sends nothing.')
+
 finally:
     if classes:
         ids=','.join(classes)
-        sql('DELETE FROM jurnal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM nilai_siswa WHERE komponen_nilai_id IN (SELECT id FROM komponen_nilai WHERE kelas_id IN ('+ids+'));DELETE FROM komponen_nilai WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM pengampu_mapel WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
+        sql('DELETE FROM pesan_komunikasi WHERE kelas_id IN ('+ids+');DELETE FROM jurnal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM nilai_siswa WHERE komponen_nilai_id IN (SELECT id FROM komponen_nilai WHERE kelas_id IN ('+ids+'));DELETE FROM komponen_nilai WHERE kelas_id IN ('+ids+');DELETE FROM jadwal_kelas WHERE kelas_id IN ('+ids+');DELETE FROM pengampu_mapel WHERE kelas_id IN ('+ids+');DELETE FROM siswa WHERE kelas_id IN ('+ids+');DELETE FROM kelas WHERE id IN ('+ids+');')
     if users:sql('DELETE FROM pengguna WHERE id IN ('+','.join(users)+')')
     if teacher:sql('DELETE FROM guru WHERE id='+teacher)
     if other_teacher:sql('DELETE FROM guru WHERE id='+other_teacher)

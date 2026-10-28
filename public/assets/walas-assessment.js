@@ -12,13 +12,12 @@
   function studentGreeting(student){return isTimothy(student)?dynamicGreeting():'Assalamualaikum'}
   function componentLabel(value){var match=/^UH\s*(\d+)$/i.exec(String(value||'').trim());return match?'Ulangan Harian '+Number(match[1]):value}
   function message(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', Bapak/Ibu Orangtua/Wali '+student[0]+'. Kami memberitahukan bahwa nilai ananda pada mata pelajaran '+subject+', komponen '+componentLabel(component)+', sebesar '+score+' belum mencukupi sehingga ananda berstatus Tidak Lulus. Mohon diingatkan kepada ananda untuk menghubungi '+teacher+' untuk mengikuti ulangan perbaikan atau tugas tambahan.'}
-  function studentMessage(student,subject,component,score){var teacher=teacherFor(subject);return studentGreeting(student)+', '+student[0]+'. Nilai anda pada mata pelajaran '+subject+', komponen '+componentLabel(component)+', sebesar '+score+' belum mencukupi sehingga anda berstatus Tidak Lulus. Mohon menghubungi '+teacher+' untuk mengikuti ulangan perbaikan atau tugas tambahan.'}
   function gatewayButton(number,text,label){return number?'<button type="button" class="wa-parent-action gateway-grade-action" data-gateway-phone="'+esc(number)+'" data-gateway-message="'+esc(text)+'" data-gateway-label="'+esc(label)+'">Kirim via Gateway</button>':'<span class="wa-parent-action disabled" aria-disabled="true">Nomor '+label.toLowerCase()+' belum tersedia</span>'}
   function notification(student,subject,component,score){
     if(score===null||score>=threshold)return '<span class="walas-grade-notification-empty">—</span>';
     var parentNumber=phone(student[6]),studentNumber=phone(student[5]);
     var parentAction=gatewayButton(parentNumber,message(student,subject,component,score),'Orangtua');
-    var studentAction=gatewayButton(studentNumber,studentMessage(student,subject,component,score),'Siswa');
+    var studentAction='<span class="wa-parent-action disabled">'+(studentNumber?'Notifikasi siswa otomatis setelah nilai disimpan':'Notifikasi siswa menunggu nomor WhatsApp')+'</span>';
     return '<div class="walas-notification-actions">'+parentAction+studentAction+'</div>';
   }
   function bindGatewayActions(){
@@ -57,7 +56,7 @@
   function renderSubject(student,subject){
     if(!student||!subject||!cache)return;
     var components=cache.components.filter(function(row){return Number(row.mata_pelajaran_id)===Number(subject.id)}).sort(function(a,b){return Number(a.urutan)-Number(b.urutan)});
-    var rows=components.map(function(component){var key=String(student[7])+'-'+String(component.id),exists=Object.prototype.hasOwnProperty.call(cache.scoreMap,key),score=exists?Math.round(cache.scoreMap[key]):null,status=score===null?'—':score>=threshold?'Lulus':'Tidak Lulus',kind=score===null?'':score>=threshold?'teal':'coral';return '<tr><td>'+esc(component.nama_komponen)+'</td><td><strong>'+(score===null?'—':score)+'</strong></td><td>'+(score===null?'—':'<span class="pill '+kind+'">'+status+'</span>')+'</td><td>'+notification(student,subject.nama_mata_pelajaran,component.nama_komponen,score)+'</td></tr>'}).join('');
+    var rows=components.map(function(component){var key=String(student[7])+'-'+String(component.id),exists=Object.prototype.hasOwnProperty.call(cache.scoreMap,key),score=exists?cache.scoreMap[key]:null,status=score===null?'—':score>=threshold?'Lulus':'Tidak Lulus',kind=score===null?'':score>=threshold?'teal':'coral';return '<tr><td>'+esc(component.nama_komponen)+'</td><td><strong>'+(score===null?'—':score)+'</strong></td><td>'+(score===null?'—':'<span class="pill '+kind+'">'+status+'</span>')+'</td><td>'+notification(student,subject.nama_mata_pelajaran,component.nama_komponen,score)+'</td></tr>'}).join('');
     var target=document.getElementById('walasGradeTableWrap'),summary=document.getElementById('walasGradeSummary'),info=document.getElementById('walasGradeStudent');
     if(target)target.innerHTML='<div class="student-grade-selected"><strong>Mapel: '+esc(subject.nama_mata_pelajaran)+'</strong></div><div class="score-sheet-wrap"><table class="score-sheet student-component-grades walas-component-grades"><thead><tr><th>Komponen Nilai</th><th>Nilai</th><th>Status</th><th>Notifikasi Orangtua &amp; Siswa</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="empty-state">Belum ada komponen nilai.</td></tr>')+'</tbody></table></div>';
     bindGatewayActions();

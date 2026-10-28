@@ -57,9 +57,13 @@ class AkademikController extends BaseApiController
         $key = ['kelas_id'=>$class,'mata_pelajaran_id'=>$subject,'nama_komponen'=>$component];
         $db->query("INSERT INTO komponen_nilai (kelas_id,mata_pelajaran_id,nama_komponen,jenis_komponen,urutan,bobot,aktif) VALUES (?,?,?,?,?,0,1) ON DUPLICATE KEY UPDATE aktif=1",[$class,$subject,$component,str_starts_with($component,'UH')?'UH':'Tugas',array_search($component,['UH1','UH2','UH3','UH4','UH5','UH6','ATS','ASS'])+1]);
         $id = $db->table('komponen_nilai')->where($key)->get()->getRow()->id;
+        $notifications = new \App\Libraries\StudentGradeAutomation($db);
         foreach ($p['values'] as $nis=>$value) {
+            $previous=$db->table('nilai_siswa')->where(['siswa_id'=>$students[$nis],'komponen_nilai_id'=>$id,'semester'=>$semester])->get()->getRowArray();
             if ($value===null) $db->table('nilai_siswa')->where(['siswa_id'=>$students[$nis],'komponen_nilai_id'=>$id,'semester'=>$semester])->delete();
             else $db->query('INSERT INTO nilai_siswa (siswa_id,komponen_nilai_id,semester,nilai,dinilai_oleh) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE nilai=VALUES(nilai),dinilai_oleh=VALUES(dinilai_oleh)',[$students[$nis],$id,$semester,$value,$this->currentUser()['id']]);
+            $stored=$value===null?null:$db->table('nilai_siswa')->where(['siswa_id'=>$students[$nis],'komponen_nilai_id'=>$id,'semester'=>$semester])->get()->getRowArray()['nilai'];
+            $notifications->changed((int)$students[$nis],(int)$id,$semester,$previous['nilai']??null,$stored);
         }
         $db->transComplete();
         return $this->respond(['ok'=>$db->transStatus()],$db->transStatus()?200:500);

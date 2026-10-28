@@ -13,6 +13,8 @@ $cron = "MAILTO=admin\n0 3 * * * /usr/bin/backup\n";
 $next = teacherSchedulerCron($cron,'/var/www/app space', '/usr/bin/php');
 schedulerAssert(str_starts_with($next,$cron),'Unrelated cron changed');
 schedulerAssert(substr_count($next,'# aiwalas-teacher-scheduler') === 1,'Duplicate scheduler');
+schedulerAssert(substr_count($next,'# aiwalas-student-grade-scheduler') === 1,'Missing student grade scheduler');
+schedulerAssert(str_contains($next,'spark whatsapp:student-grades --send'),'Missing automatic grade command');
 schedulerAssert(str_contains($next,"cd '/var/www/app space'"),'Path not quoted');
 schedulerAssert(teacherSchedulerCron($next,'/var/www/app space','/usr/bin/php') === $next,'Cron not idempotent');
 schedulerAssert(substr_count(teacherSchedulerCron($next . $next,'/var/www/app space','/usr/bin/php'),'# aiwalas-teacher-scheduler') === 1,'Duplicate scheduler retained');

@@ -77,3 +77,7 @@ Nilai dan jurnal disimpan di database. Patch ZIP lewat web dinonaktifkan; pembar
 ## Pengingat guru otomatis
 
 Scheduler server menyiapkan pengingat 10 menit sebelum jadwal mengajar dan ucapan terima kasih saat jadwal selesai melalui gateway WhatsApp. Histori tampil di Komunikasi dengan status Terkirim/Pending. Wahyu Lukman Hakim, Putu Arya Ranesda, dan Ruby Eka Prawira dikecualikan dari otomatisasi. Lokal default nonaktif; deployment memasang cron VPS dan mengaktifkan flag jika belum dikonfigurasi. Simulasi tersedia lewat `php spark whatsapp:teacher-schedule`. Petunjuk konfigurasi dan pengujian ada di [docs/TEACHER-WHATSAPP-AUTOMATION.md](docs/TEACHER-WHATSAPP-AUTOMATION.md).
+
+## Notifikasi nilai siswa otomatis
+
+Nilai komponen baru atau berubah di bawah 80 masuk antrean WhatsApp siswa setelah penyimpanan berhasil. Orangtua tetap menerima pesan melalui konfirmasi dan pengiriman manual wali kelas. Petunjuk antrean, cron, dan penanganan status tersedia di [docs/STUDENT-GRADE-AUTOMATION.md](docs/STUDENT-GRADE-AUTOMATION.md).

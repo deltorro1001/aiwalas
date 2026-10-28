@@ -14,10 +14,11 @@ function teacherSchedulerCron(string $original, string $root, string $php): stri
 {
     if (preg_match('/[\r\n%]/', $root . $php)) throw new RuntimeException('Lokasi scheduler tidak didukung.');
     $lines = preg_split('/\r?\n/', $original);
-    $lines = array_filter($lines, static fn($line) => !str_contains($line, '# aiwalas-teacher-scheduler'));
+    $lines = array_filter($lines, static fn($line) => !str_contains($line, '# aiwalas-teacher-scheduler') && !str_contains($line, '# aiwalas-student-grade-scheduler'));
     $content = rtrim(implode("\n", $lines), "\n");
     $entry = '* * * * * cd ' . escapeshellarg($root) . ' && ' . escapeshellarg($php) . ' spark whatsapp:teacher-schedule --send >> ' . escapeshellarg($root . '/writable/logs/teacher-schedule-cron.log') . ' 2>&1 # aiwalas-teacher-scheduler';
-    return ($content === '' ? '' : $content . "\n") . $entry . "\n";
+    $gradeEntry = '* * * * * cd ' . escapeshellarg($root) . ' && ' . escapeshellarg($php) . ' spark whatsapp:student-grades --send >> ' . escapeshellarg($root . '/writable/logs/student-grade-cron.log') . ' 2>&1 # aiwalas-student-grade-scheduler';
+    return ($content === '' ? '' : $content . "\n") . $entry . "\n" . $gradeEntry . "\n";
 }
 
 function teacherSchedulerProcess(array $command, string $input = ''): array

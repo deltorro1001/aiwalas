@@ -180,3 +180,9 @@ Status untuk hari tanpa catatan pada akhir pekan ditampilkan sebagai Libur di Ab
 `SchoolCalendar` menjadi sumber kalender server dan `school-calendar.js` mengatur tampilan bersama, termasuk pembaruan pada pergantian tanggal/ketika tab dibuka kembali. Tanggal Libur tanpa catatan tidak menawarkan tombol pemberitahuan ketidakhadiran WhatsApp.
 
 Verifikasi: `php tests/school-calendar.php` dan `python3 tests/school-calendar-browser.py` (Chrome DevTools localhost:9222, server localhost:8080). Tes browser memakai simulasi waktu/API tanpa perubahan akun atau data asli.
+
+## Penugasan mapel tanpa jadwal waktu
+
+`TeacherAssignments` menggabungkan penugasan dari `jadwal_kelas` dan `pengampu_mapel`, dengan deduplikasi kelas/mapel/guru. Data ini dipakai untuk kelas dan dropdown mapel guru, penilaian, jurnal, daftar siswa guru, serta kontak pengajar wali kelas. Slot jadwal dan otomatisasi WhatsApp tetap mengikuti `jadwal_kelas`.
+
+Migrasi `TambahMapelAnimasi3d` menambahkan **Animasi 3D**, menautkannya kepada **Sumantoro Kasdhani, S.Kom., M.I.Kom.** pada kelas aktif yang sudah diampunya, serta melengkapi nama guru dan akun gurunya. Penugasan mapel tidak membuat hari/jam pelajaran baru. Pengujian lokal: `AIWALAS_BROWSER_TEST=1 python3 tests/teacher-assignments-local.py`.

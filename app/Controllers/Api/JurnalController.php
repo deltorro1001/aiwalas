@@ -8,9 +8,7 @@ class JurnalController extends BaseApiController
         $db=db_connect();$user=$this->currentUser();
         if (!$db->table('kelas')->where('id',$class)->countAllResults()) return false;
         if ($user['peran']!=='guru') return true;
-        $q=$db->table('jadwal_kelas')->where(['kelas_id'=>$class,'guru_id'=>(int)($user['guru_id']??0)]);
-        if ($subject) $q->where('mata_pelajaran_id',$subject);
-        return $q->countAllResults()>0;
+        return \App\Libraries\TeacherAssignments::has($class,(int)($user['guru_id']??0),$subject);
     }
     public function index()
     {
@@ -19,9 +17,8 @@ class JurnalController extends BaseApiController
         $db=db_connect();$user=$this->currentUser();
         $q=$db->table('jurnal_kelas j')->select('j.*,m.nama_mata_pelajaran,g.nama_lengkap AS nama_guru,p.nama_lengkap AS nama_pembuat')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('guru g','g.id=j.guru_id')->join('pengguna p','p.id=j.dibuat_oleh')->where('j.kelas_id',$class);
         if ($user['peran']==='guru') $q->where('j.guru_id',$user['guru_id']);
-        $subjects=$db->table('jadwal_kelas j')->distinct()->select('j.mata_pelajaran_id,j.guru_id,m.nama_mata_pelajaran,g.nama_lengkap AS nama_guru')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('guru g','g.id=j.guru_id')->where('j.kelas_id',$class);
-        if ($user['peran']==='guru') $subjects->where('j.guru_id',$user['guru_id']);
-        return $this->respond(['data'=>$q->orderBy('j.tanggal','DESC')->orderBy('j.id','DESC')->get()->getResultArray(),'assignments'=>$subjects->get()->getResultArray()]);
+        $subjects=array_map(static fn($r)=>array_intersect_key($r,array_flip(['mata_pelajaran_id','guru_id','nama_mata_pelajaran','nama_guru'])),\App\Libraries\TeacherAssignments::rows($class,$user['peran']==='guru'?(int)$user['guru_id']:null));
+        return $this->respond(['data'=>$q->orderBy('j.tanggal','DESC')->orderBy('j.id','DESC')->get()->getResultArray(),'assignments'=>$subjects]);
     }
     public function create(){return $this->persist();}
     public function update(int $id){return $this->persist($id);}
@@ -32,7 +29,7 @@ class JurnalController extends BaseApiController
         if ($errors) return $this->respond(['ok'=>false,'message'=>'Data jurnal tidak valid.','errors'=>$errors],422);
         if (!$this->allowed((int)$p['kelas_id'],(int)$p['mata_pelajaran_id']) || ($user['peran']==='guru' && (int)$p['guru_id']!==(int)$user['guru_id'])) return $this->respond(['ok'=>false,'message'=>'Penugasan tidak dapat diakses.'],403);
         $assignment=['kelas_id'=>(int)$p['kelas_id'],'mata_pelajaran_id'=>(int)$p['mata_pelajaran_id'],'guru_id'=>(int)$p['guru_id']];
-        if (!$db->table('jadwal_kelas')->where($assignment)->countAllResults()) return $this->respond(['ok'=>false,'message'=>'Guru belum ditugaskan pada kelas dan mata pelajaran ini.'],422);
+        if (!\App\Libraries\TeacherAssignments::has($assignment['kelas_id'],$assignment['guru_id'],$assignment['mata_pelajaran_id'])) return $this->respond(['ok'=>false,'message'=>'Guru belum ditugaskan pada kelas dan mata pelajaran ini.'],422);
         if ($id) {
             $old=$db->table('jurnal_kelas')->where('id',$id)->get()->getRowArray();
             if (!$old) return $this->respond(['ok'=>false,'message'=>'Jurnal tidak ditemukan.'],404);

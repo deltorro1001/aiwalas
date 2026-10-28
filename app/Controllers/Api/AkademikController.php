@@ -12,7 +12,7 @@ class AkademikController extends BaseApiController
         if (!in_array($semester, ['Ganjil','Genap'], true) || !$db->table('kelas')->where('id',$class)->countAllResults()) return null;
         $subjects = $db->table('mata_pelajaran')->where('aktif',1)->orderBy('nama_mata_pelajaran')->get()->getResultArray();
         if ($user['peran'] === 'guru') {
-            $assigned = $db->table('jadwal_kelas')->where(['kelas_id'=>$class,'guru_id'=>(int)($user['guru_id']??0)])->get()->getResultArray();
+            $assigned = \App\Libraries\TeacherAssignments::rows($class,(int)($user['guru_id']??0));
             $ids = array_column($assigned,'mata_pelajaran_id');
             $subjects = array_values(array_filter($subjects,static fn($row)=>in_array($row['id'],$ids)));
             if (!$subjects) return null;

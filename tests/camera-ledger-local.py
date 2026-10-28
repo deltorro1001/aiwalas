@@ -17,7 +17,7 @@ try:
     for role in ['wali_kelas','guru']:
         users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,guru_id) VALUES('{prefix}_{role}','{hashed}','Fixture {role}','{role}',{teacher if role=='guru' else 'NULL'});SELECT LAST_INSERT_ID();"))
     year=sql(f"INSERT INTO tahun_ajaran(nama_tahun_ajaran,semester,aktif) VALUES('{prefix}','Ganjil',1);SELECT LAST_INSERT_ID();")
-    subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='Tata Kamera dan Cahaya' AND aktif=1")
+    subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='Tata Kamera & Cahaya' AND aktif=1")
     if not subject:
         subject=sql("INSERT INTO mata_pelajaran(nama_mata_pelajaran,aktif) VALUES('Tata Kamera dan Cahaya',1);SELECT LAST_INSERT_ID();");created_subject=True
     other_subject=sql("SELECT id FROM mata_pelajaran WHERE nama_mata_pelajaran='PAI' AND aktif=1")

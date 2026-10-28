@@ -232,7 +232,7 @@
       remoteSubject=(data.subjects||[]).find(function(s){return token(s.nama_mata_pelajaran)===token(selected)})||(data.subjects||[])[0];
       remoteValues={};(data.data||[]).filter(function(row){return remoteSubject&&Number(row.mata_pelajaran_id)===Number(remoteSubject.id)}).forEach(function(row){if(!remoteValues[row.nis])remoteValues[row.nis]={};remoteValues[row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
       drawAssessment();
-      var heading=document.querySelector('#pageContent h1');if(heading)heading.textContent='Nilai '+(remoteSubject?remoteSubject.nama_mata_pelajaran:'—');
+      var heading=document.querySelector('#pageContent h1');if(heading)heading.textContent='Nilai '+(remoteSubject?window.academicSubjectLabel(remoteSubject.nama_mata_pelajaran):'—');
       document.getElementById('openAssessmentInput').disabled=!remoteSubject;
     }).catch(function(error){if(version===requestVersion&&window.page==='assessment')document.getElementById('pageContent').textContent=error.message;});
   }

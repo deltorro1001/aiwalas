@@ -17,4 +17,8 @@
     var key = String(subject || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     return aliases[key] || key;
   };
+  window.academicSubjectLabel = function (subject) {
+    return window.academicSubjectKey(subject) === 'tatakameracahaya'
+      ? 'Tata Kamera dan Cahaya' : String(subject || '');
+  };
 })();

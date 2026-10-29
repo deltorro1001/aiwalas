@@ -7,9 +7,14 @@ foreach([
     ['2026-10-31T12:00:00+07:00','2026-10-31',true],
     ['2026-11-01T23:59:59+07:00','2026-11-01',true],
     ['2026-11-01T17:00:00+00:00','2026-11-02',false],
+    ['2026-08-16T17:00:00+00:00','2026-08-17',true],
+    ['2026-08-17T17:00:00+00:00','2026-08-18',true],
+    ['2026-08-18T17:00:00+00:00','2026-08-19',false],
+    ['2027-08-17T08:00:00+07:00','2027-08-17',false],
 ] as [$instant,$date,$holiday]){
     $info=SchoolCalendar::info(new DateTimeImmutable($instant));
     if($info['tanggal']!==$date||$info['hari_libur']!==$holiday)throw new RuntimeException('Incorrect school calendar at '.$instant);
 }
 if(SchoolCalendar::isWeekend('2026-02-31'))throw new RuntimeException('Invalid date accepted');
-echo "PASS: Saturday/Sunday holidays, Friday/Monday school days, exact Jakarta midnight across UTC and invalid dates.\n";
+foreach(['2026-08-17','2026-08-18'] as $date)if(!SchoolCalendar::isSpecialHoliday($date)||SchoolCalendar::isWeekend($date))throw new RuntimeException('Special holiday treated as weekend');
+echo "PASS: Weekend and 17-18 August 2026 holidays, adjacent school days/year, exact Jakarta midnight across UTC and invalid dates.\n";

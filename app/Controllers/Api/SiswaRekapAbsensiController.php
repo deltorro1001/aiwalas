@@ -22,6 +22,7 @@ class SiswaRekapAbsensiController extends BaseApiController
         $rows=$db->table('absensi')->select('tanggal,waktu_scan,status')->where(['siswa_id'=>$student['id'],'semester'=>$semester])
             ->where('tanggal >=',$start->format('Y-m-d'))->where('tanggal <',$end->format('Y-m-d'))->orderBy('tanggal','ASC')->orderBy('id','ASC')->get()->getResultArray();
         $months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        foreach($rows as &$row)if(\App\Libraries\SchoolCalendar::isSpecialHoliday($row['tanggal'])){$row['status']='Libur';$row['waktu_scan']=null;}unset($row);
         $this->response->setHeader('Cache-Control','no-store');
         return $this->respond(['data'=>$rows,'bulan'=>$month,'tahun'=>(int)$start->format('Y'),'nomor_bulan'=>(int)$start->format('n'),'jumlah_hari'=>(int)$start->format('t'),'label_bulan'=>$months[(int)$start->format('n')-1].' '.$start->format('Y')]);
     }

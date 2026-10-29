@@ -14,7 +14,9 @@ class AbsensiController extends BaseApiController
   $q=(new AbsensiModel())->select('absensi.*,siswa.nis,siswa.nama_lengkap')->join('siswa','siswa.id=absensi.siswa_id')->where('absensi.kelas_id',$kelas)->where('absensi.tanggal',$tanggal)->where('absensi.semester',$semester)->orderBy('siswa.nama_lengkap');
   $u=$this->currentUser();
   if(($u['peran']??'')==='siswa')$q->where('siswa.nis',$u['nis']);
-  return $this->respond(['data'=>$q->findAll(),'kalender'=>\App\Libraries\SchoolCalendar::info($date)]);
+  $rows=$q->findAll();
+  if(\App\Libraries\SchoolCalendar::isSpecialHoliday($tanggal))foreach($rows as &$row){$row->status='Libur';$row->waktu_scan=null;}unset($row);
+  return $this->respond(['data'=>$rows,'kalender'=>\App\Libraries\SchoolCalendar::info($date)]);
  }
 
  public function createQr(){
@@ -58,6 +60,7 @@ class AbsensiController extends BaseApiController
   }
   $errors=$this->validatePayload($p,['siswa_id'=>'required|is_natural_no_zero','kelas_id'=>'required|is_natural_no_zero','tanggal'=>'required|valid_date[Y-m-d]','semester'=>'required|in_list[Ganjil,Genap]','waktu_scan'=>'permit_empty|valid_date[H:i:s]','status'=>'required|in_list[Hadir,Terlambat,Sakit,Izin,Alpha,PJJ,Menunggu keterangan]','keterangan'=>'permit_empty|max_length[2000]']);
   if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);
+  if(\App\Libraries\SchoolCalendar::isSpecialHoliday($p['tanggal']))return $this->respond(['ok'=>false,'message'=>'Tanggal ini ditetapkan sebagai Libur. Absensi tidak perlu diisi.'],422);
   $student=db_connect()->table('siswa')->where(['id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id'],'aktif'=>1])->get()->getRowArray();
   if(!$student)return $this->respond(['ok'=>false,'message'=>'Siswa tidak terdaftar pada kelas tersebut.'],422);
   $data=['siswa_id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id'],'tanggal'=>$p['tanggal'],'semester'=>$p['semester'],'waktu_scan'=>empty($p['waktu_scan'])?null:$p['waktu_scan'],'status'=>$p['status'],'keterangan'=>trim((string)($p['keterangan']??''))?:null,'dicatat_oleh'=>$u['id']];

@@ -58,7 +58,7 @@ class KedisiplinanController extends BaseApiController
         }
         $record['tanggal']=$dates?end($dates):null;
         if($correctLate){
-            $auto=$db->table('absensi')->select('tanggal')->where(['siswa_id'=>$student['id'],'kelas_id'=>$student['kelas_id'],'status'=>'Terlambat'])->where('tanggal <=',date('Y-m-d'))->get()->getResultArray();
+            $auto=$db->table('absensi')->select('tanggal')->where(['siswa_id'=>$student['id'],'kelas_id'=>$student['kelas_id'],'status'=>'Terlambat'])->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::specialHolidayDates())->where('tanggal <=',date('Y-m-d'))->get()->getResultArray();
             $autoDates=array_column($auto,'tanggal');
             // Preserve the scan records; remember which dates were removed from discipline.
             $record['tanggal_dikecualikan']=json_encode(array_values(array_diff(array_unique($autoDates),$dates)));

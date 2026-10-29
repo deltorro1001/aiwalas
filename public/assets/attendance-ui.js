@@ -8,7 +8,7 @@
     ['scanQr','makeLiveQr','manualAttendance','attendanceManual','createStudentQr'].forEach(function(id){var b=document.getElementById(id);if(b){b.disabled=!isToday();b.title=isToday()?'':'Pilih tanggal hari ini untuk mencatat absensi.'}});
   }
   function rows(){
-    return (window.students||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]),'id')}).map(function(student){var record=records[String(student[7])];return {student:student,record:record,status:record?record.status:(window.AIWalasCalendar&&window.AIWalasCalendar.isWeekend(selectedDate||today())?'Libur':'Menunggu keterangan')}});
+    return (window.students||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]),'id')}).map(function(student){var record=records[String(student[7])];return {student:student,record:record,status:record?record.status:(window.AIWalasCalendar&&window.AIWalasCalendar.isHoliday(selectedDate||today())?'Libur':'Menunggu keterangan')}});
   }
   function paint(){
     if(window.page!=='attendance'||window.currentRole==='student')return;
@@ -17,7 +17,7 @@
     var counts={};list.forEach(function(row){counts[row.status]=(counts[row.status]||0)+1});
     var cards=root.querySelectorAll('.grid-stats .stat-card'),total=list.length,present=counts.Hadir||0;
     [[present,total?Math.round(present/total*100)+'% siswa':'0% siswa'],[counts.Terlambat||0,'Berdasarkan tanggal pilihan'],[(counts.Sakit||0)+(counts.Izin||0)+(counts.Alpha||0),'Sakit, izin, atau alpha'],[counts['Menunggu keterangan']||0,'Belum ada catatan kehadiran']].forEach(function(value,i){var card=cards[i];if(!card)return;var number=card.querySelector('.stat-number'),note=card.querySelector('.stat-note');if(number)number.textContent=value[0];if(note)note.textContent=value[1]});
-    body.innerHTML=visible.map(function(row){var s=row.student,r=row.record,status=row.status,time=r&&r.waktu_scan?String(r.waktu_scan).slice(0,8):'—';return '<tr data-attendance-student="'+esc(s[7])+'" data-attendance-status="'+esc(status)+'"><td><div class="student-cell"><span class="avatar avatar-teal">'+esc(s[3])+'</span><strong>'+esc(s[0])+'</strong></div></td><td>'+esc(time)+'</td><td><span class="status '+statusClass(status)+'">'+esc(status)+'</span></td><td><span class="stat-note">'+(isToday()?'—':'Riwayat')+'</span></td><td>'+(currentRole==='walas'?'<button type="button" class="panel-action attendance-correct" data-student-id="'+esc(s[7])+'" data-student-name="'+esc(s[0])+'" data-status="'+esc(status)+'" data-time="'+esc(time)+'" data-note="'+esc(r&&r.keterangan||'')+'">Koreksi</button>':'<span class="stat-note">'+(isToday()?'Wali kelas':'Riwayat')+'</span>')+'</td></tr>'}).join('')||'<tr><td colspan="5" class="summary-empty">'+(list.length?'Tidak ada siswa dengan status '+esc(selectedFilter)+' pada tanggal ini.':'Belum ada siswa pada kelas ini.')+'</td></tr>';
+    body.innerHTML=visible.map(function(row){var s=row.student,r=row.record,status=row.status,time=r&&r.waktu_scan?String(r.waktu_scan).slice(0,8):'—';return '<tr data-attendance-student="'+esc(s[7])+'" data-attendance-status="'+esc(status)+'"><td><div class="student-cell"><span class="avatar avatar-teal">'+esc(s[3])+'</span><strong>'+esc(s[0])+'</strong></div></td><td>'+esc(time)+'</td><td><span class="status '+statusClass(status)+'">'+esc(status)+'</span></td><td><span class="stat-note">'+(isToday()?'—':'Riwayat')+'</span></td><td>'+(currentRole==='walas'&&!(window.AIWalasCalendar&&window.AIWalasCalendar.isSpecialHoliday(selectedDate))?'<button type="button" class="panel-action attendance-correct" data-student-id="'+esc(s[7])+'" data-student-name="'+esc(s[0])+'" data-status="'+esc(status)+'" data-time="'+esc(time)+'" data-note="'+esc(r&&r.keterangan||'')+'">Koreksi</button>':'<span class="stat-note">'+(isToday()?'Wali kelas':'Riwayat')+'</span>')+'</td></tr>'}).join('')||'<tr><td colspan="5" class="summary-empty">'+(list.length?'Tidak ada siswa dengan status '+esc(selectedFilter)+' pada tanggal ini.':'Belum ada siswa pada kelas ini.')+'</td></tr>';
     var note=document.getElementById('attendanceViewSummary');if(note)note.textContent=visible.length+' dari '+list.length+' siswa · '+selectedDate;
     body.querySelectorAll('.attendance-correct').forEach(function(btn){btn.onclick=function(){openCorrection(btn)}});
     actionState();
@@ -54,7 +54,7 @@
   function updateHeading(){
     var root=document.getElementById('pageContent'),heading=root.querySelector('.page-heading p'),title=root.querySelector('.table-panel .panel-head h2');
     if(heading)heading.textContent='Tanggal '+selectedDate+' · '+(isToday()?'Absensi hari ini':'Riwayat absensi');
-    if(title)title.textContent=(isToday()?'Status absensi hari ini':'Status absensi '+selectedDate)+(window.AIWalasCalendar&&window.AIWalasCalendar.isWeekend(selectedDate)?' · Libur':'');
+    if(title)title.textContent=(isToday()?'Status absensi hari ini':'Status absensi '+selectedDate)+(window.AIWalasCalendar&&window.AIWalasCalendar.isHoliday(selectedDate)?' · Libur':'');
   }
   function openCorrection(btn){
     if(window.currentRole!=='walas')return;

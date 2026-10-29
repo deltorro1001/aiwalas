@@ -28,6 +28,7 @@ try:
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_student','{hashed}','Siswa Uji','siswa','{prefix}_0');SELECT LAST_INSERT_ID();"))
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_secretary','{hashed}','Sekretaris Rekap','sekretaris','{prefix}_1');SELECT LAST_INSERT_ID();"))
     records=[(0,'2026-01-01','Sakit','Genap'),(0,'2026-01-31','Izin','Genap'),(0,'2026-02-01','Alpha','Genap'),(0,'2026-07-01','Terlambat','Ganjil'),(0,'2026-12-31','Sakit','Ganjil'),(0,'2027-01-01','Alpha','Genap'),(0,'2026-01-01','Sakit','Ganjil'),(1,'2026-01-01','Izin','Genap'),(1,'2026-10-02','Alpha','Ganjil'),(1,'2026-10-03','PJJ','Ganjil'),(1,'2026-10-04','Menunggu keterangan','Ganjil'),(1,'2026-10-05','Hadir','Ganjil'),(2,'2026-10-01','Sakit','Ganjil'),(3,'2026-10-01','Terlambat','Ganjil')]
+    records += [(0,'2026-08-17','Alpha','Ganjil'),(0,'2026-08-18','Terlambat','Ganjil'),(1,'2026-08-17','Sakit','Ganjil'),(1,'2026-08-18','Izin','Ganjil')]
     for i,date,status,semester in records:sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[i]},{classes[1] if i==3 else classes[0]},'{date}','{status}','{semester}',{users[0]});")
     wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_0','password':password})
     other=Client();other.call('api/auth/login',{'role':'walas','username':prefix+'_1','password':password})
@@ -56,6 +57,25 @@ try:
     empty=wali.call('api/absensi/rekap-kelas?kelas_id='+classes[2]);assert empty['siswa']==[] and empty['total']==zero
     for invalid in ['2025','9999','abc','2026-01','2026.0']:wali.call('api/absensi/rekap-kelas?kelas_id='+classes[0]+'&tahun='+invalid,status=422)
     for query in ['kelas_id[]=1','kelas_id=0','kelas_id='+classes[0]+'&tahun[]=2026','kelas_id='+classes[0]+'&semester[]=Ganjil','kelas_id='+classes[0]+'&semester=invalid']:wali.call('api/absensi/rekap-kelas?'+query,status=422)
+    for date in ['2026-08-17','2026-08-18']:
+        for client in [wali,secretary,student,parent]:
+            result=client.call('api/absensi?kelas_id='+classes[0]+'&tanggal='+date+'&semester=Ganjil')
+            assert result['kalender']['hari_libur'] is True,result
+            assert result['data'] and all(r['status']=='Libur' and r['waktu_scan'] is None for r in result['data']),result
+        wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(classes[0]),'tanggal':date,'semester':'Ganjil','status':'Hadir'},status=422)
+    for client in [student,parent]:
+        august=client.call('api/siswa/rekap-absensi?bulan=8&tahun=2026')
+        assert len(august['data'])==2 and all(r['status']=='Libur' and r['waktu_scan'] is None for r in august['data']),august
+        overview=client.call('api/siswa/dashboard')['data']
+        assert all(r['tanggal'] not in ['2026-08-17','2026-08-18'] for r in overview['keterlambatan']['riwayat']),overview
+    report=wali.call('api/laporan?kelas_id='+classes[0]+'&semester=Ganjil')['data']['siswa']
+    own=next(r for r in report if str(r['id'])==pupils[0])
+    assert int(own['sakit'])==2 and int(own['alpha'])==0 and int(own['izin'])==0,own
+    discipline=wali.call('api/kedisiplinan?kelas_id='+classes[0])['data']
+    own=next(r for r in discipline if str(r['id'])==pupils[0])
+    assert own['keterlambatan']['jumlah']==1 and '2026-08-18' not in own['tanggal_pelanggaran']['terlambat'],own
+    # Original records remain intact; calendar overrides reads and aggregate counts only.
+    assert sql('SELECT status FROM absensi WHERE siswa_id='+pupils[0]+" AND tanggal='2026-08-17'")=='Alpha'
     today=datetime.datetime.now(ZoneInfo('Asia/Jakarta')).date()
     correction={'siswa_id':int(pupils[0]),'kelas_id':int(classes[0]),'tanggal':str(today),'semester':'Ganjil','status':'Sakit','waktu_scan':None}
     # Existing seeded dates differ from today; changing attendance must update the recap.

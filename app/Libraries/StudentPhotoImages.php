@@ -18,7 +18,7 @@ final class StudentPhotoImages
         if(!preg_match('/^[a-f0-9]{48}\.jpg$/D',$file))throw new RuntimeException('Berkas foto tidak valid.');
         return self::directory().$file;
     }
-    public static function snapshot(array $rows): string {return hash('sha256','single-page-created-v2:'.implode(',',array_column($rows,'id')));}
+    public static function snapshot(array $rows): string {return hash('sha256','single-page-class-title-v3:'.implode(',',array_column($rows,'id')));}
     private static function ready(): void
     {
         if(!extension_loaded('gd'))throw new RuntimeException('Pemrosesan foto belum tersedia di server.');
@@ -77,8 +77,7 @@ final class StudentPhotoImages
         }
         $out=imagecreatetruecolor($w,$h);$white=imagecolorallocate($out,255,255,255);$ink=imagecolorallocate($out,20,38,50);$teal=imagecolorallocate($out,0,115,108);imagefill($out,0,0,$white);
         try{
-            self::text($out,'Kolase Foto - '.$class,$margin,22,3,$teal,$availableW);
-            self::text($out,(new \DateTimeImmutable($date))->format('d-m-Y').' | '.$count.' foto',$margin,82,2,$ink,$availableW);
+            self::text($out,'Kolase Kelas '.$class,$margin,22,3,$teal,$availableW);
             foreach($photos as $i=>$photo){
                 $x=$margin+($i%$best['cols'])*($best['cellW']+$gap);$y=$top+(int)floor($i/$best['cols'])*($best['cellH']+$gap);
                 $source=@imagecreatefromjpeg(self::path($photo['berkas']));if(!$source)throw new RuntimeException('Salah satu foto tidak tersedia. Muat ulang dan coba kembali.');

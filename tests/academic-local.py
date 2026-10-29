@@ -111,11 +111,13 @@ try:
         saved_rows=other.call('api/akademik?kelas_id='+classes[0])['data']
         assert any(row['nama_komponen']=='UH2' and float(row['nilai'])==82 for row in saved_rows)
         c.js("window.page='journal';window.render()")
-        c.wait("!!document.getElementById('addJournal')")
+        c.wait("!!document.getElementById('addJournal') && !document.getElementById('addJournal').disabled")
         c.js("document.getElementById('addJournal').click();document.getElementById('jMateri').value='Browser persisted journal';document.getElementById('journalForm').requestSubmit()")
         c.wait("document.getElementById('pageContent').textContent.includes('Browser persisted journal')")
         assert len(other.call('api/jurnal?kelas_id='+classes[0])['data'])==7
-        assert c.js("document.querySelectorAll('.teacher-journal-table tbody tr').length")==7
+        assert c.js("document.querySelectorAll('.teacher-journal-table tbody tr').length")==1
+        c.js("document.getElementById('journalViewDate').value='2026-10-18';document.getElementById('journalViewDate').dispatchEvent(new Event('change'))")
+        c.wait("document.querySelectorAll('.teacher-journal-table tbody tr').length===6")
         browser_teacher=sql(f"INSERT INTO guru(nama_lengkap,nama_panggilan,aktif) VALUES('{prefix}_ui','{prefix}_ui',1); SELECT LAST_INSERT_ID();")
         teachers.append(browser_teacher)
         c.js("authRequest('api/auth/logout',{method:'POST',body:'{}'}).then(function(){return authRequest('api/auth/login',{method:'POST',body:JSON.stringify({role:'walas',username:'sumantoro',password:'aiwalas123'})})}).then(function(d){return finishLogin(d.user)})")

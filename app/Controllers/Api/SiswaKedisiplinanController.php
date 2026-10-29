@@ -16,6 +16,6 @@ class SiswaKedisiplinanController extends BaseApiController
             foreach($fields as $field)$records[$kind][$field]=$source['records'][$kind][$field]??null;
         }
         $this->response->setHeader('Cache-Control','no-store');
-        return $this->respond(['data'=>['student'=>['nama'=>$source['nama_lengkap'],'nis'=>$source['nis']],'records'=>$records,'keterlambatan'=>$source['keterlambatan'],'kategori_bercatatan'=>array_column($source['catatan'],'kategori')]]);
+        return $this->respond(['data'=>['student'=>['nama'=>$source['nama_lengkap'],'nis'=>$source['nis']],'records'=>$records,'keterlambatan'=>$source['keterlambatan'],'status_kedisiplinan'=>$source['status_kedisiplinan'],'kategori_bercatatan'=>array_column($source['catatan'],'kategori')]]);
     }
 }

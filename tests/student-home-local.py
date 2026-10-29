@@ -129,6 +129,23 @@ try:
     for category,values in [('etika',{'pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','alasan':'Alasan etika','tindakan':'Pembinaan'}),('atribut',{'pelanggaran':'Atribut kurang lengkap','perbaikan':'Lengkapi atribut'}),('terlambat',{'jumlah_terlambat':2,'tanggal':str(today),'alasan':'Alasan terlambat'})]:
         wali.call('api/kedisiplinan',dict(siswa_id=int(pupils[0]),kategori=category,**values))
     wali.call('api/kedisiplinan',{'siswa_id':int(pupils[2]),'kategori':'etika','pelanggaran':'CATATAN SISWA LAIN'})
+    discipline_result=wali.call('api/kedisiplinan?kelas_id='+class_id)
+    status_options=discipline_result['status_options']
+    assert status_options==['Baik','Peringatan 1','Peringatan 2 dan Pemanggilan Orangtua/Wali Murid ke-1','Peringatan 3 dan Pemanggilan Orangtua/Wali Murid ke-2','Peringatan Keras dan Pemanggilan Orangtua/Wali Murid ke-3']
+    peer_status=next(row for row in discipline_result['data'] if str(row['id'])==pupils[1])['status_kedisiplinan']
+    assert peer_status=={'etika':'Baik','atribut':'Baik','terlambat':'Terlambat 1x'},peer_status
+    for category,content in [('etika',{'pelanggaran':'Catatan Etika Awal','tanggal':str(today),'saksi':'Test Wali','alasan':'Alasan etika','tindakan':'Pembinaan'}),('atribut',{'pelanggaran':'Atribut kurang lengkap','perbaikan':'Lengkapi atribut'})]:
+        payload=dict(siswa_id=int(pupils[0]),kategori=category,**content)
+        for selected_status in status_options[1:]:
+            wali.call('api/kedisiplinan',dict(payload,status_kedisiplinan=selected_status))
+            current_status=a.call('api/siswa/kedisiplinan')['data']['status_kedisiplinan']
+            assert current_status[category]==selected_status and current_status['terlambat']=='Dalam Peringatan (Terlambat 2x)',current_status
+        for invalid in ['Tidak Baik',[],None]:wali.call('api/kedisiplinan',dict(payload,status_kedisiplinan=invalid),status=422)
+        wali.call('api/kedisiplinan',dict(payload,status_kedisiplinan='Baik'),status=422)
+        wali.call('api/kedisiplinan',dict(payload,status_kedisiplinan='Peringatan 1'))
+    wali.call('api/kedisiplinan',{'siswa_id':int(pupils[0]),'kategori':'terlambat','status_kedisiplinan':'Peringatan 1'},status=422)
+    sql(f"UPDATE catatan_kedisiplinan SET status_kedisiplinan=NULL WHERE siswa_id={pupils[0]} AND kategori='etika'")
+    assert a.call('api/siswa/kedisiplinan')['data']['status_kedisiplinan']['etika']=='Peringatan 1'
     own_notes=a.call('api/siswa/dashboard?kelas_id='+classes[1])['data']['kedisiplinan']['catatan']
     assert len(own_notes)==3 and 'CATATAN SISWA LAIN' not in json.dumps(own_notes)
     assert own_notes[1]['status']=='Dalam Peringatan (Terlambat 2x)'
@@ -274,6 +291,21 @@ try:
         c.js("window.page='discipline';window.render()")
         print('PASS: Wali PJJ correction saves, survives re-render, reopens selected and filters correctly.')
         c.wait("!!document.querySelector('[data-stored-discipline=\""+pupils[0]+"\"]')")
+        selected_statuses={'etika':status_options[2],'atribut':status_options[4]}
+        for category,selected_status in selected_statuses.items():
+            c.js("document.getElementById('storedDisciplineCategory').value="+json.dumps(category)+";document.getElementById('storedDisciplineCategory').dispatchEvent(new Event('change'))")
+            assert c.js("Array.from(document.querySelectorAll('#storedDisciplineHead th')).map(th=>th.textContent).includes('Status Kedisiplinan')")
+            peer_status_selector=json.dumps('[data-stored-discipline="'+pupils[1]+'"]')
+            assert c.js("document.querySelector("+peer_status_selector+").closest('tr').children[document.querySelector("+peer_status_selector+").closest('tr').children.length-2].textContent")=='Baik'
+            own_status_selector=json.dumps('[data-stored-discipline="'+pupils[0]+'"]')
+            c.js("document.querySelector("+own_status_selector+").click()")
+            assert c.js("Array.from(document.querySelectorAll('#storedDisciplineStatus option')).map(o=>o.textContent)")==status_options
+            c.js("document.getElementById('storedDisciplineStatus').value="+json.dumps(selected_status)+";document.getElementById('saveStoredDiscipline').click()")
+            c.wait("!document.getElementById('modalBackdrop').classList.contains('show')")
+            c.js("window.render()")
+            c.wait("document.getElementById('storedDisciplineRows')?.textContent.includes("+json.dumps(selected_status)+")")
+            assert a.call('api/siswa/kedisiplinan')['data']['status_kedisiplinan'][category]==selected_status
+        print('PASS: Independent ethics/attributes status columns, default Baik despite lateness, all warning options saved via Edit and durable after reload, unchanged automatic lateness.')
         for category,pupil,expected in [('etika',pupils[0],[earlier,today]),('terlambat',pupils[1],[earlier,previous,today]),('atribut',pupils[0],[earlier,today])]:
             c.js("document.getElementById('storedDisciplineCategory').value="+json.dumps(category)+";document.getElementById('storedDisciplineCategory').dispatchEvent(new Event('change'))")
             selector=json.dumps('[data-stored-discipline="'+pupil+'"]')
@@ -353,7 +385,7 @@ try:
         c.js("document.querySelector('.sidebar [data-page=studentDiscipline]').click()")
         c.wait("document.getElementById('studentDiscipline_etika')?.textContent.includes('Etika UI')")
         assert c.js("Array.from(document.querySelectorAll('.student-discipline-page h2')).map(el=>el.textContent)")==['Pelanggaran Etika','Keterlambatan','Pakaian & Atribut']
-        assert c.js("Array.from(document.querySelector('.student-discipline-page table').querySelectorAll('th')).map(el=>el.textContent)")==['Nomor','Pelanggaran Yang Dilakukan','Tanggal Dilakukan','Disaksikan Oleh','Tindakan']
+        assert c.js("Array.from(document.querySelector('.student-discipline-page table').querySelectorAll('th')).map(el=>el.textContent)")==['Nomor','Pelanggaran Yang Dilakukan','Tanggal Dilakukan','Disaksikan Oleh','Tindakan','Status Kedisiplinan']
         ethics=c.js("document.getElementById('studentDiscipline_etika').textContent")
         assert 'Etika UI <img src=x onerror=alert(1)>' in ethics and 'Test Wali' in ethics and 'Pembinaan' in ethics and 'Alasan etika' not in ethics
         assert 'Alasan terlambat' in c.js("document.getElementById('studentDiscipline_terlambat').textContent")

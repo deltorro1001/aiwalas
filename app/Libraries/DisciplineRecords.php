@@ -7,6 +7,19 @@ class DisciplineRecords
     public const CATEGORIES=['etika'=>'Pelanggaran Etika','terlambat'=>'Keterlambatan','atribut'=>'Pakaian & Atribut'];
     public const FIELDS=['etika'=>['pelanggaran','tanggal','saksi','alasan','tindakan'],'terlambat'=>['jumlah_terlambat','tanggal','alasan'],'atribut'=>['pelanggaran','perbaikan']];
     public const LABELS=['pelanggaran'=>'Pelanggaran','tanggal'=>'Tanggal','saksi'=>'Disaksikan oleh','alasan'=>'Alasan','tindakan'=>'Tindakan','perbaikan'=>'Perbaikan','jumlah_terlambat'=>'Jumlah keterlambatan'];
+    public const MANUAL_STATUSES=['Baik','Peringatan 1','Peringatan 2 dan Pemanggilan Orangtua/Wali Murid ke-1','Peringatan 3 dan Pemanggilan Orangtua/Wali Murid ke-2','Peringatan Keras dan Pemanggilan Orangtua/Wali Murid ke-3'];
+
+    public static function hasDetails(array $record): bool
+    {
+        foreach(['pelanggaran','tanggal','saksi','alasan','tindakan','perbaikan'] as $field)if(trim((string)($record[$field]??''))!=='')return true;
+        return (bool)(json_decode($record['tanggal_kejadian']??'[]',true)?:[]);
+    }
+    public static function manualStatus(array $record): string
+    {
+        $status=$record['status_kedisiplinan']??null;
+        if(in_array($status,array_slice(self::MANUAL_STATUSES,1),true))return $status;
+        return self::hasDetails($record)?'Peringatan 1':'Baik';
+    }
 
     public static function status(int $count): string
     {
@@ -62,13 +75,15 @@ class DisciplineRecords
             $student['records']=$saved;
             $lastDate=isset($saved['terlambat']['tanggal_dikecualikan'])?$saved['terlambat']['tanggal']:($saved['terlambat']['tanggal']??$auto['tanggal']??null);
             $student['keterlambatan']=['jumlah'=>$count,'tanggal'=>$lastDate,'status'=>self::status($count)];
+            $student['status_kedisiplinan']=['etika'=>self::manualStatus($saved['etika']??[]),'terlambat'=>self::status($count),'atribut'=>self::manualStatus($saved['atribut']??[])];
             $notes=[];
             foreach(self::CATEGORIES as $kind=>$title){
                 $record=$saved[$kind]??[];
                 if($kind==='terlambat'&&$count>0)$record=array_replace($record,['jumlah_terlambat'=>$count,'tanggal'=>$student['keterlambatan']['tanggal']]);
                 $details=[];
                 foreach(self::FIELDS[$kind] as $field){$value=$record[$field]??null;if($value===null||trim((string)$value)===''||($field==='jumlah_terlambat'&&(int)$value===0))continue;$details[]=['label'=>self::LABELS[$field],'nilai'=>(string)$value];}
-                if($details)$notes[]=['kategori'=>$kind,'judul'=>$title,'rincian'=>$details,'status'=>$kind==='terlambat'?self::status($count):null];
+                $categoryStatus=$student['status_kedisiplinan'][$kind];
+                if($details||($kind!=='terlambat'&&$categoryStatus!=='Baik'))$notes[]=['kategori'=>$kind,'judul'=>$title,'rincian'=>$details,'status'=>$categoryStatus];
             }
             $student['catatan']=$notes;
         }

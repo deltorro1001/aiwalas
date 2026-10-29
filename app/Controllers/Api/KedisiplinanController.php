@@ -9,12 +9,16 @@ class KedisiplinanController extends BaseApiController
         $classId=(int)$this->request->getGet('kelas_id');
         if(!db_connect()->table('kelas')->where(['id'=>$classId,'wali_kelas_id'=>$this->currentUser()['id']])->countAllResults())return $this->respond(['ok'=>false,'message'=>'Kelas tidak dapat diakses.'],404);
         $this->response->setHeader('Cache-Control','no-store');
-        return $this->respond(['data'=>(new DisciplineRecords())->forClass($classId)]);
+        return $this->respond(['data'=>(new DisciplineRecords())->forClass($classId),'status_options'=>DisciplineRecords::MANUAL_STATUSES]);
     }
     public function save()
     {
         $p=$this->payload();$errors=$this->validatePayload($p,['siswa_id'=>'required|is_natural_no_zero','kategori'=>'required|in_list[etika,terlambat,atribut]','pelanggaran'=>'permit_empty|max_length[2000]','tanggal'=>'permit_empty|valid_date[Y-m-d]','saksi'=>'permit_empty|max_length[180]','alasan'=>'permit_empty|max_length[2000]','tindakan'=>'permit_empty|max_length[2000]','perbaikan'=>'permit_empty|max_length[2000]','jumlah_terlambat'=>'permit_empty|is_natural|less_than_equal_to[10000]']);
         if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);
+        if(array_key_exists('status_kedisiplinan',$p)){
+            if($p['kategori']==='terlambat')return $this->respond(['message'=>'Status keterlambatan dihitung otomatis dari jumlah keterlambatan.'],422);
+            if(!is_string($p['status_kedisiplinan'])||!in_array($p['status_kedisiplinan'],DisciplineRecords::MANUAL_STATUSES,true))return $this->respond(['message'=>'Pilih status kedisiplinan yang valid.'],422);
+        }
         $dates=null;
         if(array_key_exists('tanggal_kejadian',$p)){
             if(!is_array($p['tanggal_kejadian'])||count($p['tanggal_kejadian'])>500)return $this->respond(['message'=>'Maksimal 500 tanggal kejadian.'],422);
@@ -66,6 +70,13 @@ class KedisiplinanController extends BaseApiController
             $dates=array_values(array_diff($dates,$autoDates));
         }
         $record['tanggal_kejadian']=json_encode($dates);
+        if($p['kategori']!=='terlambat'){
+            $requested=$p['status_kedisiplinan']??(DisciplineRecords::hasDetails($record)?($existing['status_kedisiplinan']??null):'Baik');
+            if(array_key_exists('status_kedisiplinan',$p)&&$requested==='Baik'&&DisciplineRecords::hasDetails($record)){
+                $db->transRollback();return $this->respond(['message'=>'Pilih status peringatan untuk catatan pelanggaran. Status Baik berlaku jika tidak ada catatan pelanggaran.'],422);
+            }
+            $record['status_kedisiplinan']=DisciplineRecords::manualStatus($record+['status_kedisiplinan'=>$requested]);
+        }
         if($reasons!==null){
             $record['alasan_per_tanggal']=json_encode($reasons);
             $record['alasan']=$record['tanggal']?($reasons[$record['tanggal']]??null):null;

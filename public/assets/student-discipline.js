@@ -1,7 +1,7 @@
 (function(){
   var version=0;
   var tables=[
-    {key:'etika',title:'Pelanggaran Etika',headers:['Nomor','Pelanggaran Yang Dilakukan','Tanggal Dilakukan','Disaksikan Oleh','Tindakan']},
+    {key:'etika',title:'Pelanggaran Etika',headers:['Nomor','Pelanggaran Yang Dilakukan','Tanggal Dilakukan','Disaksikan Oleh','Tindakan','Status Kedisiplinan']},
     {key:'terlambat',title:'Keterlambatan',headers:['Nomor','Nama Siswa','NIS','Jumlah Keterlambatan','Tanggal Dilakukan','Alasan','Status Kedisiplinan']},
     {key:'atribut',title:'Pakaian & Atribut',headers:['Nomor','Nama Siswa','NIS','Pelanggaran Yang Dilakukan','Perbaikan','Status Kedisiplinan']}
   ];
@@ -19,9 +19,9 @@
       document.getElementById('studentDisciplineIdentity').textContent=(student.nama||'Siswa')+' · NIS '+(student.nis||'');
       tables.forEach(function(table){
         var record=records[table.key]||{},cells;
-        if(table.key==='etika')cells=[1,record.pelanggaran,record.tanggal,record.saksi,record.tindakan];
+        if(table.key==='etika')cells=[1,record.pelanggaran,record.tanggal,record.saksi,record.tindakan,(data.status_kedisiplinan||{}).etika||'Baik'];
         else if(table.key==='terlambat')cells=[1,student.nama,student.nis,late.jumlah,record.tanggal||late.tanggal,record.alasan,late.status];
-        else cells=[1,student.nama,student.nis,record.pelanggaran,record.perbaikan,late.status];
+        else cells=[1,student.nama,student.nis,record.pelanggaran,record.perbaikan,(data.status_kedisiplinan||{}).atribut||'Baik'];
         document.getElementById('studentDiscipline_'+table.key).innerHTML=table.key!=='terlambat'&&(data.kategori_bercatatan||[]).indexOf(table.key)<0?'<tr><td colspan="'+table.headers.length+'">Tidak Ada Catatan Pelanggaran</td></tr>':'<tr>'+cells.map(function(cell){return '<td>'+esc(value(cell))+'</td>'}).join('')+'</tr>';
       });
     }).catch(function(error){

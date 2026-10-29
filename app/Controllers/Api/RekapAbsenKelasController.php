@@ -18,6 +18,8 @@ class RekapAbsenKelasController extends BaseApiController
         if(($user['peran']??'')==='sekretaris'){
             $own=$db->table('siswa')->where(['nis'=>$user['nis']??'','kelas_id'=>(int)$class,'aktif'=>1])->countAllResults();
             if(!$own)return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);
+        }elseif(($user['peran']??'')==='guru'){
+            if(!\App\Libraries\TeacherAssignments::has((int)$class,(int)($user['guru_id']??0)))return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);
         }else $query->where('wali_kelas_id',(int)$user['id']);
         $klass=$query->get()->getRowArray();
         if(!$klass)return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);

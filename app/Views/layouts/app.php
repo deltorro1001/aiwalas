@@ -26,11 +26,11 @@
 <script src='<?= base_url('assets/academic-subjects.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script>window.AIWalasGradeComponentLabels=<?= json_encode(\App\Libraries\GradeComponents::labels()) ?>;</script>
 <script src='<?= base_url('assets/grade-components.js?v=20261029-tasks-six') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261029-tasks-six') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261029-tasks-six') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261029-august-pjj') ?>'></script>
-<script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
+<script src='<?= base_url('assets/teacher-role.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
 <script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261022-exclusions') ?>'></script>
@@ -47,8 +47,8 @@
 <script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
 <script src='<?= base_url('assets/dashboard-summary.js?v=20261029-august-pjj') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20261029-august-pjj') ?>'></script>
-<script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261030-teacher-read') ?>'></script>
+<script src='<?= base_url('assets/attendance-live.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/attendance-recap-detail.js?v=20261028-secretary-menus') ?>'></script>
@@ -127,12 +127,12 @@
   setTimeout(ensureWalasAssessment,1500);
 })();
 </script>
-<script src='<?= base_url('assets/class-attendance-recap.js?v=20261028-secretary-menus') ?>'></script>
+<script src='<?= base_url('assets/class-attendance-recap.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/account-management.js?v=20261028-student-alias') ?>'></script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
 <script src='<?= base_url('assets/communication-history.js?v=20261022') ?>'></script>
-<script src='<?= base_url('assets/discipline-page.js?v=20261029-discipline-wrap') ?>'></script>
+<script src='<?= base_url('assets/discipline-page.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/student-schedule.js?v=20261026-complete') ?>'></script>
 <script src='<?= base_url('assets/student-discipline.js?v=20261029-category-status') ?>'></script>
 <script src='<?= base_url('assets/student-attendance-recap.js?v=20261029-august-pjj') ?>'></script>

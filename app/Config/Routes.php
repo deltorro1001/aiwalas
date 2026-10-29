@@ -36,8 +36,8 @@ $routes->get('api/siswa/(:num)', 'Api\SiswaController::show/$1', ['filter' => ['
 $routes->post('api/siswa', 'Api\SiswaController::create', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->put('api/siswa/(:num)', 'Api\SiswaController::update/$1', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->delete('api/siswa/(:num)', 'Api\SiswaController::delete/$1', ['filter' => ['auth', 'role:wali_kelas']]);
-$routes->get('api/absensi/rekap-kelas', 'Api\RekapAbsenKelasController::index', ['filter'=>['auth','role:wali_kelas,sekretaris']]);
-$routes->get('api/absensi', 'Api\AbsensiController::index', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa']]);
+$routes->get('api/absensi/rekap-kelas', 'Api\RekapAbsenKelasController::index', ['filter'=>['auth','role:wali_kelas,sekretaris,guru']]);
+$routes->get('api/absensi', 'Api\AbsensiController::index', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa,guru']]);
 $routes->post('api/absensi/qr', 'Api\AbsensiController::createQr', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->post('api/absensi', 'Api\AbsensiController::save', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa']]);
 $routes->get('api/pengajuan-sakit', 'Api\PengajuanSakitController::index', ['filter' => 'auth']);
@@ -93,7 +93,7 @@ $routes->get('laporan/csv', 'Api\LaporanController::csv', ['filter' => ['auth', 
 // Legacy URLs now load the integrated single-page application.
 $routes->get('login', 'Dashboard::index');
 $routes->get('siswa', 'Dashboard::index', ['filter' => ['auth', 'role:wali_kelas']]);
-$routes->get('absensi', 'Dashboard::index', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa']]);
+$routes->get('absensi', 'Dashboard::index', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa,guru']]);
 $routes->get('nilai', 'Dashboard::index', ['filter' => ['auth', 'role:wali_kelas']]);
 
 $routes->get('api/akademik', 'Api\AkademikController::index', ['filter' => ['auth', 'role:wali_kelas,guru,siswa']]);
@@ -104,7 +104,7 @@ $routes->post('api/akun-guru/(:num)', 'Api\AkunGuruController::save/$1', ['filte
 
 $routes->get('api/whatsapp/teacher-schedule', 'Api\TeacherScheduleAutomationController::index', ['filter'=>['auth','role:wali_kelas']]);
 
-$routes->get('api/kedisiplinan', 'Api\\KedisiplinanController::index', ['filter'=>['auth','role:wali_kelas']]);
+$routes->get('api/kedisiplinan', 'Api\\KedisiplinanController::index', ['filter'=>['auth','role:wali_kelas,guru']]);
 $routes->post('api/kedisiplinan', 'Api\\KedisiplinanController::save', ['filter'=>['auth','role:wali_kelas']]);
 
 $routes->get('api/kelola-akun', 'Api\KelolaAkunController::index', ['filter'=>['auth','role:wali_kelas']]);

@@ -6,17 +6,19 @@ class AbsensiController extends BaseApiController
 {
  public function index(){
   $kelas=(int)$this->request->getGet('kelas_id');
+  $u=$this->currentUser();
+  if(($u['peran']??'')==='guru'&&!\App\Libraries\TeacherAssignments::has($kelas,(int)($u['guru_id']??0)))return $this->respond(['message'=>'Kelas tidak dapat diakses.'],404);
   $tanggal=$this->request->getGet('tanggal')?:date('Y-m-d');
   if(!is_string($tanggal))return $this->respond(['ok'=>false,'message'=>'Tanggal absensi tidak valid.'],422);
   $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$tanggal);
   if(!$date||$date->format('Y-m-d')!==$tanggal)return $this->respond(['ok'=>false,'message'=>'Tanggal absensi tidak valid.'],422);
   $semester=$this->request->getGet('semester')?:'Ganjil';if(!in_array($semester,['Ganjil','Genap'],true))$semester='Ganjil';
   $q=(new AbsensiModel())->select('absensi.*,siswa.nis,siswa.nama_lengkap')->join('siswa','siswa.id=absensi.siswa_id')->where('absensi.kelas_id',$kelas)->where('absensi.tanggal',$tanggal)->where('absensi.semester',$semester)->orderBy('siswa.nama_lengkap');
-  $u=$this->currentUser();
   if(($u['peran']??'')==='siswa')$q->where('siswa.nis',$u['nis']);
   $rows=$q->findAll();
   $override=\App\Libraries\SchoolCalendar::attendanceOverride($tanggal);
   if($override!==null)foreach($rows as &$row){$row->status=$override;$row->waktu_scan=null;}unset($row);
+  $this->response->setHeader('Cache-Control','private, no-store');
   return $this->respond(['data'=>$rows,'kalender'=>\App\Libraries\SchoolCalendar::info($date)]);
  }
 

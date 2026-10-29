@@ -7,7 +7,11 @@ class KedisiplinanController extends BaseApiController
     public function index()
     {
         $classId=(int)$this->request->getGet('kelas_id');
-        if(!db_connect()->table('kelas')->where(['id'=>$classId,'wali_kelas_id'=>$this->currentUser()['id']])->countAllResults())return $this->respond(['ok'=>false,'message'=>'Kelas tidak dapat diakses.'],404);
+        $user=$this->currentUser();
+        $allowed=($user['peran']??'')==='guru'
+            ? \App\Libraries\TeacherAssignments::has($classId,(int)($user['guru_id']??0))
+            : db_connect()->table('kelas')->where(['id'=>$classId,'wali_kelas_id'=>$user['id']])->countAllResults();
+        if(!$allowed)return $this->respond(['ok'=>false,'message'=>'Kelas tidak dapat diakses.'],404);
         $this->response->setHeader('Cache-Control','no-store');
         return $this->respond(['data'=>(new DisciplineRecords())->forClass($classId),'status_options'=>DisciplineRecords::MANUAL_STATUSES]);
     }

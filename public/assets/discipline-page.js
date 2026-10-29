@@ -20,7 +20,7 @@
       return '<tr data-discipline-student="'+esc(student.id)+'">'+(index===0?'<td'+span+'>'+esc(student.nama_lengkap)+'</td><td'+span+'>'+esc(student.nis)+'</td><td'+span+'>'+esc(late.jumlah)+'</td>':'')+'<td class="discipline-event-dates">'+esc(date?formatDate(date):' - ')+'</td><td class="discipline-event-reason-cell">'+esc(date?(reasons[date]||'Belum diisi'):' - ')+'</td>'+(index===0?'<td'+span+'>'+esc(late.status)+'</td>'+(withAction?'<td'+span+'>'+editButton(student)+'</td>':''):'')+'</tr>';
     }).join('');
   }
-  function editButton(student){return '<button type="button" class="panel-action" data-stored-discipline="'+esc(student.id)+'">Edit</button>'}
+  function editButton(student){if(window.currentRole!=='walas')return '<button type="button" class="panel-action" disabled title="Hanya wali kelas yang dapat mengedit">Edit</button>';return '<button type="button" class="panel-action" data-stored-discipline="'+esc(student.id)+'">Edit</button>'}
   function paint(){
     var body=document.getElementById('storedDisciplineRows');if(!body)return;
     document.getElementById('storedDisciplineCols').innerHTML=columnWidths[kind].map(function(width){return '<col style="width:'+width+'%">'}).join('');
@@ -29,6 +29,7 @@
     body.querySelectorAll('[data-stored-discipline]').forEach(function(button){button.onclick=function(){edit(rows.find(function(student){return String(student.id)===button.dataset.storedDiscipline}))}});
   }
   function edit(student){
+    if(window.currentRole!=='walas')return;
     var record=student.records[kind]||{},category=kind,classId=window.activeClassId,userId=(window.currentUser||{}).id;
     var manual=[];try{manual=JSON.parse(record.tanggal_kejadian||'[]')}catch(error){}if(record.tanggal)manual.push(record.tanggal);manual=Array.from(new Set(manual)).sort();if(category==='terlambat')manual=((student.tanggal_pelanggaran||{}).terlambat||manual).slice();var countTouched=false;
     modal('Edit '+titles[category],'Catatan disimpan dan ditampilkan pada Beranda siswa yang bersangkutan.','<form>'+fields[category].map(function(field){
@@ -78,7 +79,7 @@
     };
   }
   function renderDiscipline(){
-    if(window.currentRole!=='walas')return;
+    if(['walas','teacher'].indexOf(window.currentRole)<0)return;
     var request=++version,classId=window.activeClassId,userId=(window.currentUser||{}).id;
     document.getElementById('pageContent').innerHTML='<div class="page discipline-page"><div class="page-heading"><div><div class="eyebrow">REPORT</div><h1>Status Kedisiplinan</h1><p>Pantauan Kedisiplinan Siswa</p></div><div class="discipline-actions"><select id="storedDisciplineCategory" class="filter-btn">'+Object.keys(titles).map(function(key){return '<option value="'+key+'"'+(key===kind?' selected':'')+'>'+esc(titles[key])+'</option>'}).join('')+'</select><button type="button" id="exportStoredDiscipline" class="outline-btn">Export</button></div></div><p id="storedDisciplineLoadError" class="login-error" role="alert"></p><section class="panel table-panel"><div class="table-wrap"><table class="discipline-records-table"><colgroup id="storedDisciplineCols"></colgroup><thead id="storedDisciplineHead"></thead><tbody id="storedDisciplineRows"><tr><td>Memuat catatan...</td></tr></tbody></table></div></section></div>';
     document.getElementById('storedDisciplineCategory').onchange=function(){kind=this.value;paint()};

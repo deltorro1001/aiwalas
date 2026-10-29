@@ -18,7 +18,7 @@ final class StudentPhotoImages
         if(!preg_match('/^[a-f0-9]{48}\.jpg$/D',$file))throw new RuntimeException('Berkas foto tidak valid.');
         return self::directory().$file;
     }
-    public static function snapshot(array $rows): string {return hash('sha256','single-page-class-title-v3:'.implode(',',array_column($rows,'id')));}
+    public static function snapshot(array $rows): string {return hash('sha256','single-page-centered-banner-v4:'.implode(',',array_column($rows,'id')));}
     private static function ready(): void
     {
         if(!extension_loaded('gd'))throw new RuntimeException('Pemrosesan foto belum tersedia di server.');
@@ -77,7 +77,13 @@ final class StudentPhotoImages
         }
         $out=imagecreatetruecolor($w,$h);$white=imagecolorallocate($out,255,255,255);$ink=imagecolorallocate($out,20,38,50);$teal=imagecolorallocate($out,0,115,108);imagefill($out,0,0,$white);
         try{
-            self::text($out,'Kolase Kelas '.$class,$margin,22,3,$teal,$availableW);
+            $banner=imagecolorallocate($out,18,62,60);$titleColor=imagecolorallocate($out,241,250,247);$bannerHeight=100;
+            imagefilledrectangle($out,0,0,$w-1,$bannerHeight-1,$banner);
+            $title=strtoupper(preg_replace('/[\x00-\x1f\x7f]/',' ',iconv('UTF-8','ASCII//TRANSLIT//IGNORE','Kolase Kelas '.$class)?:''));
+            $titleScale=max(1,min(4,(int)floor($availableW/max(1,strlen($title)*9))));
+            $title=substr($title,0,(int)floor($availableW/(9*$titleScale)));
+            // GD font 5 uses bold glyphs; center the scaled title inside the full-width banner.
+            self::text($out,$title,(int)(($w-strlen($title)*9*$titleScale)/2),(int)(($bannerHeight-15*$titleScale)/2),$titleScale,$titleColor,$availableW);
             foreach($photos as $i=>$photo){
                 $x=$margin+($i%$best['cols'])*($best['cellW']+$gap);$y=$top+(int)floor($i/$best['cols'])*($best['cellH']+$gap);
                 $source=@imagecreatefromjpeg(self::path($photo['berkas']));if(!$source)throw new RuntimeException('Salah satu foto tidak tersedia. Muat ulang dan coba kembali.');

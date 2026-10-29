@@ -18,7 +18,7 @@ try{
     foreach([($pixel>>16)&255,($pixel>>8)&255,$pixel&255] as $channel)layoutAssert(abs($channel-40)<12,'Upload photo has an added timestamp stripe');
     foreach([1,2,7,20,35] as $count){
         $output=bin2hex(random_bytes(24)).'.jpg';$files[]=$output;
-        StudentPhotoImages::collage(array_slice($photos,0,$count),'Kelas 11PF1','2026-10-28',$created,StudentPhotoImages::path($output));
+        StudentPhotoImages::collage(array_slice($photos,0,$count),'11PF1','2026-10-28',$created,StudentPhotoImages::path($output));
         $image=imagecreatefromjpeg(StudentPhotoImages::path($output));layoutAssert(imagesx($image)===2480&&imagesy($image)===3508,'Page dimensions changed with photo count');
         $seen=array_fill(0,$count,0);
         for($y=140;$y<3348;$y+=10)for($x=40;$x<2440;$x+=10){

@@ -18,21 +18,40 @@ final class StudentPhotoImages
         if(!preg_match('/^[a-f0-9]{48}\.jpg$/D',$file))throw new RuntimeException('Berkas foto tidak valid.');
         return self::directory().$file;
     }
-    public static function snapshot(array $rows): string {return hash('sha256','single-page-centered-banner-v4:'.implode(',',array_column($rows,'id')));}
+    public static function snapshot(array $rows): string {return hash('sha256','single-page-segoe-ui-v5:'.implode(',',array_column($rows,'id')));}
     private static function ready(): void
     {
         if(!extension_loaded('gd'))throw new RuntimeException('Pemrosesan foto belum tersedia di server.');
+        if(!function_exists('imagettftext')||!is_readable(self::font())||!is_readable(self::font(true)))throw new RuntimeException('Font Segoe UI untuk kolase belum tersedia di server.');
     }
-    private static function text($image,string $text,int $x,int $y,int $scale,int $color,int $width): void
+    private static function font(bool $bold=false): string
     {
-        $text=iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$text)?:'';
+        return ROOTPATH.'resources/fonts/segoe-ui/'.($bold?'segoeuib.ttf':'segoeui.ttf');
+    }
+    private static function bounds(string $text,int $scale,bool $bold=false): array
+    {
+        $box=imagettfbbox(10*$scale,0,self::font($bold),$text);
+        if($box===false)throw new RuntimeException('Font Segoe UI tidak dapat dibaca.');
+        $xs=[$box[0],$box[2],$box[4],$box[6]];$ys=[$box[1],$box[3],$box[5],$box[7]];
+        return ['x'=>min($xs),'y'=>min($ys),'width'=>max($xs)-min($xs),'height'=>max($ys)-min($ys)];
+    }
+    private static function fitText(string $text,int $scale,int $width,bool $bold=false): string
+    {
         $text=preg_replace('/[\x00-\x1f\x7f]/',' ',$text);
-        $text=substr($text,0,max(1,(int)floor($width/(9*$scale))));
-        if($scale===1){imagestring($image,5,$x,$y,$text,$color);return;}
-        $layer=imagecreatetruecolor(max(1,strlen($text)*9),15);
-        imagefill($layer,0,0,imagecolorallocate($layer,0,0,0));imagecolortransparent($layer,imagecolorallocate($layer,0,0,0));
-        $rgb=imagecolorsforindex($image,$color);imagestring($layer,5,0,0,$text,imagecolorallocate($layer,$rgb['red'],$rgb['green'],$rgb['blue']));
-        imagecopyresized($image,$layer,$x,$y,0,0,imagesx($layer)*$scale,15*$scale,imagesx($layer),15);imagedestroy($layer);
+        if($text===''||self::bounds($text,$scale,$bold)['width']<=$width)return $text;
+        $low=0;$high=mb_strlen($text);
+        while($low<$high){
+            $mid=(int)ceil(($low+$high)/2);
+            if(self::bounds(mb_substr($text,0,$mid),$scale,$bold)['width']<=$width)$low=$mid;
+            else $high=$mid-1;
+        }
+        return mb_substr($text,0,$low);
+    }
+    private static function text($image,string $text,int $x,int $y,int $scale,int $color,int $width,bool $bold=false): void
+    {
+        $text=self::fitText($text,$scale,$width,$bold);if($text==='')return;
+        $box=self::bounds($text,$scale,$bold);
+        imagettftext($image,10*$scale,0,$x-$box['x'],$y-$box['y'],$color,self::font($bold),$text);
     }
     private static function contain($target,$source,int $x,int $y,int $width,int $height): void
     {
@@ -79,11 +98,10 @@ final class StudentPhotoImages
         try{
             $banner=imagecolorallocate($out,18,62,60);$titleColor=imagecolorallocate($out,241,250,247);$bannerHeight=100;
             imagefilledrectangle($out,0,0,$w-1,$bannerHeight-1,$banner);
-            $title=strtoupper(preg_replace('/[\x00-\x1f\x7f]/',' ',iconv('UTF-8','ASCII//TRANSLIT//IGNORE','Kolase Kelas '.$class)?:''));
-            $titleScale=max(1,min(4,(int)floor($availableW/max(1,strlen($title)*9))));
-            $title=substr($title,0,(int)floor($availableW/(9*$titleScale)));
-            // GD font 5 uses bold glyphs; center the scaled title inside the full-width banner.
-            self::text($out,$title,(int)(($w-strlen($title)*9*$titleScale)/2),(int)(($bannerHeight-15*$titleScale)/2),$titleScale,$titleColor,$availableW);
+            $title=mb_strtoupper('Kolase Kelas '.$class);$titleScale=4;
+            while($titleScale>1&&self::bounds($title,$titleScale,true)['width']>$availableW)$titleScale--;
+            $title=self::fitText($title,$titleScale,$availableW,true);$titleBox=self::bounds($title,$titleScale,true);
+            self::text($out,$title,(int)(($w-$titleBox['width'])/2),(int)(($bannerHeight-$titleBox['height'])/2),$titleScale,$titleColor,$availableW,true);
             foreach($photos as $i=>$photo){
                 $x=$margin+($i%$best['cols'])*($best['cellW']+$gap);$y=$top+(int)floor($i/$best['cols'])*($best['cellH']+$gap);
                 $source=@imagecreatefromjpeg(self::path($photo['berkas']));if(!$source)throw new RuntimeException('Salah satu foto tidak tersedia. Muat ulang dan coba kembali.');
@@ -95,8 +113,8 @@ final class StudentPhotoImages
                 self::text($out,preg_replace('/\s+/u',' ',trim($photo['keterangan'])),$x,$captionY+3*$line,$scale,$ink,$best['cellW']);
             }
             $created=$created->setTimezone(new \DateTimeZone('Asia/Jakarta'));$signature='created by aiwalas';$time=$created->format('d-m-Y H:i:s');$scale=3;$line=15*$scale;
-            self::text($out,$signature,$w-$margin-strlen($signature)*9*$scale,$h-$margin-2*$line-10,$scale,$ink,$availableW);
-            self::text($out,$time,$w-$margin-strlen($time)*9*$scale,$h-$margin-$line,$scale,$ink,$availableW);
+            self::text($out,$signature,$w-$margin-self::bounds($signature,$scale)['width'],$h-$margin-2*$line-10,$scale,$ink,$availableW);
+            self::text($out,$time,$w-$margin-self::bounds($time,$scale)['width'],$h-$margin-$line,$scale,$ink,$availableW);
             if(!imagejpeg($out,$destination,85))throw new RuntimeException('Kolase belum tersimpan.');
         }finally{imagedestroy($out);}
     }

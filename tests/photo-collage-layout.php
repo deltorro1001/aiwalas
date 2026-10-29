@@ -20,6 +20,13 @@ try{
         $output=bin2hex(random_bytes(24)).'.jpg';$files[]=$output;
         StudentPhotoImages::collage(array_slice($photos,0,$count),'11PF1','2026-10-28',$created,StudentPhotoImages::path($output));
         $image=imagecreatefromjpeg(StudentPhotoImages::path($output));layoutAssert(imagesx($image)===2480&&imagesy($image)===3508,'Page dimensions changed with photo count');
+        $titleLeft=2480;$titleRight=0;$titleTop=100;$titleBottom=0;
+        for($y=0;$y<100;$y++)for($x=0;$x<2480;$x++){
+            $pixel=imagecolorat($image,$x,$y);
+            if((($pixel>>16)&255)>180&&(($pixel>>8)&255)>180&&($pixel&255)>180){$titleLeft=min($titleLeft,$x);$titleRight=max($titleRight,$x);$titleTop=min($titleTop,$y);$titleBottom=max($titleBottom,$y);}
+        }
+        layoutAssert($titleRight>$titleLeft&&abs(($titleLeft+$titleRight)/2-1240)<3&&abs(($titleTop+$titleBottom)/2-50)<3,'Light Segoe UI title is not centered in the banner');
+        foreach([0,2479] as $x){$pixel=imagecolorat($image,$x,50);layoutAssert((($pixel>>16)&255)<40&&(($pixel>>8)&255)<85&&($pixel&255)<85,'Dark title banner does not span the page');}
         $seen=array_fill(0,$count,0);
         for($y=140;$y<3348;$y+=10)for($x=40;$x<2440;$x+=10){
             $pixel=imagecolorat($image,$x,$y);$r=($pixel>>16)&255;$g=($pixel>>8)&255;$b=$pixel&255;

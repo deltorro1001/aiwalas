@@ -28,6 +28,7 @@ jobs:
             php scripts/configure-whatsapp-gateway.php --apply
             php spark migrate --all
             php -r 'echo "Photo processing GD (CLI): ".(extension_loaded("gd") ? "available" : "unavailable").PHP_EOL;'
+            php -r 'foreach (["segoeui.ttf", "segoeuib.ttf"] as $font) { if (!function_exists("imagettfbbox") || imagettfbbox(40, 0, "resources/fonts/segoe-ui/".$font, "KOLASE KELAS 11PF1") === false) { exit(1); } } echo "Collage Segoe UI/FreeType: available".PHP_EOL;'
             systemctl is-active --quiet cron
             php scripts/configure-teacher-scheduler.php --apply
             php spark whatsapp:teacher-schedule

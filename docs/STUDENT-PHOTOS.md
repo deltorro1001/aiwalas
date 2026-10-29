@@ -8,12 +8,13 @@
 - Login wali kelas → **Upload Foto**, tepat di atas Pengaturan. Pilih tanggal untuk melihat galeri. Tombol Muat ulang memuat foto terbaru. Galeri dibagi 24 foto per halaman.
 - Maksimal **35 foto per kelas pada tanggal yang sama**. Unggahan ke-36 ditolak; tanggal dan kelas lain mempunyai kuota sendiri. Batas dilindungi transaksi dan kunci kelas agar unggahan bersamaan tidak melewatinya.
 - **Buat Kolase** memasukkan seluruh foto kelas pada tanggal tersebut, termasuk foto di halaman galeri berikutnya, dalam **satu halaman JPEG 2480 × 3508 piksel**. Jumlah baris/kolom dan ukuran foto menyesuaikan jumlah serta proporsi foto. Foto tetap utuh dengan skala proporsional.
+- Semua teks kolase menggunakan **Segoe UI**. Judul kapital tebal berada di tengah blok teal gelap selebar halaman, tanpa tanggal atau jumlah foto di bagian atas. Nama, NIS, keterangan, dan teks pembuat menggunakan Segoe UI Regular.
 - Periksa pratinjau kolase satu halaman. Pilih guru dari Data Guru, lalu **Kirim Kolase** dan konfirmasikan. Nomor dibaca ulang dari data guru aktif, tidak berasal dari nomor bebas di formulir. Kolase dikirim sebagai satu gambar melalui gateway yang sudah dikonfigurasi.
 - Jika ada foto baru setelah pembuatan kolase, buat kolase kembali. Foto baru tidak ditambahkan secara diam-diam ke dokumen yang sudah dibuat atau dikirim.
 
 ## Penyimpanan dan deployment
 
-Jalankan `php spark migrate --all`. Pemrosesan memerlukan PHP GD pada **PHP web dan CLI**. Periksa dengan `php -r 'exit(extension_loaded("gd") ? 0 : 1);'`; pasang ekstensi GD yang sesuai dengan versi PHP server bila belum tersedia.
+Jalankan `php spark migrate --all`. Pemrosesan memerlukan PHP GD dengan dukungan FreeType pada **PHP web dan CLI**. Periksa dengan `php -r 'exit(function_exists("imagettftext") ? 0 : 1);'`; pasang ekstensi GD yang sesuai dengan versi PHP server bila belum tersedia. Berkas Segoe UI Regular/Bold disertakan di `resources/fonts/segoe-ui/`, di luar document root, sehingga font tidak bergantung pada instalasi sistem operasi.
 
 Foto disimpan di `writable/uploads/student-photos/`, di luar document root. Direktori harus dapat ditulis oleh proses PHP. Sertakan direktori ini dan tabel `foto_siswa`, `foto_kolase`, `foto_kolase_halaman`, dan `foto_kolase_pengiriman` dalam backup. Pertahankan berkas saat deployment; foto/kolase tidak disimpan dalam Git.
 

@@ -30,8 +30,8 @@
    if(!active())return;
    var row=(result.data||[])[0],status=document.getElementById('studentAttendanceStatus'),time=document.getElementById('studentAttendanceScan');
    var holiday=result.kalender&&result.kalender.hari_libur;
-   status.textContent=row?row.status:holiday?'Libur':'Belum tercatat';
-   status.dataset.status=row?row.status:holiday?'Libur':'';
+   status.textContent=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'Belum tercatat');
+   status.dataset.status=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'');
    time.textContent=row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan';
    document.getElementById('studentAttendanceDate').textContent='Absensi '+(row?row.tanggal:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()));
    document.getElementById('studentAttendanceError').textContent='';

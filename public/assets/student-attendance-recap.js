@@ -24,7 +24,8 @@
       (result.data||[]).forEach(function(row){(byDate[row.tanggal]||(byDate[row.tanggal]=[])).push(row)});
       for(var day=1;day<=result.jumlah_hari;day++){
         var date=result.bulan+'-'+String(day).padStart(2,'0');
-        if(window.AIWalasCalendar&&window.AIWalasCalendar.isSpecialHoliday(date))calendar.push({tanggal:date,waktu_scan:null,status:'Libur'});
+        var override=window.AIWalasCalendar&&window.AIWalasCalendar.attendanceOverride(date);
+        if(override)calendar.push({tanggal:date,waktu_scan:null,status:override});
         else if(byDate[date])calendar=calendar.concat(byDate[date]);
         else calendar.push({tanggal:date,waktu_scan:null,status:window.AIWalasCalendar&&window.AIWalasCalendar.isHoliday(date)?'Libur':'Belum ada catatan'});
       }

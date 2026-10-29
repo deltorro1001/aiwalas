@@ -30,7 +30,7 @@ class RekapAbsenKelasController extends BaseApiController
         if($students){
             $rows=$db->table('absensi')->select('siswa_id,MONTH(tanggal) AS bulan,status,COUNT(*) AS jumlah',false)
                 ->where(['kelas_id'=>(int)$class,'semester'=>$semester])->where('tanggal >=',$year.'-01-01')->where('tanggal <',((int)$year+1).'-01-01')
-                ->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::specialHolidayDates())
+                ->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())
                 ->whereIn('siswa_id',array_keys($students))->whereIn('status',['Sakit','Izin','Alpha','Terlambat'])->groupBy('siswa_id,MONTH(tanggal),status')->get()->getResultArray();
             foreach($rows as $row){
                 $key=['Sakit'=>'sakit','Izin'=>'izin','Alpha'=>'alpha','Terlambat'=>'terlambat'][$row['status']];

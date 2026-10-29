@@ -29,6 +29,7 @@ try:
     users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran,nis) VALUES('{prefix}_secretary','{hashed}','Sekretaris Rekap','sekretaris','{prefix}_1');SELECT LAST_INSERT_ID();"))
     records=[(0,'2026-01-01','Sakit','Genap'),(0,'2026-01-31','Izin','Genap'),(0,'2026-02-01','Alpha','Genap'),(0,'2026-07-01','Terlambat','Ganjil'),(0,'2026-12-31','Sakit','Ganjil'),(0,'2027-01-01','Alpha','Genap'),(0,'2026-01-01','Sakit','Ganjil'),(1,'2026-01-01','Izin','Genap'),(1,'2026-10-02','Alpha','Ganjil'),(1,'2026-10-03','PJJ','Ganjil'),(1,'2026-10-04','Menunggu keterangan','Ganjil'),(1,'2026-10-05','Hadir','Ganjil'),(2,'2026-10-01','Sakit','Ganjil'),(3,'2026-10-01','Terlambat','Ganjil')]
     records += [(0,'2026-08-17','Alpha','Ganjil'),(0,'2026-08-18','Terlambat','Ganjil'),(1,'2026-08-17','Sakit','Ganjil'),(1,'2026-08-18','Izin','Ganjil'),(0,'2026-08-25','Terlambat','Ganjil'),(1,'2026-08-25','Alpha','Ganjil')]
+    records += [(0,'2026-08-27','Alpha','Ganjil'),(0,'2026-08-28','Terlambat','Ganjil'),(1,'2026-08-27','Sakit','Ganjil'),(1,'2026-08-28','Izin','Ganjil')]
     for i,date,status,semester in records:sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,dicatat_oleh) VALUES({pupils[i]},{classes[1] if i==3 else classes[0]},'{date}','{status}','{semester}',{users[0]});")
     wali=Client();wali.call('api/auth/login',{'role':'walas','username':prefix+'_0','password':password})
     other=Client();other.call('api/auth/login',{'role':'walas','username':prefix+'_1','password':password})
@@ -63,11 +64,18 @@ try:
             assert result['kalender']['hari_libur'] is True,result
             assert result['data'] and all(r['status']=='Libur' and r['waktu_scan'] is None for r in result['data']),result
         wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(classes[0]),'tanggal':date,'semester':'Ganjil','status':'Hadir'},status=422)
+    for date in ['2026-08-27','2026-08-28']:
+        for client in [wali,secretary,student,parent]:
+            result=client.call('api/absensi?kelas_id='+classes[0]+'&tanggal='+date+'&semester=Ganjil')
+            assert result['kalender']['hari_libur'] is False and result['kalender']['status']=='PJJ',result
+            assert result['data'] and all(r['status']=='PJJ' and r['waktu_scan'] is None for r in result['data']),result
+        corrected=wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(classes[0]),'tanggal':date,'semester':'Ganjil','status':'Alpha','waktu_scan':'06:50:00'})
+        assert corrected['data']['status']=='PJJ' and corrected['data']['waktu_scan'] is None,corrected
     for client in [student,parent]:
         august=client.call('api/siswa/rekap-absensi?bulan=8&tahun=2026')
-        assert len(august['data'])==3 and all(r['status']=='Libur' and r['waktu_scan'] is None for r in august['data']),august
+        assert len(august['data'])==5 and all(r['status']==('PJJ' if r['tanggal'] in ['2026-08-27','2026-08-28'] else 'Libur') and r['waktu_scan'] is None for r in august['data']),august
         overview=client.call('api/siswa/dashboard')['data']
-        assert all(r['tanggal'] not in ['2026-08-17','2026-08-18','2026-08-25'] for r in overview['keterlambatan']['riwayat']),overview
+        assert all(r['tanggal'] not in ['2026-08-17','2026-08-18','2026-08-25','2026-08-27','2026-08-28'] for r in overview['keterlambatan']['riwayat']),overview
     report=wali.call('api/laporan?kelas_id='+classes[0]+'&semester=Ganjil')['data']['siswa']
     own=next(r for r in report if str(r['id'])==pupils[0])
     assert int(own['sakit'])==2 and int(own['alpha'])==0 and int(own['izin'])==0,own

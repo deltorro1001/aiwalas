@@ -21,13 +21,13 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script>window.AIWalasSchoolHolidays=<?= json_encode(\App\Libraries\SchoolCalendar::SPECIAL_HOLIDAYS, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src='<?= base_url('assets/school-calendar.js?v=20261029-august-holidays') ?>'></script>
+<script>window.AIWalasSchoolHolidays=<?= json_encode(\App\Libraries\SchoolCalendar::SPECIAL_HOLIDAYS, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;window.AIWalasSchoolPjjDates=<?= json_encode(\App\Libraries\SchoolCalendar::PJJ_DATES) ?>;</script>
+<script src='<?= base_url('assets/school-calendar.js?v=20261029-august-pjj') ?>'></script>
 <script src='<?= base_url('assets/academic-subjects.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
-<script src='<?= base_url('assets/student-qr-attendance.js?v=20261028-weekend') ?>'></script>
+<script src='<?= base_url('assets/student-qr-attendance.js?v=20261029-august-pjj') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261010-gateway') ?>'></script>
@@ -43,9 +43,9 @@
 <script src='<?= base_url('assets/ledger-import.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/ledger-page.js?v=20260918-name-left') ?>'></script>
 <script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
-<script src='<?= base_url('assets/dashboard-summary.js?v=20261029-august-holidays') ?>'></script>
+<script src='<?= base_url('assets/dashboard-summary.js?v=20261029-august-pjj') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20261029-august-holidays') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261029-august-pjj') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261026-attendance-grace') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20261028-secretary-menus') ?>'></script>
@@ -133,7 +133,7 @@
 <script src='<?= base_url('assets/discipline-page.js?v=20261027-discipline-aligned') ?>'></script>
 <script src='<?= base_url('assets/student-schedule.js?v=20261026-complete') ?>'></script>
 <script src='<?= base_url('assets/student-discipline.js?v=20261026') ?>'></script>
-<script src='<?= base_url('assets/student-attendance-recap.js?v=20261029-august-holidays') ?>'></script>
+<script src='<?= base_url('assets/student-attendance-recap.js?v=20261029-august-pjj') ?>'></script>
 <script src='<?= base_url('assets/parent-sick-request.js?v=20261027') ?>'></script>
 <script src='<?= base_url('assets/photo-uploads.js?v=20261028-single-page') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261028-all-grade-logins') ?>'></script>

@@ -20,5 +20,12 @@ foreach([
     if($info['tanggal']!==$date||$info['hari_libur']!==$holiday)throw new RuntimeException('Incorrect school calendar at '.$instant);
 }
 if(SchoolCalendar::isWeekend('2026-02-31'))throw new RuntimeException('Invalid date accepted');
+foreach(['2026-08-27','2026-08-28'] as $date){
+    $info=SchoolCalendar::info(new DateTimeImmutable($date.'T08:00:00+07:00'));
+    if($info['hari_libur']||!$info['pjj']||$info['status']!=='PJJ'||SchoolCalendar::attendanceOverride($date)!=='PJJ')throw new RuntimeException('PJJ date inconsistent');
+}
+foreach(['2026-08-26','2026-08-31','2027-08-27','2027-08-28'] as $date)if(SchoolCalendar::isPjj($date))throw new RuntimeException('PJJ applied to another day/year');
+if(SchoolCalendar::info(new DateTimeImmutable('2026-08-26T17:00:00+00:00'))['status']!=='PJJ')throw new RuntimeException('PJJ Jakarta midnight incorrect');
+if(SchoolCalendar::info(new DateTimeImmutable('2026-08-28T17:00:00+00:00'))['status']!=='Libur')throw new RuntimeException('PJJ did not end at Jakarta midnight');
 foreach(['2026-08-17','2026-08-18','2026-08-25'] as $date)if(!SchoolCalendar::isSpecialHoliday($date)||SchoolCalendar::isWeekend($date))throw new RuntimeException('Special holiday treated as weekend');
-echo "PASS: Weekend and 17, 18, 25 August 2026 holidays, adjacent school days/year, exact Jakarta midnight across UTC and invalid dates.\n";
+echo "PASS: Weekend and 17, 18, 25 August 2026 holidays, 27-28 August PJJ, adjacent school days/year, exact Jakarta midnight across UTC and invalid dates.\n";

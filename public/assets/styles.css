@@ -331,10 +331,19 @@
 .attendance-action-buttons #attendanceRecap{background:linear-gradient(135deg,#f2ad43,#d88920)!important;color:#fff!important;border-color:#d88920!important;box-shadow:0 5px 12px rgba(242,173,67,.24)}
 .attendance-action-buttons button:hover{filter:brightness(1.08);transform:translateY(-1px)}
 /* Status Kedisiplinan */
-.discipline-page .text-center{text-align:center!important}.discipline-page .table-wrap{overflow-x:auto}.discipline-page table th:nth-child(3),.discipline-page table td:nth-child(3){text-align:center;white-space:nowrap}.discipline-page table th:nth-child(5),.discipline-page table td:nth-child(5){text-align:center}.discipline-page .pill{white-space:normal;line-height:1.25}
+.discipline-page .text-center{text-align:center!important}.discipline-page .pill{white-space:normal;line-height:1.25}
 .discipline-actions{display:flex;flex-direction:column;gap:8px;align-items:stretch}.discipline-actions select,.discipline-actions button{min-width:180px}
 
-.discipline-page .table-wrap{overflow-x:auto!important;overflow-y:visible!important;width:100%}.discipline-page table{min-width:1180px!important}.discipline-page th,.discipline-page td{white-space:nowrap}.discipline-page th:nth-child(1),.discipline-page td:nth-child(1){min-width:190px}.discipline-page th:nth-child(3),.discipline-page td:nth-child(3){min-width:190px}.discipline-page th:nth-child(4),.discipline-page td:nth-child(4){min-width:160px}.discipline-page th:nth-child(5),.discipline-page td:nth-child(5){min-width:170px}.discipline-page th:nth-child(6),.discipline-page td:nth-child(6){min-width:150px}.discipline-page th:nth-child(7),.discipline-page td:nth-child(7){min-width:150px}
+.discipline-page{max-width:none;min-width:0}
+.discipline-page .page-heading{flex-wrap:wrap;align-items:flex-start}
+.discipline-page .discipline-actions{width:220px;max-width:100%;min-width:0}
+.discipline-page .discipline-actions select,.discipline-page .discipline-actions button{min-width:0;max-width:100%;width:100%}
+.discipline-page .table-wrap{width:100%;max-width:100%;overflow-x:auto}
+.discipline-page .discipline-records-table{table-layout:fixed;width:100%;min-width:0}
+.discipline-page .discipline-records-table th,.discipline-page .discipline-records-table td{min-width:0;max-width:none;padding:9px 6px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;vertical-align:top;font-size:11px;line-height:1.45}
+.discipline-page .discipline-records-table th{font-size:10px;letter-spacing:0;white-space:normal}
+.discipline-page .discipline-records-table .panel-action{max-width:100%;width:100%;min-width:0;padding:4px 0;white-space:normal;overflow-wrap:anywhere;font-size:inherit}
+@media(max-width:650px){.discipline-page .discipline-records-table th,.discipline-page .discipline-records-table td{padding:7px 2px;font-size:9px;line-height:1.4}.discipline-page .discipline-records-table th{font-size:8px}}
 
 .discipline-page table th:last-child,.discipline-page table td:last-child{text-align:center!important}.discipline-page table td:last-child .panel-action{display:inline-flex;justify-content:center;align-items:center}
 
@@ -600,7 +609,7 @@
 .discipline-delete-confirm{background:#fff7f7;border:1px solid #fecaca;border-radius:10px;padding:14px;margin:18px 0}.discipline-delete-confirm p{line-height:1.5}.discipline-delete-confirm button{margin:4px}
 .discipline-date-entry:has(.discipline-event-reason){padding:14px;border:1px solid #dce6eb;border-radius:10px;margin:14px 0;background:#fafcfd}
 .discipline-date-entry .discipline-event-reason{width:100%;box-sizing:border-box;min-height:72px;resize:vertical}.discipline-date-entry label{display:block;margin-top:10px}
-.discipline-page td.discipline-event-reason-cell{white-space:pre-wrap;overflow-wrap:anywhere;min-width:180px;max-width:360px;line-height:1.8;vertical-align:top}
+.discipline-page td.discipline-event-reason-cell{white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:top}
 .discipline-page td.discipline-event-dates{vertical-align:top}
 .managed-accounts-table{margin-top:18px}.managed-accounts-table .panel-head{gap:18px;flex-wrap:wrap}.managed-accounts-table label{display:block;min-width:0}.managed-accounts-table input,.managed-accounts-table select{display:block;box-sizing:border-box;margin-top:8px;max-width:100%;padding:10px;border:1px solid #dce6eb;border-radius:8px;font:inherit}.managed-accounts-table #managedAccountCount,.managed-accounts-table #managedAccountError{padding:0 20px}
 .class-recap-actions,.class-recap-tabs{display:flex;gap:10px;flex-wrap:wrap}.class-recap-controls{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:18px}.class-recap-controls label{display:flex;align-items:center;gap:12px;min-width:0}.class-recap-controls label>span{white-space:nowrap}.class-recap-controls #classRecapStudentLabel{flex:1 1 320px;max-width:620px}.class-recap-controls select{margin-top:0;min-width:0}.class-recap-controls #classRecapStudent{flex:1}.class-recap-controls select{display:block;max-width:100%;margin-top:0}.class-recap-roster select{display:block;max-width:100%;margin-top:8px}.class-recap-controls p{flex-basis:100%;margin:0;line-height:1.6}.class-recap-active{background:#dff6f1!important;color:#007d72!important;border-color:#6fcabf!important}.class-recap-total{background:#f0faf8;font-weight:700}.class-recap-roster{margin-top:20px}.class-recap-page .stat-card{padding:20px}.class-recap-page [hidden]{display:none!important}.class-recap-page .table-wrap{overflow-x:auto}.class-recap-page td:not(:first-child),.class-recap-page th:not(:first-child){font-variant-numeric:tabular-nums}

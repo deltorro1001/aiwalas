@@ -3,7 +3,7 @@ namespace App\Libraries;
 
 final class SchoolCalendar
 {
-    public const SPECIAL_HOLIDAYS=['2026-08-17'=>'Libur sekolah.','2026-08-18'=>'Libur sekolah.'];
+    public const SPECIAL_HOLIDAYS=['2026-08-17'=>'Libur sekolah.','2026-08-18'=>'Libur sekolah.','2026-08-25'=>'Libur sekolah.'];
 
     public static function specialHolidayDates(): array {return array_keys(self::SPECIAL_HOLIDAYS);}
     public static function isSpecialHoliday(string $date): bool {return isset(self::SPECIAL_HOLIDAYS[$date]);}

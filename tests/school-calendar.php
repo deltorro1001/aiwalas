@@ -11,10 +11,14 @@ foreach([
     ['2026-08-17T17:00:00+00:00','2026-08-18',true],
     ['2026-08-18T17:00:00+00:00','2026-08-19',false],
     ['2027-08-17T08:00:00+07:00','2027-08-17',false],
+    ['2026-08-24T16:59:59+00:00','2026-08-24',false],
+    ['2026-08-24T17:00:00+00:00','2026-08-25',true],
+    ['2026-08-25T17:00:00+00:00','2026-08-26',false],
+    ['2027-08-25T08:00:00+07:00','2027-08-25',false],
 ] as [$instant,$date,$holiday]){
     $info=SchoolCalendar::info(new DateTimeImmutable($instant));
     if($info['tanggal']!==$date||$info['hari_libur']!==$holiday)throw new RuntimeException('Incorrect school calendar at '.$instant);
 }
 if(SchoolCalendar::isWeekend('2026-02-31'))throw new RuntimeException('Invalid date accepted');
-foreach(['2026-08-17','2026-08-18'] as $date)if(!SchoolCalendar::isSpecialHoliday($date)||SchoolCalendar::isWeekend($date))throw new RuntimeException('Special holiday treated as weekend');
-echo "PASS: Weekend and 17-18 August 2026 holidays, adjacent school days/year, exact Jakarta midnight across UTC and invalid dates.\n";
+foreach(['2026-08-17','2026-08-18','2026-08-25'] as $date)if(!SchoolCalendar::isSpecialHoliday($date)||SchoolCalendar::isWeekend($date))throw new RuntimeException('Special holiday treated as weekend');
+echo "PASS: Weekend and 17, 18, 25 August 2026 holidays, adjacent school days/year, exact Jakarta midnight across UTC and invalid dates.\n";

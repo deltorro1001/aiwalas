@@ -4,7 +4,7 @@ namespace App\Libraries;
 final class SchoolCalendar
 {
     public const SPECIAL_HOLIDAYS=['2026-08-17'=>'Libur sekolah.','2026-08-18'=>'Libur sekolah.','2026-08-25'=>'Libur sekolah.'];
-    public const PJJ_DATES=['2026-08-27','2026-08-28'];
+    public const PJJ_DATES=['2026-08-27','2026-08-28','2026-09-07','2026-09-08'];
 
     public static function specialHolidayDates(): array {return array_keys(self::SPECIAL_HOLIDAYS);}
     public static function attendanceOverrideDates(): array {return array_merge(self::specialHolidayDates(),self::PJJ_DATES);}

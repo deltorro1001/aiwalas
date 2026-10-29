@@ -29,7 +29,7 @@ final class StudentGradeAutomation
             $hour=(int)(new \DateTimeImmutable('now',new \DateTimeZone('Asia/Jakarta')))->format('H');
             $greeting=$hour<11?'Selamat pagi':($hour<15?'Selamat siang':($hour<18?'Selamat sore':'Selamat malam'));
         }
-        $component=preg_replace('/^UH\s*(\d+)$/i','Ulangan Harian $1',$row['nama_komponen']);
+        $component=preg_replace('/^UH\s*(\d+)$/i','Ulangan Harian $1',GradeComponents::label($row['nama_komponen']));
         $teacher='guru mata pelajaran';
         $author=$this->db->table('pengguna')->select('guru_id')->where('id',$row['dinilai_oleh'])->get()->getRowArray();
         $assignments=TeacherAssignments::rows((int)$row['kelas_id']);

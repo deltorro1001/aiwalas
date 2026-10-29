@@ -63,6 +63,14 @@ try{
     checkGrade($db->table('student_grade_dispatches')->where(['siswa_id'=>$student,'status'=>'unknown'])->countAllResults()===3,'Stale processing not marked unknown');
     checkGrade($db->table('pesan_komunikasi')->where(['kelas_id'=>$class,'status_pengiriman'=>'Terkirim'])->countAllResults()===3,'Sent history mismatch');
     checkGrade(!StudentGradeAutomation::enabled(),'Local automation enabled by default');
+    $db->table('komponen_nilai')->insert(['kelas_id'=>$class,'mata_pelajaran_id'=>$subject,'nama_komponen'=>'Tugas6','jenis_komponen'=>'Tugas']);$task=$db->insertID();
+    $db->table('nilai_siswa')->insert(['siswa_id'=>$student,'komponen_nilai_id'=>$task,'semester'=>'Ganjil','nilai'=>70,'dinilai_oleh'=>$owner]);
+    $taskService=new StudentGradeAutomation($db,static function($phone,$text){
+        checkGrade($phone==='6281234567890'&&str_contains($text,'komponen Tugas 6, sebesar 70')&&str_contains($text,'Bpk Guru Fixture'),'Task message or recipient inconsistent');
+        return ['ok'=>true,'response'=>['status'=>true]];
+    });
+    $taskService->changed($student,$task,'Ganjil',null,70);
+    checkGrade($taskService->run($student)['sent']===1,'Task notification did not use existing student automation');
     echo "PASS: Below-80/zero, unchanged saves, rollback, superseded/corrected/deleted grades, atomic claims, student-only phone, missing-phone recovery, subject/component/teacher message, sent/pending history, rejection/unknown/timeout without retries. No real WhatsApp sent.\n";
 }catch(Throwable $e){fwrite(STDERR,$e->getMessage()."\n");$failed=true;}
 finally{

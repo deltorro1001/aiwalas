@@ -94,12 +94,12 @@ try:
         return browser.js("Array.from(document.querySelectorAll('#studentGradeTableWrap tbody tr')).map(row=>row.children[1].textContent.trim())")
     for role,username,secret in [('student',prefix+'_siswa',password),('parent',prefix,prefix)]:
         login(role,username,secret)
-        assert family_scores('Ganjil')==['90','60','—','—','—','—','82','88']
+        assert family_scores('Ganjil')==['90','60']+['—']*10+['82','88']
         browser.js("window.page='dashboard';window.render()")
         browser.wait("!!document.querySelector('.student-home')")
         assert browser.js("authRequest('api/siswa/dashboard?semester=Genap').then(r=>r.data.capaian_nilai.filter(row=>academicSubjectKey(row.nama_mata_pelajaran)===academicSubjectKey('Tata Kamera & Cahaya')).length)")==0
     login('parent',prefix+'_other',prefix+'_other')
-    assert family_scores('Ganjil')==['—']*8
+    assert family_scores('Ganjil')==['—']*14
     print('PASS: Wali assessment and report, accurate Wahyu parent-message preview without sending, student/parent saved grades and semester/child isolation.')
     assert sql(f"SELECT COUNT(*) FROM pesan_komunikasi WHERE kelas_id IN ({','.join(classes)})")=='0'
     print('PASS: Real VPS structure: legacy Tata Cahaya grades populate the single Wahyu directory row and detail; separate Tata Kamera grades cannot override or fill missing semesters.')

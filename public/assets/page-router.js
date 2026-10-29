@@ -9,7 +9,7 @@
     authRequest('api/akademik?kelas_id='+window.activeClassId+'&semester='+encodeURIComponent(window.activeSemester||'Ganjil')).then(function(data){
       if(version!==requestVersion||window.page!==page||context()!==requestedContext)return;
       ledger={};ledgerContext=requestedContext;var names={};(data.subjects||[]).forEach(function(s){names[s.id]=s.nama_mata_pelajaran});
-      (data.data||[]).forEach(function(row){var name=subjectKey(names[row.mata_pelajaran_id]);if(!ledger[name])ledger[name]={};if(!ledger[name][row.nis])ledger[name][row.nis]={};ledger[name][row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
+      (data.data||[]).forEach(function(row){var name=subjectKey(names[row.mata_pelajaran_id]);if(!ledger[name])ledger[name]={};if(!ledger[name][row.nis])ledger[name][row.nis]={};ledger[name][row.nis][window.academicComponentKey(row.nama_komponen)]=Number(row.nilai)});
       if(page==='grades')document.getElementById('pageContent').innerHTML=window.grades();
       else fallback();
     }).catch(function(error){if(version===requestVersion&&window.page===page&&context()===requestedContext)document.getElementById('pageContent').textContent=error.message;});

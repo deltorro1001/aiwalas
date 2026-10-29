@@ -1,5 +1,5 @@
 (function () {
-  var components = ['UH1', 'UH2', 'UH3', 'UH4', 'UH5', 'UH6', 'ATS', 'ASS'];
+  var components = window.academicComponentKeys();
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
@@ -28,36 +28,8 @@
       });
     });
   }
-  function calculate(row) {
-    var uhValues = components.slice(0, 6).map(function (component) {
-      return score(row[component]);
-    }).filter(function (value) { return value !== null; });
-    var average = uhValues.length
-      ? Math.round(uhValues.reduce(function (total, value) { return total + value; }, 0) / uhValues.length)
-      : null;
-    var ats = score(row.ATS);
-    var ass = score(row.ASS);
-    var available = uhValues.slice();
-    if (ats !== null) available.push(ats);
-    if (ass !== null) available.push(ass);
-    var report = available.length === 1 ? available[0] : null;
-    if (report === null && average !== null && ats !== null) {
-      report = ass === null
-        ? Math.round((3 * average + ats) / 4)
-        : Math.round((3 * average + ats + 2 * ass) / 6);
-    }
-    return { average: average, report: report };
-  }
-  function visibleColumns(values) {
-    var active = activeComponents(values);
-    var uhColumns = active.filter(function (component) { return /^UH[0-9]+$/.test(component); });
-    var columns = uhColumns.slice();
-    if (uhColumns.length >= 2) columns.push('Rerata UH');
-    if (active.indexOf('ATS') >= 0) columns.push('ATS');
-    if (active.indexOf('ASS') >= 0) columns.push('ASS');
-    if (active.length === 1 || (uhColumns.length >= 1 && active.indexOf('ATS') >= 0)) columns.push('Nilai Raport');
-    return columns;
-  }
+  function calculate(row) { return window.academicGradeSummary(row); }
+  function visibleColumns(values) { return window.academicGradeColumns(values); }
   function renderTable(values) {
     var columns = visibleColumns(values);
     if (!columns.length) return '';
@@ -68,16 +40,16 @@
         columns.map(function (column) {
           var value = column === 'Rerata UH' ? calculated.average
             : column === 'Nilai Raport' ? calculated.report : score(scores[column]);
-          return '<td>' + (value === null ? '&mdash;' : esc(Math.round(value))) + '</td>';
+          return '<td class="'+window.academicGradeClass(value)+'">' + (value === null ? '&mdash;' : esc(Math.round(value))) + '</td>';
         }).join('') + '</tr>';
     }).join('');
     return '<section class="panel table-panel"><div class="panel-head"><div><h2>Rekap Nilai</h2><p>Kolom tampil sesuai komponen yang sudah disimpan.</p></div><span class="pill teal">' + studentsList().length + ' siswa</span></div>' +
       '<div class="score-sheet-wrap assessment-table-wrap"><table class="score-sheet assessment-table"><thead><tr><th>Nama Siswa</th>' +
-      columns.map(function (column) { return '<th>' + esc(column) + '</th>'; }).join('') +
+      columns.map(function (column) { return '<th>' + esc(window.academicComponentLabel(column)) + '</th>'; }).join('') +
       '</tr></thead><tbody>' + rows + '</tbody></table></div></section>';
   }
   function downloadTemplate() {
-    var rows = [['NIS', 'Nama Siswa'].concat(components)].concat(studentsList().map(function (student) {
+    var rows = [['NIS', 'Nama Siswa'].concat(components.map(window.academicComponentLabel))].concat(studentsList().map(function (student) {
       return [student[1], student[0]].concat(components.map(function () { return ''; }));
     }));
     if (!window.XLSX) { toast('Pembuat Excel belum tersedia. Muat ulang halaman lalu coba lagi.'); return; }
@@ -139,7 +111,7 @@
     var draft = {};
     var selected = 'UH1';
     var html = '<form><label>Komponen Nilai<select id="assessmentComponent">' +
-      components.map(function (component) { return '<option value="' + component + '">' + component + '</option>'; }).join('') +
+      components.map(function (component) { return '<option value="' + component + '">' + esc(window.academicComponentLabel(component)) + '</option>'; }).join('') +
       '</select></label><div class="assessment-import-toolbar"><button type="button" class="outline-btn" id="chooseAssessmentFile">Choose File</button>' +
       '<span id="assessmentFileName" class="stat-note">Belum ada file dipilih</span><input id="assessmentFile" type="file" accept=".xlsx,.xls" hidden></div>' +
       '<div class="score-sheet-wrap"><table class="score-sheet assessment-input-table"><thead><tr><th>Nama Siswa</th><th id="assessmentInputHeader">UH1</th></tr></thead><tbody>' +
@@ -154,7 +126,7 @@
     var fileName = document.getElementById('assessmentFileName');
     var errorBox = document.getElementById('assessmentError');
     function fillInputs(component) {
-      document.getElementById('assessmentInputHeader').textContent = component;
+      document.getElementById('assessmentInputHeader').textContent = window.academicComponentLabel(component);
       document.querySelectorAll('.assessment-score').forEach(function (input) {
         var nis = normalize(input.dataset.nis);
         var value = Object.prototype.hasOwnProperty.call(draft, nis) ? draft[nis] : (values[nis] || {})[component];
@@ -230,7 +202,7 @@
       if(version!==requestVersion||window.page!=='assessment')return;
       var selected=subjectName(), token=window.academicSubjectKey;
       remoteSubject=(data.subjects||[]).find(function(s){return token(s.nama_mata_pelajaran)===token(selected)})||(data.subjects||[])[0];
-      remoteValues={};(data.data||[]).filter(function(row){return remoteSubject&&Number(row.mata_pelajaran_id)===Number(remoteSubject.id)}).forEach(function(row){if(!remoteValues[row.nis])remoteValues[row.nis]={};remoteValues[row.nis][row.nama_komponen.replace(/\s/g,'')]=Number(row.nilai)});
+      remoteValues={};(data.data||[]).filter(function(row){return remoteSubject&&Number(row.mata_pelajaran_id)===Number(remoteSubject.id)}).forEach(function(row){if(!remoteValues[row.nis])remoteValues[row.nis]={};remoteValues[row.nis][window.academicComponentKey(row.nama_komponen)]=Number(row.nilai)});
       drawAssessment();
       var heading=document.querySelector('#pageContent h1');if(heading)heading.textContent='Nilai '+(remoteSubject?window.academicSubjectLabel(remoteSubject.nama_mata_pelajaran):'—');
       document.getElementById('openAssessmentInput').disabled=!remoteSubject;

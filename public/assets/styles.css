@@ -618,3 +618,6 @@
 .grade-below-threshold,.grade-below-threshold strong{color:#dc2626!important}
 
 .journal-date-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.journal-date-controls label{display:flex;align-items:center;gap:12px;min-width:0}.journal-date-controls input{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;min-width:0}.journal-date-controls p{flex-basis:100%;line-height:1.5}.journal-page .page-heading{flex-wrap:wrap;gap:12px}.journal-page .teacher-journal-table td{white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:top}@media(max-width:650px){.journal-date-controls label{width:100%}.journal-date-controls input{flex:1;width:0}.journal-date-controls button{flex:1}}
+
+/* Parent leave requests share the sick-request card layout. */
+#leaveRequestCard select{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:8px;padding:12px;border:1px solid #ccdce2;border-radius:10px;font:inherit;background:#fff;color:#172a3a}

@@ -31,3 +31,5 @@ Warna label/status Sakit adalah hijau (#15803d), Izin coklat tua (#6b3f1d), term
 Label hari dan tanggal pada rekap serta kartu kehadiran mengikuti status: Libur merah (#dc2626), Sakit hijau, dan Izin coklat tua. Tanggal libur kalender mendapat prioritas merah. Banner Libur dan tanggal jurnal memakai aturan kalender yang sama; PJJ tidak ikut menjadi merah. Hari/tanggal tidak mewarnai nama siswa atau kolom waktu scan.
 
 Pemeriksaan warna baca-saja tanpa data baru: `PYTHONDONTWRITEBYTECODE=1 python3 tests/attendance-date-colors-browser.py`.
+
+Status Hadir menggunakan warna hitam (#000), termasuk label hari/tanggal, waktu scan, kartu status siswa/orangtua, dan ringkasan kehadiran yang terkait. Warna status lain mengikuti palet sebelumnya.

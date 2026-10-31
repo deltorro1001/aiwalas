@@ -33,6 +33,8 @@
    status.textContent=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'Belum tercatat');
    var attachment=document.getElementById('studentAttendanceAttachment');attachment.textContent=window.AIWalasAttendanceDisplay.note(status.textContent,row&&row.keterangan_lampiran);attachment.hidden=!attachment.textContent;attachment.dataset.attendanceStatus=status.textContent;
    status.dataset.status=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'');
+   time.dataset.attendanceStatus=status.dataset.status;
+   time.setAttribute('data-attendance-time','');
    time.textContent=row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan';
    document.getElementById('studentAttendanceDate').dataset.attendanceStatus=status.dataset.status;
    document.getElementById('studentAttendanceDate').setAttribute('data-attendance-date','');
@@ -44,6 +46,7 @@
    document.getElementById('studentAttendanceStatus').textContent='Tidak dapat dimuat';
    document.getElementById('studentAttendanceStatus').dataset.status='';
    document.getElementById('studentAttendanceScan').textContent='Tidak dapat dimuat';
+   delete document.getElementById('studentAttendanceScan').dataset.attendanceStatus;
    document.getElementById('studentAttendanceAttachment').textContent='';document.getElementById('studentAttendanceAttachment').hidden=true;
    var dateLabel=document.getElementById('studentAttendanceDate');dateLabel.textContent='';delete dateLabel.dataset.attendanceStatus;delete dateLabel.dataset.calendarDate;
    document.getElementById('studentAttendanceError').textContent=error.message||'Data absensi gagal dimuat. Silakan muat ulang.';

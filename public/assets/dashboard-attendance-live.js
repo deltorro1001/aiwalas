@@ -11,6 +11,7 @@
       if(window.currentRole==='student'){
         var own=rows[0],status=own?own.status:(result.kalender||{}).status||'Belum tercatat',box=document.querySelector('.student-current-attendance');
         if(box){box.dataset.attendanceStatus=status;box.innerHTML=window.AIWalasAttendanceDisplay.html(status,own&&own.keterangan_lampiran)}
+        var time=box&&box.parentElement.querySelector('[data-attendance-time]');if(time){time.dataset.attendanceStatus=status;time.textContent=own&&own.waktu_scan?own.waktu_scan:'--:--:--'}
         return;
       }
       var counts={},notes={};(window.students||[]).forEach(function(student){var record=map[String(student[7])];student[2]=record?record.status:(result.kalender||{}).status||'Menunggu keterangan';counts[student[2]]=(counts[student[2]]||0)+1;notes[String(student[7])]=record?record.keterangan_lampiran||'':''});

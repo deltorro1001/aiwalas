@@ -3,6 +3,7 @@
   function refresh(){
     document.querySelectorAll('#pageContent td,#pageContent th,#pageContent span,#pageContent strong,#pageContent p,#pageContent option,#modalContent td,#modalContent th,#modalContent span,#modalContent option,#pageContent .summary-empty').forEach(function(node){
       var text=node.textContent.trim();
+      node.classList.toggle('attendance-present-text',/^(?:Total\s+)?Hadir(?:\s+(?:\d+|Hari Ini))?$/.test(text));
       node.classList.toggle('attendance-holiday-text',/^Libur(?:\b|$)/.test(text));
       node.classList.toggle('attendance-sick-text',/^Sakit(?:\s+\d+)?$/.test(text));
       node.classList.toggle('attendance-permission-text',/^Izin(?:\s+\d+)?$/.test(text));

@@ -86,6 +86,11 @@ $routes->put('api/remedial/(:num)', 'Api\RemedialController::update/$1', ['filte
 $routes->delete('api/remedial/(:num)', 'Api\RemedialController::delete/$1', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/notifikasi', 'Api\NotifikasiController::index', ['filter' => 'auth']);
 $routes->post('api/whatsapp/send', 'Api\WhatsAppController::send', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->get('api/whatsapp/status', 'Api\WhatsAppController::status', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/whatsapp/pair', 'Api\WhatsAppController::pair', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/whatsapp/disconnect', 'Api\WhatsAppController::disconnect', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/whatsapp/test', 'Api\WhatsAppController::test', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->post('api/whatsapp/webhook', 'Api\WhatsAppController::webhook');
 $routes->post('api/notifikasi', 'Api\NotifikasiController::create', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->patch('api/notifikasi/(:num)/baca', 'Api\NotifikasiController::read/$1', ['filter' => 'auth']);
 $routes->patch('api/notifikasi/baca-semua', 'Api\NotifikasiController::readAll', ['filter' => 'auth']);

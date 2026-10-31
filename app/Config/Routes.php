@@ -78,7 +78,7 @@ $routes->delete('api/jadwal/(:num)', 'Api\JadwalController::delete/$1', ['filter
 $routes->get('api/jurnal', 'Api\JurnalController::index', ['filter' => ['auth']]);
 $routes->post('api/jurnal', 'Api\JurnalController::create', ['filter' => ['auth', 'role:wali_kelas,sekretaris,guru']]);
 $routes->put('api/jurnal/(:num)', 'Api\JurnalController::update/$1', ['filter' => ['auth', 'role:wali_kelas,sekretaris,guru']]);
-$routes->delete('api/jurnal/(:num)', 'Api\JurnalController::delete/$1', ['filter' => ['auth', 'role:wali_kelas']]);
+$routes->delete('api/jurnal/(:num)', 'Api\JurnalController::delete/$1', ['filter' => ['auth', 'role:wali_kelas,guru']]);
 $routes->get('api/remedial', 'Api\RemedialController::index', ['filter' => ['auth', 'role:wali_kelas,siswa']]);
 $routes->post('api/remedial', 'Api\RemedialController::create', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->put('api/remedial/(:num)', 'Api\RemedialController::update/$1', ['filter' => ['auth', 'role:wali_kelas']]);

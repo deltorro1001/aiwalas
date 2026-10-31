@@ -5,6 +5,11 @@ class JurnalController extends BaseApiController
 {
     private const MIN_DATE='2026-01-01';
     private function writer(): bool {return in_array($this->currentUser()['peran']??'',['wali_kelas','guru','sekretaris'],true);}
+    private function canDelete(array $row): bool
+    {
+        $user=$this->currentUser();
+        return ($user['peran']??'')==='wali_kelas'||(($user['peran']??'')==='guru'&&(int)$row['dibuat_oleh']===(int)$user['id']&&(int)$row['guru_id']===(int)($user['guru_id']??0));
+    }
     private function allowed(int $class, ?int $subject = null): bool
     {
         $db=db_connect();$user=$this->currentUser();
@@ -29,7 +34,7 @@ class JurnalController extends BaseApiController
         if($date!==null)$q->where('j.tanggal',$date);
         $subjects=array_map(static fn($r)=>array_intersect_key($r,array_flip(['mata_pelajaran_id','guru_id','nama_mata_pelajaran','nama_guru'])),\App\Libraries\TeacherAssignments::rows($class,$user['peran']==='guru'?(int)$user['guru_id']:null));
         $rows=$q->orderBy('j.tanggal','DESC')->orderBy('j.id','DESC')->get()->getResultArray();
-        foreach($rows as &$row)$row['can_edit']=$this->writer()&&($user['peran']!=='guru'||(int)$row['dibuat_oleh']===(int)$user['id']);unset($row);
+        foreach($rows as &$row){$row['can_edit']=$this->writer()&&($user['peran']!=='guru'||(int)$row['dibuat_oleh']===(int)$user['id']);$row['can_delete']=$this->canDelete($row);}unset($row);
         $this->response->setHeader('Cache-Control','private, no-store');
         return $this->respond(['data'=>$rows,'assignments'=>$this->writer()?$subjects:[],'can_create'=>$this->writer(),'minimum_date'=>self::MIN_DATE,'tanggal'=>$date]);
     }
@@ -61,7 +66,11 @@ class JurnalController extends BaseApiController
     public function delete(int $id)
     {
         $db=db_connect();$row=$db->table('jurnal_kelas')->where('id',$id)->get()->getRowArray();if(!$row)return $this->respond(['ok'=>false],404);
-        if(($this->currentUser()['peran']??'')!=='wali_kelas'||!$this->allowed((int)$row['kelas_id']))return $this->respond(['message'=>'Jurnal ini tidak dapat dihapus.'],403);
-        $db->table('jurnal_kelas')->where('id',$id)->delete();return $this->respond(['ok'=>true]);
+        if(!$this->allowed((int)$row['kelas_id'])||!$this->canDelete($row))return $this->respond(['message'=>'Anda tidak memiliki izin untuk menghapus jurnal ini.'],403);
+        $query=$db->table('jurnal_kelas')->where('id',$id);
+        if(($this->currentUser()['peran']??'')==='guru')$query->where(['dibuat_oleh'=>$this->currentUser()['id'],'guru_id'=>$this->currentUser()['guru_id']]);
+        $query->delete();
+        if(!$db->affectedRows())return $this->respond(['message'=>'Jurnal sudah berubah atau dihapus. Muat ulang daftar jurnal.'],409);
+        return $this->respond(['ok'=>true,'message'=>'Jurnal berhasil dihapus.']);
     }
 }

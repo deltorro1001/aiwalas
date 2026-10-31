@@ -65,6 +65,23 @@ try:
     assert student.call(endpoint+'&tanggal=2026-01-01')['data'][1]['catatan']=='Tugas dikoreksi sekretaris'
     assert sql(f'SELECT dibuat_oleh FROM jurnal_kelas WHERE id={first}')==users[2]
     assert wali.call(endpoint+'&tanggal='+today)['data'][0]['materi']=='Materi hari ini'
+    assert guru.call(endpoint+'&tanggal=2026-01-01')['data'][0]['can_delete'] is True
+    assert all(row['can_delete'] for row in wali.call(endpoint)['data'])
+    assert all(not row['can_delete'] for row in secretary.call(endpoint)['data'])
+    for client in [student,parent,secretary,guest]:client.call('api/jurnal/'+str(first),method='DELETE',status=403)
+    guru.call('api/jurnal/'+str(second),method='DELETE',status=403)
+    guru.call('api/jurnal/'+str(wali_note),method='DELETE',status=403)
+    disposable=guru.call('api/jurnal',dict(payload,tanggal='2026-01-05',materi='Jurnal dobel API'))['id']
+    assert guru.call('api/jurnal/'+str(disposable),method='DELETE')['ok'] is True
+    assert sql(f'SELECT COUNT(*) FROM jurnal_kelas WHERE id={disposable}')=='0'
+    guru.call('api/jurnal/'+str(disposable),method='DELETE',status=404)
+    disposable=other.call('api/jurnal',dict(payload,mata_pelajaran_id=int(subjects[1]),guru_id=int(teachers[1]),tanggal='2026-01-05'))['id']
+    wali.call('api/jurnal/'+str(disposable),method='DELETE')
+    assert sql(f'SELECT COUNT(*) FROM jurnal_kelas WHERE id={disposable}')=='0'
+    foreign=sql(f"INSERT INTO jurnal_kelas(kelas_id,mata_pelajaran_id,guru_id,tanggal,materi,catatan,status,dibuat_oleh) VALUES({classes[1]},{subjects[0]},{teachers[0]},'2026-01-05','Kelas lain','','Terbit',{users[2]});SELECT LAST_INSERT_ID();")
+    guru.call('api/jurnal/'+foreign,method='DELETE',status=403)
+    print('PASS: Teacher may delete own entries only, Wali may delete own-class entries, foreign classes/other authors/readers denied and repeated deletion returns 404.')
+
     sql(f'DELETE FROM pengampu_mapel WHERE guru_id={teachers[1]} AND kelas_id={classes[0]}')
     archived=dict(payload,mata_pelajaran_id=int(subjects[1]),guru_id=int(teachers[1]),materi='Koreksi penugasan lama')
     wali.call('api/jurnal/'+str(second),archived,method='PUT')
@@ -106,6 +123,32 @@ try:
         c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
         assert c.js('document.documentElement.scrollWidth<=innerWidth')
         c.call('Emulation.clearDeviceMetricsOverride')
+        # Trash icons, cancel confirmation, confirmed deletion and selected-date retention.
+        own_delete=guru.call('api/jurnal',dict(payload,tanggal='2026-01-05',materi='Hapus UI <img src=x onerror=alert(1)>'))['id']
+        wali_delete=wali.call('api/jurnal',dict(payload,tanggal='2026-01-05',materi='Hapus UI wali'))['id']
+        login('teacher',tag+'_guru0');select('2026-01-05')
+        assert c.js("!!document.querySelector('[data-journal-delete=\""+str(own_delete)+"\"] svg')")
+        assert not c.js("!!document.querySelector('[data-journal-delete=\""+str(wali_delete)+"\"]')")
+        c.js("document.querySelector('[data-journal-delete=\""+str(own_delete)+"\"]').click()")
+        assert not c.js("!!document.querySelector('.journal-delete-preview img')")
+        assert '5 Januari 2026' in c.js("document.querySelector('.journal-delete-preview').textContent")
+        c.js("document.getElementById('cancelModal').click()")
+        assert sql(f'SELECT COUNT(*) FROM jurnal_kelas WHERE id={own_delete}')=='1'
+        c.js("document.querySelector('[data-journal-delete=\""+str(own_delete)+"\"]').click();document.getElementById('journalDeleteForm').requestSubmit();document.getElementById('journalDeleteForm').requestSubmit()")
+        c.wait("!document.getElementById('modalBackdrop').classList.contains('show')")
+        c.wait("!document.querySelector('[data-journal-delete=\""+str(own_delete)+"\"]')")
+        assert sql(f'SELECT COUNT(*) FROM jurnal_kelas WHERE id={own_delete}')=='0'
+        assert c.js("document.getElementById('journalViewDate').value")=='2026-01-05'
+        login('walas',tag+'_wali0');select('2026-01-05')
+        c.js("document.querySelector('[data-journal-delete=\""+str(wali_delete)+"\"]').click();document.getElementById('journalDeleteForm').requestSubmit()")
+        c.wait("!document.getElementById('modalBackdrop').classList.contains('show')")
+        c.wait("document.getElementById('journalRows')?.textContent.includes('Belum ada jurnal')")
+        assert c.js("document.getElementById('journalViewDate').value")=='2026-01-05'
+        assert sql(f'SELECT COUNT(*) FROM jurnal_kelas WHERE id={wali_delete}')=='0'
+        for role,username,secret in [('assistant',tag+'_sekretaris',password),('student',tag+'_siswa',password),('parent',tag+'_0',tag+'_0')]:
+            login(role,username,secret);select('2026-01-01')
+            assert c.js("document.querySelectorAll('[data-journal-delete]').length")==0
+        print('PASS: Trash icons and safe preview, cancel preserves entry, teacher/Wali delete after confirmation, duplicate-submit guard, empty-date view and no delete buttons for secretary/student/parent.')
         print('PASS: Jan date picker, edit/reload for all three writer roles, retained filter, archived selector, selected-date create defaults, empty date, today button, reader sidebar/buttons and mobile layout.')
 finally:
     if c:

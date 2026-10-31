@@ -27,3 +27,7 @@ Tes menggunakan database development lokal, data sementara, dan Chrome DevTools 
 Pengajuan dan absensi disimpan dalam transaksi yang sama dengan penguncian baris siswa. Semester ditentukan per tanggal: Januari–Juni Genap, Juli–Desember Ganjil. Data absensi tersimpan langsung pada tabel absensi yang dipakai semua login, rekap, dan laporan. Koreksi wali kelas setelah pengajuan tidak diputar ulang atau ditimpa oleh pembacaan riwayat.
 
 Warna label/status Sakit adalah hijau (#15803d), Izin coklat tua (#6b3f1d), termasuk kartu status siswa/orangtua, tabel harian, rekap, pilihan status, dan legenda. PJJ memiliki kelas tampilan tersendiri sehingga tidak ikut berubah menjadi warna Izin.
+
+Label hari dan tanggal pada rekap serta kartu kehadiran mengikuti status: Libur merah (#dc2626), Sakit hijau, dan Izin coklat tua. Tanggal libur kalender mendapat prioritas merah. Banner Libur dan tanggal jurnal memakai aturan kalender yang sama; PJJ tidak ikut menjadi merah. Hari/tanggal tidak mewarnai nama siswa atau kolom waktu scan.
+
+Pemeriksaan warna baca-saja tanpa data baru: `PYTHONDONTWRITEBYTECODE=1 python3 tests/attendance-date-colors-browser.py`.

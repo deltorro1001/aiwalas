@@ -29,7 +29,7 @@
         else if(byDate[date])calendar=calendar.concat(byDate[date]);
         else calendar.push({tanggal:date,waktu_scan:null,status:window.AIWalasCalendar&&window.AIWalasCalendar.isHoliday(date)?'Libur':'Belum ada catatan'});
       }
-      document.getElementById('studentAttendanceRecapRows').innerHTML=calendar.map(function(row){return '<tr><td>'+esc(weekdays.format(new Date(row.tanggal+'T12:00:00+07:00')))+'</td><td>'+esc(String(row.tanggal).split('-').reverse().join('/'))+'</td><td>'+esc(row.waktu_scan?row.waktu_scan+' WIB':'—')+'</td><td>'+esc(row.status)+'</td></tr>'}).join('')||'<tr><td colspan="4">Belum ada catatan absensi pada bulan ini.</td></tr>';
+      document.getElementById('studentAttendanceRecapRows').innerHTML=calendar.map(function(row){return '<tr data-attendance-status="'+esc(row.status)+'"><td data-attendance-date data-calendar-date="'+esc(row.tanggal)+'">'+esc(weekdays.format(new Date(row.tanggal+'T12:00:00+07:00')))+'</td><td data-attendance-date data-calendar-date="'+esc(row.tanggal)+'">'+esc(String(row.tanggal).split('-').reverse().join('/'))+'</td><td>'+esc(row.waktu_scan?row.waktu_scan+' WIB':'—')+'</td><td>'+esc(row.status)+'</td></tr>'}).join('')||'<tr><td colspan="4">Belum ada catatan absensi pada bulan ini.</td></tr>';
     }).catch(function(error){
       if(request!==version||!active()||!section.isConnected||(window.currentUser||{}).id!==userId)return;
       document.getElementById('studentAttendanceRecapMonthLabel').textContent='';

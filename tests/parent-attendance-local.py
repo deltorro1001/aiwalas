@@ -98,8 +98,8 @@ try:
             login(role,username,secret);c.wait("!!document.getElementById('attendanceViewDate')")
             for day,status in [('2026-10-19','Sakit'),('2026-11-02','Izin')]:
                 c.js("document.getElementById('attendanceViewDate').value='"+day+"';document.getElementById('attendanceViewDate').dispatchEvent(new Event('change'))")
-                c.wait("!!document.querySelector('[data-attendance-status=\""+status+"\"]')")
-                assert c.js("getComputedStyle(document.querySelector('[data-attendance-status=\""+status+"\"] .status')).color")==colors[status]
+                c.wait("!!document.querySelector('tr[data-attendance-status=\""+status+"\"]')")
+                assert c.js("getComputedStyle(document.querySelector('tr[data-attendance-status=\""+status+"\"] .status')).color")==colors[status]
             c.js("window.page='attendanceRecapPage';render()")
             c.wait("!document.getElementById('exportClassRecap').disabled")
             c.js('AIWalasAttendanceColors.refresh()')

@@ -53,6 +53,8 @@
   }
   function updateHeading(){
     var root=document.getElementById('pageContent'),heading=root.querySelector('.page-heading p'),title=root.querySelector('.table-panel .panel-head h2');
+    if(heading)heading.dataset.calendarDate=selectedDate;
+    if(title)title.dataset.calendarDate=selectedDate;
     if(heading)heading.textContent='Tanggal '+selectedDate+' · '+(isToday()?'Absensi hari ini':'Riwayat absensi');
     if(title)title.textContent=(isToday()?'Status absensi hari ini':'Status absensi '+selectedDate)+(window.AIWalasCalendar&&window.AIWalasCalendar.isHoliday(selectedDate)?' · Libur':window.AIWalasCalendar&&window.AIWalasCalendar.isPjj(selectedDate)?' · PJJ':'');
   }

@@ -13,6 +13,7 @@
     var banner=document.getElementById('schoolHolidayBanner');
     if(!banner){banner=document.createElement('div');banner.id='schoolHolidayBanner';banner.className='school-holiday-banner';banner.setAttribute('role','status');root.parentNode.insertBefore(banner,root)}
     var show=!!window.currentRole&&(holiday(date)||pjj(date));banner.hidden=!show;
+    banner.dataset.status=show?(pjj(date)?'PJJ':'Libur'):'';
     if(show){var text=(pjj(date)?'PJJ':'Libur')+' — '+new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(date+'T12:00:00+07:00'))+'. '+(specialHoliday(date)?special[date]:pjj(date)?'Pembelajaran Jarak Jauh (PJJ).':'Sabtu dan Minggu merupakan hari libur.');if(banner.textContent!==text)banner.textContent=text}
   }
   window.AIWalasCalendar={today:today,isWeekend:weekend,isHoliday:holiday,isSpecialHoliday:specialHoliday,isPjj:pjj,attendanceOverride:attendanceOverride,refresh:refresh};

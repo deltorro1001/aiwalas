@@ -33,6 +33,9 @@
    status.textContent=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'Belum tercatat');
    status.dataset.status=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'');
    time.textContent=row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan';
+   document.getElementById('studentAttendanceDate').dataset.attendanceStatus=status.dataset.status;
+   document.getElementById('studentAttendanceDate').setAttribute('data-attendance-date','');
+   document.getElementById('studentAttendanceDate').dataset.calendarDate=row?row.tanggal:(result.kalender&&result.kalender.tanggal)||window.AIWalasCalendar.today();
    document.getElementById('studentAttendanceDate').textContent='Absensi '+(row?row.tanggal:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()));
    document.getElementById('studentAttendanceError').textContent='';
   }).catch(function(error){
@@ -40,6 +43,7 @@
    document.getElementById('studentAttendanceStatus').textContent='Tidak dapat dimuat';
    document.getElementById('studentAttendanceStatus').dataset.status='';
    document.getElementById('studentAttendanceScan').textContent='Tidak dapat dimuat';
+   var dateLabel=document.getElementById('studentAttendanceDate');dateLabel.textContent='';delete dateLabel.dataset.attendanceStatus;delete dateLabel.dataset.calendarDate;
    document.getElementById('studentAttendanceError').textContent=error.message||'Data absensi gagal dimuat. Silakan muat ulang.';
   }).finally(function(){if(active())statusTimer=setTimeout(function(){if(!document.hidden)refreshStatus()},15000)});
  }

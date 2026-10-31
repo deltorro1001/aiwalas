@@ -629,3 +629,11 @@
 .status.distance{color:#c1841d}
 .analytics-legend>span:has(.legend-bar.sick){color:var(--attendance-sick)!important;background:#eefbf2;padding:3px 6px;border-radius:5px}
 .analytics-legend>span:has(.legend-bar.permission){color:var(--attendance-permission)!important;background:#fff4e8;padding:3px 6px;border-radius:5px}
+
+/* Date/day labels inherit the attendance meaning; holiday dates take priority. */
+:root{--attendance-holiday:#dc2626}
+[data-attendance-status="Sakit"][data-attendance-date],[data-attendance-status="Sakit"] [data-attendance-date]{color:var(--attendance-sick)!important}
+[data-attendance-status="Izin"][data-attendance-date],[data-attendance-status="Izin"] [data-attendance-date]{color:var(--attendance-permission)!important}
+.status.holiday,.attendance-holiday-text,.student-attendance-value[data-status="Libur"],[data-attendance-status="Libur"][data-attendance-date],[data-attendance-status="Libur"] [data-attendance-date],[data-calendar-date].attendance-calendar-holiday,#pageContent input.attendance-calendar-holiday,#modalContent input.attendance-calendar-holiday{color:var(--attendance-holiday)!important}
+.school-holiday-banner[data-status="Libur"]{color:var(--attendance-holiday);background:#fff1f2;border-color:#fecaca}
+.status.holiday{background:#fff1f2}

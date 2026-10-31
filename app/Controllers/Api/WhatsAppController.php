@@ -80,6 +80,9 @@ class WhatsAppController extends BaseApiController
     public function webhook()
     {
         $c=$this->ensureConfig(); if (!hash_equals((string)$c['webhook_token'], (string)$this->request->getGet('token'))) return $this->response->setStatusCode(401)->setJSON(['ok'=>false]);
-        $payload=$this->request->getJSON(true) ?? $this->request->getPost(); log_message('info','WhatsApp webhook: '.json_encode($payload)); return $this->response->setJSON(['ok'=>true]);
+        $payload=$this->request->getJSON(true) ?? $this->request->getPost();
+        $type=(string)($payload['type']??''); $data=is_array($payload['data']??null)?$payload['data']:[];
+        if($type==='session.status.update' && !empty($data['status'])){ $this->save(['status'=>(string)$data['status'],'phone'=>$data['phone']??null]); }
+        log_message('info','WhatsApp webhook: '.json_encode(['type'=>$type,'instanceId'=>$payload['instanceId']??null])); return $this->response->setJSON(['ok'=>true]);
     }
 }

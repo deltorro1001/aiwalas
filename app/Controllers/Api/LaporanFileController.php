@@ -130,7 +130,7 @@ class LaporanFileController extends WhatsAppController
         if (strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== 'pdf' || $mime !== 'application/pdf' || substr($pdf, 0, 5) !== '%PDF-') {
             return $this->respond(['ok' => false, 'message' => 'File harus berupa dokumen PDF, bukan hanya file dengan ekstensi .pdf.'], 422);
         }
-        if (!env('WHATSAPP_GATEWAY_API_KEY') || !$this->phone(env('WHATSAPP_GATEWAY_SENDER', '6285810283863'))) {
+        if (!(new \App\Libraries\WhatsAppGateway())->configured()) {
             return $this->respond(['ok' => false, 'message' => 'Gateway WhatsApp belum dikonfigurasi di server.'], 503);
         }
         if ($this->mediaUrlIsLocal()) {

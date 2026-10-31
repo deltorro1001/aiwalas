@@ -8,7 +8,7 @@
     const studentData = studentHome && studentHome.classSummaryData;
     if (window.currentRole === "student" && !studentData) return;
     const studentSummary = studentData && studentData.ringkasan_kelas;
-    const summaryStudents = (rows) => (rows || []).map((row) => [row.nama_lengkap, '', row.status, '']);
+    const summaryStudents = (rows) => (rows || []).map((row) => [row.nama_lengkap, '', row.status, '', row.keterangan_lampiran]);
     const grid = document.querySelector(".dashboard-grid");
     const summaryPanel = grid && grid.querySelector(":scope > .panel:not(.dashboard-right-stack)");
     if (!grid || !summaryPanel || summaryPanel.dataset.summaryReady === "1") return;
@@ -27,7 +27,7 @@
       const absenceCard = document.createElement("section");
       absenceCard.className = "panel dashboard-absence-card";
       absenceCard.innerHTML = '<div class="panel-head"><div><h2>Siswa Tidak Hadir Hari Ini</h2><p>Daftar siswa yang tidak hadir dan keterangan absensi</p></div></div><div class="dashboard-absence-list">' +
-        (absent.length ? absent.map((student) => '<div class="dashboard-absence-row"><strong>' + esc(student[0]) + '</strong> <span>(' + esc(String(student[2]).toLowerCase()) + ')</span></div>').join("") : '<div class="summary-empty">Tidak ada siswa yang tidak hadir.</div>') + "</div>";
+        (absent.length ? absent.map((student) => '<div class="dashboard-absence-row"><strong>' + esc(student[0]) + '</strong> <span>' + window.AIWalasAttendanceDisplay.html(student[2],studentSummary?student[4]:((window.dashboardData||{}).attachment_notes||{})[String(student[7])]) + '</span></div>').join("") : '<div class="summary-empty">Tidak ada siswa yang tidak hadir.</div>') + "</div>";
       if (studentData) {
         const messages = (studentData.notifikasi_whatsapp || []).slice(0, 4);
         notificationPanel.classList.add('student-discipline-panel');

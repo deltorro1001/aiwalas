@@ -18,12 +18,15 @@ class SiswaDashboardController extends BaseApiController
         $classId = (int) $student['kelas_id'];
         // Class overview contains only names/statuses, scoped to the authenticated student's class.
         $class = $db->table('kelas')->select('nama_kelas')->where('id', $classId)->get()->getRowArray();
-        $classRows = $db->table('siswa s')->select("s.nama_lengkap,COALESCE(a.status,".$db->escape($missingStatus).") AS status")
-            ->join('absensi a', "a.siswa_id=s.id AND a.tanggal=" . $db->escape($today) . " AND a.semester=" . $db->escape($semester), 'left')
+        $classRows = $db->table('siswa s')->select("s.id,s.nama_lengkap,COALESCE(a.status,".$db->escape($missingStatus).") AS status")
+            ->join('absensi a', "a.siswa_id=s.id AND a.kelas_id=s.kelas_id AND a.tanggal=" . $db->escape($today) . " AND a.semester=" . $db->escape($semester), 'left')
             ->where(['s.kelas_id' => $classId, 's.aktif' => 1])->orderBy('s.nama_lengkap')->get()->getResultArray();
         $classSummary = ['nama_kelas' => $class['nama_kelas'] ?? '', 'status' => [], 'siswa_tidak_hadir' => [], 'menunggu_keterangan' => [], 'tren_absensi' => []];
+        $attachments=new \App\Libraries\AttendanceAttachmentDetails($classId,array_column($classRows,'id'),$today,$today);
         foreach ($classRows as $row) {
             if(\App\Libraries\SchoolCalendar::attendanceOverride($today)!==null)$row['status']=$calendar['status'];
+            $row+=$attachments->forAttendance((int)$row['id'],$today,$row['status']);
+            unset($row['id']);
             $classSummary['status'][$row['status']] = ($classSummary['status'][$row['status']] ?? 0) + 1;
             if (in_array($row['status'], ['Sakit', 'Izin', 'Alpha'], true)) $classSummary['siswa_tidak_hadir'][] = $row;
             if ($row['status'] === 'Menunggu keterangan') $classSummary['menunggu_keterangan'][] = $row;
@@ -39,7 +42,7 @@ class SiswaDashboardController extends BaseApiController
             foreach ($weekRows as $row) if ($row['tanggal'] === $date) $values[$row['status']] = (int) $row['jumlah'];
             $classSummary['tren_absensi'][] = $values;
         }
-        $attendance = $db->table('absensi')->where(['siswa_id' => $student['id'], 'tanggal' => $today])->get()->getRowArray();
+        $attendance = $db->table('absensi')->where(['siswa_id' => $student['id'], 'kelas_id'=>$classId, 'semester'=>$semester, 'tanggal' => $today])->get()->getRowArray();
         if(\App\Libraries\SchoolCalendar::attendanceOverride($today)!==null)$attendance=['status'=>$calendar['status'],'waktu_scan'=>null];
         $counts = $db->table('absensi')->select('status, COUNT(*) jumlah')->where('siswa_id', $student['id'])->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->groupBy('status')->get()->getResultArray();
         $summary = ['Sakit' => 0, 'Izin' => 0, 'Alpha' => 0];
@@ -54,6 +57,6 @@ class SiswaDashboardController extends BaseApiController
         $discipline = (new \App\Libraries\DisciplineRecords())->forClass($classId, (int) $student['id']);
         $whatsappNotifications = (new \App\Libraries\StudentWhatsAppNotifications())->latest($student);
         $this->response->setHeader('Cache-Control', 'no-store');
-        return $this->respond(['ok' => true, 'data' => ['student' => ['nama' => $student['nama_lengkap'], 'nis' => $student['nis']], 'ringkasan_kelas' => $classSummary, 'scan' => ['tanggal' => $today, 'waktu' => $attendance['waktu_scan'] ?? null, 'status' => $attendance['status'] ?? ($calendar['status']??'Belum scan')], 'keterlambatan' => ['sejak' => '2026-07-13', 'jumlah' => count($lateRows), 'riwayat' => $lateRows], 'absensi' => $summary, 'kedisiplinan' => ['catatan' => $discipline[0]['catatan'] ?? []], 'notifikasi_whatsapp' => $whatsappNotifications, 'kalender'=>$calendar,'jadwal_hari_ini' => $schedule, 'capaian_nilai' => $scores, 'capaian_mapel' => $classScores, 'ulangan_harian' => [], 'tugas_belum_selesai' => $tasks]]);
+        return $this->respond(['ok' => true, 'data' => ['student' => ['nama' => $student['nama_lengkap'], 'nis' => $student['nis']], 'ringkasan_kelas' => $classSummary, 'scan' => $attachments->forAttendance((int)$student['id'],$today,$attendance['status']??'')+['tanggal' => $today, 'waktu' => $attendance['waktu_scan'] ?? null, 'status' => $attendance['status'] ?? ($calendar['status']??'Belum scan')], 'keterlambatan' => ['sejak' => '2026-07-13', 'jumlah' => count($lateRows), 'riwayat' => $lateRows], 'absensi' => $summary, 'kedisiplinan' => ['catatan' => $discipline[0]['catatan'] ?? []], 'notifikasi_whatsapp' => $whatsappNotifications, 'kalender'=>$calendar,'jadwal_hari_ini' => $schedule, 'capaian_nilai' => $scores, 'capaian_mapel' => $classScores, 'ulangan_harian' => [], 'tugas_belum_selesai' => $tasks]]);
     }
 }

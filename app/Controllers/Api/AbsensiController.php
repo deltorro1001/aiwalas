@@ -18,6 +18,8 @@ class AbsensiController extends BaseApiController
   $rows=$q->findAll();
   $override=\App\Libraries\SchoolCalendar::attendanceOverride($tanggal);
   if($override!==null)foreach($rows as &$row){$row->status=$override;$row->waktu_scan=null;}unset($row);
+  $details=new \App\Libraries\AttendanceAttachmentDetails($kelas,array_map(static fn($row)=>(int)$row->siswa_id,$rows),$tanggal,$tanggal);
+  foreach($rows as $row)foreach($details->forAttendance((int)$row->siswa_id,$tanggal,$row->status) as $field=>$value)$row->$field=$value;
   $this->response->setHeader('Cache-Control','private, no-store');
   return $this->respond(['data'=>$rows,'kalender'=>\App\Libraries\SchoolCalendar::info($date)]);
  }

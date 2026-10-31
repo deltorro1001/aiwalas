@@ -637,3 +637,5 @@
 .status.holiday,.attendance-holiday-text,.student-attendance-value[data-status="Libur"],[data-attendance-status="Libur"][data-attendance-date],[data-attendance-status="Libur"] [data-attendance-date],[data-calendar-date].attendance-calendar-holiday,#pageContent input.attendance-calendar-holiday,#modalContent input.attendance-calendar-holiday{color:var(--attendance-holiday)!important}
 .school-holiday-banner[data-status="Libur"]{color:var(--attendance-holiday);background:#fff1f2;border-color:#fecaca}
 .status.holiday{background:#fff1f2}
+
+.attendance-attachment-note{display:inline-block;font-size:12px;font-weight:400;white-space:normal;overflow-wrap:anywhere;line-height:1.5}.attendance-attachment-note[data-attendance-status="Sakit"]{color:var(--attendance-sick)}.attendance-attachment-note[data-attendance-status="Izin"]{color:var(--attendance-permission)}.student-current-attendance{margin:8px 0}.dashboard-absence-row>span{white-space:normal;overflow-wrap:anywhere}

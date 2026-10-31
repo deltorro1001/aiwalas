@@ -14,7 +14,7 @@ class SiswaRekapAbsensiController extends BaseApiController
         elseif(!is_string($year)||!preg_match('/^[0-9]{4}$/D',$year)||(int)$year<2026||(int)$year>9998)return $this->respond(['ok'=>false,'message'=>'Pilih tahun yang valid mulai 2026.'],422);
         $month=sprintf('%04d-%02d',(int)$year,(int)$month);
         $db=db_connect();
-        $student=$db->table('siswa')->select('id')->where(['nis'=>$this->currentUser()['nis']??'','aktif'=>1])->get()->getRowArray();
+        $student=$db->table('siswa')->select('id,kelas_id')->where(['nis'=>$this->currentUser()['nis']??'','aktif'=>1])->get()->getRowArray();
         if(!$student)return $this->respond(['ok'=>false,'message'=>'Profil siswa tidak ditemukan.'],404);
         $start=new \DateTimeImmutable($month.'-01 00:00:00',$zone);
         $end=$start->modify('+1 month');
@@ -23,6 +23,8 @@ class SiswaRekapAbsensiController extends BaseApiController
             ->where('tanggal >=',$start->format('Y-m-d'))->where('tanggal <',$end->format('Y-m-d'))->orderBy('tanggal','ASC')->orderBy('id','ASC')->get()->getResultArray();
         $months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
         foreach($rows as &$row){$override=\App\Libraries\SchoolCalendar::attendanceOverride($row['tanggal']);if($override!==null){$row['status']=$override;$row['waktu_scan']=null;}}unset($row);
+        $attachments=new \App\Libraries\AttendanceAttachmentDetails((int)$student['kelas_id'],[(int)$student['id']],$start->format('Y-m-d'),$end->modify('-1 day')->format('Y-m-d'));
+        foreach($rows as &$row)$row+=$attachments->forAttendance((int)$student['id'],$row['tanggal'],$row['status']);unset($row);
         $this->response->setHeader('Cache-Control','no-store');
         return $this->respond(['data'=>$rows,'bulan'=>$month,'tahun'=>(int)$start->format('Y'),'nomor_bulan'=>(int)$start->format('n'),'jumlah_hari'=>(int)$start->format('t'),'label_bulan'=>$months[(int)$start->format('n')-1].' '.$start->format('Y')]);
     }

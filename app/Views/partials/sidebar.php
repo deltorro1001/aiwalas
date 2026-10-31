@@ -7,7 +7,6 @@
     <button class="nav-item" data-page="guestSchedule" style="display:none"><span></span> Jadwal Mapel</button>
     <button class="nav-item" data-page="guestAnnouncements" style="display:none"><span></span> Pengumuman</button>
     <button class="nav-item" data-page="guestCalendar" style="display:none"><span></span> Kalender Akademik</button>
-    <button class="nav-item" data-page="publicAnnouncements" style="display:none"><span></span> Pengumuman Tamu</button>
     <button class="nav-item" data-page="schedule"><span></span> Jadwal Kelas</button>
     <button class="nav-item" data-page="students"><span></span> Daftar Siswa</button>
     <button class="nav-item" data-page="teachers"><span></span> Guru Mapel</button>
@@ -35,7 +34,7 @@
     <button class="nav-item" data-page="remedial"><span></span> Remedial &amp; Tugas</button>
     <button class="nav-item" data-page="notifications"><span></span> Notifikasi <b class="nav-badge light">3</b></button>
   </nav>
-  <div class="sidebar-bottom"><button class="nav-item" data-page="photoUploads" style="display:none"><span>F</span> Upload Foto</button><button class="nav-item" data-page="settings"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button type="button" id="helpQuestion">Tanya sekarang <span></span></button></div><div class="sidebar-footer">aiwalas v1.0 - Developed by Sumantoro Kasdhani</div></div>
+  <div class="sidebar-bottom"><button class="nav-item" data-page="photoUploads" style="display:none"><span>F</span> Upload Foto</button><button class="nav-item" data-page="publicAnnouncements" style="display:none"><span></span> Pengumuman Tamu</button><button class="nav-item" data-page="settings"><span></span> Pengaturan</button><div class="help-card"><span class="sparkle"></span><strong>Butuh bantuan?</strong><p>Tanya AIWalas kapan saja.</p><button type="button" id="helpQuestion">Tanya sekarang <span></span></button></div><div class="sidebar-footer">aiwalas v1.0 - Developed by Sumantoro Kasdhani</div></div>
 </aside>
 
 

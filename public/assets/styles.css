@@ -641,3 +641,25 @@
 .attendance-attachment-note{display:inline-block;font-size:12px;font-weight:400;white-space:normal;overflow-wrap:anywhere;line-height:1.5}.attendance-attachment-note[data-attendance-status="Sakit"]{color:var(--attendance-sick)}.attendance-attachment-note[data-attendance-status="Izin"]{color:var(--attendance-permission)}.student-current-attendance{margin:8px 0}.dashboard-absence-row>span{white-space:normal;overflow-wrap:anywhere}
 
 .guest-page .page-heading{gap:16px;flex-wrap:wrap}.guest-class-picker,.guest-calendar-controls label{display:flex;align-items:center;gap:10px;min-width:0}.guest-class-picker select{max-width:100%;min-width:0}.guest-section{margin-top:20px}.guest-status-list{display:flex;gap:12px;flex-wrap:wrap}.guest-status-list>div{display:flex;align-items:center;gap:16px;background:#f7fafb;padding:12px;border-radius:8px}.guest-announcement{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.guest-announcement:last-child{border:0}.guest-announcement h3,.guest-schedule-list h3{font-size:15px}.guest-announcement-body{white-space:pre-wrap;margin:10px 0;line-height:1.6}.guest-schedule-list article{display:flex;gap:24px;border-top:1px solid var(--line);padding:16px 0}.guest-schedule-list article>strong{flex:0 0 110px;font-size:14px}.guest-schedule-list p{margin-top:6px;color:var(--muted)}.guest-calendar-controls{display:flex;gap:20px;flex-wrap:wrap}.guest-calendar-table{min-width:0;table-layout:fixed}.guest-calendar-table th,.guest-calendar-table td{white-space:normal;overflow-wrap:anywhere;padding:12px}.guest-calendar-table th:first-child{width:38%}.guest-publish-check{display:flex;align-items:center;gap:10px}.guest-publish-check input{width:auto;margin:0}@media(max-width:600px){.guest-class-picker{width:100%}.guest-class-picker select{flex:1}.guest-schedule-list article{gap:12px}.guest-schedule-list article>strong{flex-basis:90px}.guest-calendar-controls{gap:12px}.guest-calendar-table td{font-size:11px}}
+
+/* Distinct, soft backgrounds for parent sick and leave request forms. */
+#sickRequestCard{background:#f0f9f2;border-color:#c3dfcb;color:#243a2e;--request-border:#c3dfcb;--request-accent:#166534;--request-button-soft:#e1f0e4}
+#leaveRequestCard{background:#fbf4ec;border-color:#e3cfba;color:#4b3528;--request-border:#e3cfba;--request-accent:#6b3f1d;--request-button-soft:#f0e0ce}
+:is(#sickRequestCard,#leaveRequestCard) .panel-head h2{color:var(--request-accent)}
+:is(#sickRequestCard,#leaveRequestCard) .panel-head p{font-size:14px;line-height:1.6;color:inherit}
+:is(#sickRequestCard,#leaveRequestCard) label{color:inherit}
+#sickRequestCard .sick-request-guide{background:#dcefe4;border-color:#b9d8c5;color:#174b32}
+#leaveRequestCard .sick-request-guide{background:#f0e0ce;border-color:#d7bfa5;color:#57361d}
+#sickRequestCard .sick-request-summary{background:#eaf3fb;border:1px solid #c9dce9;color:#244763}
+#leaveRequestCard .sick-request-summary{background:#fff8e8;border:1px solid #e8d7ac;color:#62491f}
+:is(#sickRequestCard,#leaveRequestCard) :is(.sick-request-file,.sick-request-note-field){background:#fff;border:1px solid var(--request-border);border-radius:12px;padding:16px}
+:is(#sickRequestCard,#leaveRequestCard) :is(input,textarea,select){border-color:var(--request-border)}
+:is(#sickRequestCard,#leaveRequestCard) :is(input,textarea,select):focus-visible{outline:2px solid var(--request-accent);outline-offset:2px}
+:is(#sickRequestCard,#leaveRequestCard) input::file-selector-button{background:var(--request-button-soft);border-color:var(--request-border);color:var(--request-accent)}
+:is(#sickRequestCard,#leaveRequestCard) .sick-request-history-head{border-top-color:var(--request-border)}
+:is(#sickRequestCard,#leaveRequestCard) .sick-request-entry{background:#fff;border-color:var(--request-border)}
+:is(#sickRequestCard,#leaveRequestCard) :is(small,.stat-note,.summary-empty){color:#52616a;line-height:1.6}
+:is(#sickRequestCard,#leaveRequestCard) form>.stat-note{font-size:13px}
+#leaveRequestCard .sick-request-actions .primary-btn{background:#6b3f1d}
+#leaveRequestCard .sick-request-actions .primary-btn:hover{background:#523017}
+#leaveRequestCard :is(.panel-action,.sick-request-refresh){color:#6b3f1d}

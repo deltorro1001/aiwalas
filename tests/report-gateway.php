@@ -14,6 +14,7 @@ namespace App\Controllers\Api {
         public $request;
         public $response;
         public bool $gatewayOk = true;
+        public string $gatewayOutcome = 'failed';
         public array $sent = [];
         protected function respond($data, $status = 200) { return ['status' => $status, 'body' => $data]; }
         protected function payload() { return $this->request->getJSON(true); }
@@ -23,9 +24,10 @@ namespace App\Controllers\Api {
             if (str_starts_with($phone, '0')) $phone = '62' . substr($phone, 1);
             return preg_match('/^62\d{8,15}$/', $phone) ? $phone : '';
         }
+        protected function gatewayConfigured(): bool {global $configured;return $configured;}
         protected function gatewayRequest($phone, $message, $type = '', $url = '') {
             $this->sent[] = compact('phone', 'message', 'type', 'url');
-            return ['ok' => $this->gatewayOk, 'message' => 'Gateway test failure'];
+            return ['ok' => $this->gatewayOk, 'outcome' => $this->gatewayOutcome, 'message' => 'Gateway test failure'];
         }
     }
 }
@@ -38,7 +40,7 @@ namespace {
     $testBaseUrl = 'https://aiwalas.test/';
     function env($key, $default = null) {
         global $configured;
-        if ($key === 'WHATSAPP_GATEWAY_API_KEY') return $configured ? 'fake-test-key' : '';
+        if ($key === 'SIMS_WA_GATEWAY_API_KEY') return $configured ? 'fake-test-key' : '';
         return $default;
     }
     function base_url($path) { global $testBaseUrl; return $testBaseUrl . $path; }
@@ -157,6 +159,9 @@ namespace {
         $controller->gatewayOk = false;
         check($controller->sendReport()['status'] === 502, 'Gateway failure reported as success');
         check(end(\App\Models\PesanKomunikasiModel::$updates)['status_pengiriman'] === 'Gagal', 'Failure not recorded');
+        $controller->gatewayOutcome = 'unknown';
+        check($controller->sendReport()['status'] === 502, 'Unconfirmed result reported as sent');
+        check(end(\App\Models\PesanKomunikasiModel::$updates)['status_pengiriman'] === 'Disiapkan', 'Unconfirmed send must remain pending');
         $controller->gatewayOk = true;
         $largePdf = "%PDF-1.7\n" . str_repeat('x', 3 * 1024 * 1024);
         $controller->request->override = ['size' => strlen($largePdf), 'file_name' => 'report.pdf', 'kelas_id' => 1, 'guru_id' => 2];

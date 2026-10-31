@@ -15,7 +15,7 @@ php scripts/configure-teacher-scheduler.php --apply
 
 Helper memasang entri cron terpisah `aiwalas-student-grade-scheduler` setiap menit untuk `php spark whatsapp:student-grades --send`, dengan log `writable/logs/student-grade-cron.log`. Pengiriman tetap berjalan ketika browser ditutup. Antrean diproses bertahap; keterlambatan bisa lebih dari satu menit jika gateway lambat atau antrean banyak. Otomatisasi guru tetap menggunakan cron dan pengaturan sendiri.
 
-Default otomatisasi nilai aktif hanya pada `CI_ENVIRONMENT=production`. Lokal/development nonaktif. Override `.env` opsional `WHATSAPP_STUDENT_GRADE_AUTOMATION_ENABLED = false` menonaktifkan worker tanpa menghapus antrean; ketika diaktifkan kembali, antrean yang masih sesuai nilai terkini diproses. Memerlukan konfigurasi gateway wa.ats.co.id yang sama dengan pengiriman manual. Tanpa `--send`, perintah tidak memproses atau mengirim pesan. Jangan menjalankan `--send` dengan gateway nyata untuk pengujian.
+Default otomatisasi nilai aktif hanya pada `CI_ENVIRONMENT=production`. Lokal/development nonaktif. Override `.env` opsional `WHATSAPP_STUDENT_GRADE_AUTOMATION_ENABLED = false` menonaktifkan worker tanpa menghapus antrean; ketika diaktifkan kembali, antrean yang masih sesuai nilai terkini diproses. Memerlukan konfigurasi gateway wa.sims.id yang sama dengan pengiriman manual. Tanpa `--send`, perintah tidak memproses atau mengirim pesan. Jangan menjalankan `--send` dengan gateway nyata untuk pengujian.
 
 ## Histori dan pencegahan duplikasi
 

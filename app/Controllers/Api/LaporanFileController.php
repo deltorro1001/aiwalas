@@ -130,7 +130,7 @@ class LaporanFileController extends WhatsAppController
         if (strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== 'pdf' || $mime !== 'application/pdf' || substr($pdf, 0, 5) !== '%PDF-') {
             return $this->respond(['ok' => false, 'message' => 'File harus berupa dokumen PDF, bukan hanya file dengan ekstensi .pdf.'], 422);
         }
-        if (!(new \App\Libraries\WhatsAppGateway())->configured()) {
+        if (!$this->gatewayConfigured()) {
             return $this->respond(['ok' => false, 'message' => 'Gateway WhatsApp belum dikonfigurasi di server.'], 503);
         }
         if ($this->mediaUrlIsLocal()) {
@@ -164,14 +164,14 @@ class LaporanFileController extends WhatsAppController
         $result = $this->gatewayRequest($phone, $message, 'document', $url);
         $ok = $result['ok'];
         $model->update($id, [
-            'status_pengiriman' => $ok ? 'Terkirim' : 'Gagal',
+            'status_pengiriman' => $ok ? 'Terkirim' : (($result['outcome']??'unknown')==='failed'?'Gagal':'Disiapkan'),
             'dikirim_pada' => $ok ? date('Y-m-d H:i:s') : null,
         ]);
         return $this->respond([
             'ok' => $ok,
             'message' => $ok ? 'Laporan PDF dikirim melalui Gateway kepada ' . $teacher['nama_lengkap'] . '.'
                 : ($result['message'] ?: 'Gateway gagal mengirim laporan PDF. Silakan coba lagi.'),
-            'data' => ['id' => $id, 'status' => $ok ? 'Terkirim' : 'Gagal'],
+            'data' => ['id' => $id, 'status' => $ok ? 'Terkirim' : 'Pending'],
         ], $ok ? 200 : 502);
     }
 

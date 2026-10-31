@@ -2,20 +2,14 @@
 declare(strict_types=1);
 
 // CLI-only deployment helper. Never print credentials or expose this via HTTP.
+require_once dirname(__DIR__) . '/app/Libraries/WhatsAppGateway.php';
 function gatewaySettings(array $settings): array
 {
-    $url = rtrim(trim((string) ($settings['WHATSAPP_GATEWAY_URL'] ?? '')), '/');
-    $key = trim((string) ($settings['WHATSAPP_GATEWAY_API_KEY'] ?? ''));
-    $sender = preg_replace('/\D+/', '', (string) ($settings['WHATSAPP_GATEWAY_SENDER'] ?? ''));
-    if (str_starts_with($sender, '0')) $sender = '62' . substr($sender, 1);
-    if (!filter_var($url, FILTER_VALIDATE_URL) || !in_array(parse_url($url, PHP_URL_SCHEME), ['https', 'http'], true)) {
-        throw new RuntimeException('URL Gateway tidak valid.');
-    }
-    if ($key === '' || preg_match('/[\x00-\x1f\x7f]/', $key) || str_contains($key, '${')) {
-        throw new RuntimeException('API key Gateway kosong atau formatnya tidak didukung.');
-    }
-    if (!preg_match('/^62\d{8,15}$/', $sender)) throw new RuntimeException('Nomor pengirim Gateway tidak valid.');
-    return ['WHATSAPP_GATEWAY_URL' => $url, 'WHATSAPP_GATEWAY_API_KEY' => $key, 'WHATSAPP_GATEWAY_SENDER' => $sender];
+    $url=rtrim(trim((string)($settings['SIMS_WA_GATEWAY_API_BASE_URL']??\App\Libraries\WhatsAppGateway::API_BASE)),'/');
+    $key=trim((string)($settings['SIMS_WA_GATEWAY_API_KEY']??''));
+    if(!filter_var($url,FILTER_VALIDATE_URL)||parse_url($url,PHP_URL_SCHEME)!=='https'||parse_url($url,PHP_URL_USER)||parse_url($url,PHP_URL_PASS)||parse_url($url,PHP_URL_QUERY)||parse_url($url,PHP_URL_FRAGMENT))throw new RuntimeException('URL API wa.sims.id tidak valid.');
+    if($key===''||preg_match('/[\x00-\x1f\x7f]/',$key)||str_contains($key,'${'))throw new RuntimeException('API key gateway kosong atau formatnya tidak didukung.');
+    return ['SIMS_WA_GATEWAY_API_BASE_URL'=>$url,'SIMS_WA_GATEWAY_API_KEY'=>$key];
 }
 
 function gatewayReadEnv(string $path): array
@@ -26,13 +20,14 @@ function gatewayReadEnv(string $path): array
 
 function gatewayUpdateEnv(string $path, array $settings): bool
 {
-    $settings = gatewaySettings($settings);
+    $settings = $settings ? gatewaySettings($settings) : [];
     if (!is_file($path) || is_link($path)) throw new RuntimeException('File .env VPS harus ada dan bukan symlink.');
     $original = file_get_contents($path);
     if ($original === false) throw new RuntimeException('File .env tidak dapat dibaca.');
     $newline = str_contains($original, "\r\n") ? "\r\n" : "\n";
     $updated = $original;
-    foreach ($settings as $name => $value) {
+    $obsolete=['WHATSAPP_GATEWAY_URL','WHATSAPP_GATEWAY_API_KEY','WHATSAPP_GATEWAY_SENDER','WHATSAPP_ACCESS_TOKEN','WHATSAPP_PHONE_NUMBER_ID','WHATSAPP_API_VERSION'];
+    foreach (array_merge(array_keys($settings),$obsolete) as $name) {
         // Remove active duplicates while retaining comments and unrelated settings.
         $updated = preg_replace('/^[ \t]*(?:export[ \t]+)?' . preg_quote($name, '/') . '[ \t]*=.*(?:\r?\n|$)/m', '', $updated);
     }
@@ -93,18 +88,19 @@ function gatewayMain(array $args): void
         return;
     }
     if (($args[1] ?? '') !== '--apply') throw new RuntimeException('Gunakan --apply atau --sync-github-secret.');
-    $encoded = getenv('WHATSAPP_GATEWAY_CONFIG_B64');
-    if (!$encoded) throw new RuntimeException('GitHub Secret konfigurasi Gateway belum tersedia.');
-    $decoded = base64_decode($encoded, true);
-    if ($decoded === false) throw new RuntimeException('Format secret konfigurasi Gateway tidak valid.');
-    $settings = gatewaySettings(json_decode($decoded, true, 512, JSON_THROW_ON_ERROR));
-    $changed = gatewayUpdateEnv($envPath, $settings);
-    $saved = gatewayReadEnv($envPath);
-    foreach ($settings as $name => $value) {
-        if (($saved[$name] ?? null) !== $value) throw new RuntimeException('Konfigurasi Gateway VPS tidak cocok.');
+    $encoded=getenv('WHATSAPP_GATEWAY_CONFIG_B64');$settings=[];
+    if($encoded){
+        $decoded=base64_decode($encoded,true);if($decoded===false)throw new RuntimeException('Format secret Gateway tidak valid.');
+        $candidate=json_decode($decoded,true,512,JSON_THROW_ON_ERROR);
+        if(!is_array($candidate))throw new RuntimeException('Format secret Gateway tidak valid.');
+        // An older provider's deployment secret must never overwrite the connected SIMS session/config.
+        if(array_key_exists('SIMS_WA_GATEWAY_API_KEY',$candidate))$settings=gatewaySettings($candidate);
     }
-    echo $changed ? "Konfigurasi Gateway dipasang; backup .env tersimpan di writable/config-backups.\n" : "Konfigurasi Gateway sudah sesuai; .env tidak diubah.\n";
-    echo "Verifikasi dotenv aplikasi: URL, API key, dan nomor pengirim valid. Tidak ada pesan yang dikirim.\n";
+    $changed=gatewayUpdateEnv($envPath,$settings);
+    $saved=gatewayReadEnv($envPath);
+    foreach($settings as $name=>$value)if(($saved[$name]??null)!==$value)throw new RuntimeException('Konfigurasi Gateway VPS tidak cocok.');
+    echo $changed?"Konfigurasi wa.sims.id diperbarui; backup .env tersimpan.\n":"Konfigurasi wa.sims.id dipertahankan.\n";
+    echo "Sesi WhatsApp Gateway tidak diubah. Tidak ada pesan yang dikirim.\n";
 }
 
 if (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE__) {

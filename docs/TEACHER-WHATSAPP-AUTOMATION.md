@@ -68,7 +68,7 @@ Langkah manual bila diperlukan:
 
 1. Deploy kode dan jalankan migration.
 2. Periksa jadwal tersimpan, nomor HP guru, tahun ajaran aktif, tanggal mulai/akhir dan hari libur.
-3. Pastikan `WHATSAPP_GATEWAY_URL`, `WHATSAPP_GATEWAY_API_KEY`, dan `WHATSAPP_GATEWAY_SENDER` di `.env` server benar.
+3. Pastikan `SIMS_WA_GATEWAY_API_BASE_URL` dan `SIMS_WA_GATEWAY_API_KEY` di `.env` server benar, serta sesi pada menu **WhatsApp Gateway** berstatus **CONNECTED**. Nomor pengirim mengikuti sesi tersebut. Lihat [pengaturan wa.sims.id](WHATSAPP-GATEWAY.md).
 4. Ubah `WHATSAPP_TEACHER_AUTOMATION_ENABLED = true` pada `.env` VPS.
 5. Pasang satu entri crontab untuk user aplikasi, dijalankan setiap menit:
 

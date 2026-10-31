@@ -75,6 +75,8 @@ php spark whatsapp:teacher-schedule --status
 
 Deployment memasang cron pengingat/terima kasih guru setiap menit, mengaktifkan flag otomatisasi jika belum ada, dan menunggu heartbeat worker. Konfigurasi nonaktif yang sudah disimpan administrator tetap dipertahankan. Detail status Komunikasi dan pengecualian guru ada di [panduan otomatisasi guru](TEACHER-WHATSAPP-AUTOMATION.md).
 
+Konfigurasi pengiriman memakai wa.sims.id untuk seluruh modul. Helper gateway mempertahankan sesi database dan konfigurasi SIMS di VPS, menghapus variabel provider lama, serta mengabaikan isi secret deployment yang masih memakai format provider lama. Secret `WHATSAPP_GATEWAY_CONFIG_B64` bersifat opsional; jika diperbarui, isinya harus memakai variabel SIMS. Lihat [pengaturan WhatsApp Gateway](WHATSAPP-GATEWAY.md).
+
 ## Setup laptop Rahmad dan Deltorro
 
 Keduanya harus memiliki izin push ke repository:

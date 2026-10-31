@@ -1,5 +1,5 @@
 <?php
-// Local DB regression with injected transports; never contacts wa.ats.co.id.
+// Local DB regression with injected transports; never contacts wa.sims.id.
 $root=dirname(__DIR__);
 if(!preg_match('/^CI_ENVIRONMENT\s*=\s*development\s*$/m',file_get_contents($root.'/.env')))exit(1);
 define('ENVIRONMENT','development');define('FCPATH',$root.'/public/');require $root.'/app/Config/Paths.php';$paths=new Config\Paths();require $paths->systemDirectory.'/Boot.php';CodeIgniter\Boot::bootConsole($paths);

@@ -621,3 +621,11 @@
 
 /* Parent leave requests share the sick-request card layout. */
 #leaveRequestCard select{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:8px;padding:12px;border:1px solid #ccdce2;border-radius:10px;font:inherit;background:#fff;color:#172a3a}
+
+/* Shared attendance meanings on every role and page. */
+:root{--attendance-sick:#15803d;--attendance-permission:#6b3f1d}
+.status.sick,.absence-summary-label.sick,.attendance-sick-text,.student-attendance-value[data-status="Sakit"]{color:var(--attendance-sick)!important}
+.status.permission,.absence-summary-label.permission,.attendance-permission-text,.student-attendance-value[data-status="Izin"]{color:var(--attendance-permission)!important}
+.status.distance{color:#c1841d}
+.analytics-legend>span:has(.legend-bar.sick){color:var(--attendance-sick)!important;background:#eefbf2;padding:3px 6px;border-radius:5px}
+.analytics-legend>span:has(.legend-bar.permission){color:var(--attendance-permission)!important;background:#fff4e8;padding:3px 6px;border-radius:5px}

@@ -70,8 +70,9 @@ try:
         assert parent.op.open(BASE+'api/pengajuan-izin/'+str(iid)+'/lampiran').read()==image
     nofile=multipart(parent,dict(fields,tanggal_mulai='2028-02-29',tanggal_selesai='2028-02-29',jumlah_hari=1))['id']
     assert next(r for r in parent.call('api/pengajuan-izin')['data'] if int(r['id'])==nofile)['lampiran_url'] is None
-    assert sql(f'SELECT COUNT(*) FROM absensi WHERE kelas_id={classes[0]}')==baseline
-    print('PASS: Parent-only submission, required purpose/reason, dates/days, PDF/JPG/JPEG/PNG uploads, MIME/size checks, overlap, child/class ownership, private attachments and unchanged attendance.')
+    assert sql(f'SELECT COUNT(*) FROM absensi WHERE kelas_id={classes[0]}')=='4'
+    assert sql(f"SELECT COUNT(*) FROM absensi WHERE siswa_id={pupils[0]} AND status='Izin' AND semester='Genap' AND waktu_scan IS NULL")=='4'
+    print('PASS: Parent-only submission, required purpose/reason, dates/days, PDF/JPG/JPEG/PNG uploads, MIME/size checks, overlap, child/class ownership, private attachments and automatic Izin attendance.')
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         import tempfile
         from browser_client import CDP
@@ -119,7 +120,7 @@ finally:
         for filename in sql(f'SELECT berkas_lampiran FROM pengajuan_izin WHERE kelas_id IN ({ids}) AND berkas_lampiran IS NOT NULL').splitlines():
             path=ROOT/'writable'/'pengajuan-izin'/filename
             if path.is_file():path.unlink()
-        sql(f"DELETE FROM pengguna WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ({ids}));DELETE FROM absensi WHERE kelas_id IN ({ids});DELETE FROM catatan_kedisiplinan WHERE kelas_id IN ({ids});DELETE FROM pengampu_mapel WHERE kelas_id IN ({ids});DELETE FROM siswa WHERE kelas_id IN ({ids});DELETE FROM kelas WHERE id IN ({ids});")
+        sql(f"DELETE FROM absensi WHERE kelas_id IN ({ids});DELETE FROM pengguna WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ({ids}));DELETE FROM catatan_kedisiplinan WHERE kelas_id IN ({ids});DELETE FROM pengampu_mapel WHERE kelas_id IN ({ids});DELETE FROM siswa WHERE kelas_id IN ({ids});DELETE FROM kelas WHERE id IN ({ids});")
     if users:sql('DELETE FROM pengguna WHERE id IN ('+','.join(users)+')')
     if teachers:sql('DELETE FROM guru WHERE id IN ('+','.join(teachers)+')')
     if year:sql('DELETE FROM tahun_ajaran WHERE id='+year)

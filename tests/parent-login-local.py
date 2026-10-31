@@ -112,8 +112,9 @@ try:
     png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l3sAAAAASUVORK5CYII=')
     png_id=multipart(parent,dict(fields,jumlah_hari=1,tanggal_mulai='2028-02-29',tanggal_selesai='2028-02-29'),('surat.png','image/png',png))['id']
     assert parent.op.open(BASE+'api/pengajuan-sakit/'+str(png_id)+'/lampiran').read()==png
-    assert sql(f"SELECT status FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{today}'")=='Hadir'
-    print('PASS: Parent sick requests, multipart PDF upload, invalid MIME/size/dates, overlap protection, child identity, class ownership, private attachment access and unchanged attendance.')
+    expected='Hadir' if today.weekday()>=5 or str(today) in ['2026-08-17','2026-08-18','2026-08-25','2026-08-27','2026-08-28','2026-09-07','2026-09-08'] else 'Sakit'
+    assert sql(f"SELECT status FROM absensi WHERE siswa_id={pupils[0]} AND tanggal='{today}'")==expected
+    print('PASS: Parent sick requests, multipart PDF upload, invalid MIME/size/dates, overlap protection, child identity, class ownership, private attachment access and automatic sick attendance.')
     b_student=Client();b_student.call('api/auth/login',{'role':'student','username':nis_b,'password':nis_b})
     assert b_student.call('api/auth/session')['user']['isParent'] is False
     sql('UPDATE pengguna SET aktif=0 WHERE id='+str(b_login['id']))

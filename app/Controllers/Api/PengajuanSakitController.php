@@ -69,9 +69,12 @@ class PengajuanSakitController extends BaseApiController
             $db->query('SELECT id FROM siswa WHERE id=? FOR UPDATE',[$student['id']]);
             $overlap=$db->table('pengajuan_sakit')->where('siswa_id',$student['id'])->where('tanggal_mulai <=',$row['tanggal_selesai'])->where('tanggal_selesai >=',$row['tanggal_mulai'])->countAllResults();
             if($overlap){$db->transRollback();return $this->respond(['message'=>'Sudah ada pengajuan untuk tanggal tersebut. Periksa riwayat pengajuan atau hubungi wali kelas.'],409);}
+            $other=$db->table('pengajuan_izin')->where('siswa_id',$student['id'])->where('tanggal_mulai <=',$row['tanggal_selesai'])->where('tanggal_selesai >=',$row['tanggal_mulai'])->countAllResults();
+            if($other){$db->transRollback();return $this->respond(['message'=>'Sudah ada pengajuan sakit/izin pada rentang tanggal tersebut. Hubungi wali kelas untuk perubahan status.'],409);}
             if($path)$file->move(WRITEPATH.'pengajuan-sakit',$row['berkas_lampiran']);
             $db->table('pengajuan_sakit')->insert($row);
             $id=$db->insertID();
+            $attendance=\App\Libraries\ParentRequestAttendance::apply($row,'Sakit',(int)$id);
             if($db->transStatus()===false)throw new \RuntimeException('Pengajuan gagal disimpan.');
             $db->transCommit();
         }catch(\Throwable $error){
@@ -79,7 +82,7 @@ class PengajuanSakitController extends BaseApiController
             log_message('error','Pengajuan sakit gagal: {error}',['error'=>$error->getMessage()]);
             return $this->respond(['message'=>'Pengajuan belum tersimpan. Silakan coba kembali.'],500);
         }
-        return $this->respond(['ok'=>true,'id'=>$id,'message'=>'Pengajuan berhasil dikirim ke wali kelas.'],201);
+        return $this->respond(['ok'=>true,'id'=>$id,'absensi'=>$attendance,'message'=>'Pengajuan berhasil dikirim. Status Sakit otomatis diisi pada hari sekolah; Libur dan PJJ tetap berlaku.'],201);
     }
 
     public function attachment(int $id)

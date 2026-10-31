@@ -6,7 +6,7 @@
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
   <link rel='stylesheet' href='<?= base_url('assets/photo-uploads.css?v=20261028-single-page') ?>'>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261031-leave-request') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261031-parent-attendance') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
@@ -26,7 +26,7 @@
 <script src='<?= base_url('assets/academic-subjects.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script>window.AIWalasGradeComponentLabels=<?= json_encode(\App\Libraries\GradeComponents::labels()) ?>;</script>
 <script src='<?= base_url('assets/grade-components.js?v=20261029-tasks-six') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261030-teacher-read') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261031-parent-attendance') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261029-tasks-six') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261029-august-pjj') ?>'></script>
@@ -136,10 +136,11 @@
 <script src='<?= base_url('assets/student-schedule.js?v=20261026-complete') ?>'></script>
 <script src='<?= base_url('assets/student-discipline.js?v=20261029-category-status') ?>'></script>
 <script src='<?= base_url('assets/student-attendance-recap.js?v=20261029-august-pjj') ?>'></script>
-<script src='<?= base_url('assets/parent-sick-request.js?v=20261027') ?>'></script>
-<script src='<?= base_url('assets/parent-leave-request.js?v=20261031-leave-request') ?>'></script>
+<script src='<?= base_url('assets/parent-sick-request.js?v=20261031-parent-attendance') ?>'></script>
+<script src='<?= base_url('assets/parent-leave-request.js?v=20261031-parent-attendance') ?>'></script>
 <script src='<?= base_url('assets/photo-uploads.js?v=20261028-single-page') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261029-tasks-six') ?>'></script>
+<script src='<?= base_url('assets/attendance-status-colors.js?v=20261031-parent-attendance') ?>'></script>
 </body>
 </html>
 

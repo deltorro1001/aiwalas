@@ -19,6 +19,17 @@ class Client:
         result=json.load(r);self.token=result.get('csrfHash',self.token);assert r.code==status,(path,r.code,result);return result
     def login(self,role,username,secret=password):self.call('api/auth/login',{'role':role,'username':username,'password':secret});return self
 users=[];classes=[];teachers=[];pupils=[];year=None;c=None
+def multipart(client,fields,file=None,status=201,endpoint='api/pengajuan-sakit'):
+    boundary='aiwalas'+secrets.token_hex(12);chunks=[]
+    for key,value in fields.items():chunks.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="'+key+'"\r\n\r\n'+str(value)+'\r\n').encode())
+    if file:
+        name,mime,data=file
+        chunks.append(('--'+boundary+'\r\nContent-Disposition: form-data; name="lampiran"; filename="'+name+'"\r\nContent-Type: '+mime+'\r\n\r\n').encode()+data+b'\r\n')
+    chunks.append(('--'+boundary+'--\r\n').encode())
+    req=urllib.request.Request(BASE+endpoint,data=b''.join(chunks),headers={'Content-Type':'multipart/form-data; boundary='+boundary,'X-CSRF-TOKEN':client.token})
+    try:r=client.op.open(req)
+    except urllib.error.HTTPError as error:r=error
+    result=json.load(r);client.token=result.get('csrfHash',client.token);assert r.code==status,(r.code,result);return result
 try:
     for i in range(2):
         users.append(sql(f"INSERT INTO pengguna(nama_pengguna,kata_sandi,nama_lengkap,peran) VALUES('{tag}_wali{i}','{hashed}','Wali Jurnal {i}','wali_kelas');SELECT LAST_INSERT_ID();"))
@@ -41,6 +52,9 @@ try:
     records=[(0,'2026-07-12','Sakit','Ganjil'),(0,'2026-07-13','Sakit','Ganjil'),(0,'2026-07-14','Sakit','Ganjil'),(0,'2026-07-15','Izin','Ganjil'),(0,'2026-08-03','Izin','Ganjil'),(0,'2026-08-04','Terlambat','Ganjil'),(0,'2026-09-01','Terlambat','Ganjil'),(0,'2026-10-01','Terlambat','Ganjil'),(0,'2026-08-17','Sakit','Ganjil'),(0,'2026-08-27','Terlambat','Ganjil'),(0,'2026-08-05','Terlambat','Genap'),(0,'2026-07-13','Sakit','Genap'),(1,'2026-07-13','Izin','Ganjil'),(1,'2026-08-03','Izin','Ganjil'),(1,'2026-09-01','Izin','Ganjil'),(1,'2026-10-01','Terlambat','Ganjil'),(2,'2026-07-16','Sakit','Ganjil'),(2,'2026-08-10','Izin','Ganjil'),(4,'2026-08-04','Terlambat','Ganjil'),(5,'2026-08-04','Terlambat','Ganjil'),(0,end,'Hadir','Ganjil'),(0,str(today+datetime.timedelta(days=1)),'Sakit','Ganjil')]
     for i,day,status,semester in records:
         sql(f"INSERT INTO absensi(siswa_id,kelas_id,tanggal,status,semester,waktu_scan,keterangan,dicatat_oleh) VALUES({pupils[i]},{classes[1] if i==5 else classes[0]},'{day}','{status}','{semester}',{'NULL' if status!='Terlambat' else chr(39)+'06:45:00'+chr(39)},'Catatan <img src=x onerror=alert(1)>',{users[0]})")
+    pdf=b'%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\n%%EOF'
+    for day,endpoint_name in [('2026-07-13','api/pengajuan-sakit'),('2026-08-03','api/pengajuan-izin')]:
+        multipart(parent,{'tanggal_mulai':day,'tanggal_selesai':day,'jumlah_hari':1,'jenis_izin':'Keperluan keluarga','keterangan':'Surat uji'},('surat.pdf','application/pdf',pdf),endpoint=endpoint_name)
     endpoint='api/absensi/tanya?kelas_id='+classes[0]
     result=wali.call(endpoint)
     assert result['periode']['mulai']=='2026-07-13' and result['periode']['sampai']==end and result['periode']['zona']=='Asia/Jakarta'
@@ -50,6 +64,12 @@ try:
     kanaya=next(s for s in result['siswa'] if s['nama']=='Kanaya Safa Aulia')
     assert [kanaya['jumlah'][key] for key in ['Sakit','Izin','Terlambat']]==[2,2,3]
     assert kanaya['bulanan']['2026-08']['Terlambat']==1
+    history={r['tanggal']:r for r in kanaya['riwayat']}
+    assert history['2026-07-13']['keterangan_lampiran']=='(surat sakit terlampir)'
+    assert history['2026-07-14']['keterangan_lampiran']=='' and history['2026-07-14']['surat_terlampir'] is False
+    assert history['2026-08-03']['keterangan_lampiran']=='(surat izin terlampir)'
+    assert history['2026-07-15']['keterangan_lampiran']==''
+
     assert all('2026-07-13'<=row['tanggal']<=end for s in result['siswa'] for row in s['riwayat'])
     assert kanaya['jumlah']['Libur']==1 and kanaya['jumlah']['PJJ']==1
     assert not any(s['nama'] in ['Nonaktif Uji','Siswa Asing'] for s in result['siswa'])
@@ -97,15 +117,37 @@ try:
             c.wait("!document.getElementById('sendHelpQuestion').disabled")
             return c.js("document.getElementById('helpAnswer').textContent")
         text=ask('Berapa kali Kanaya terlambat?');assert 'Kanaya Safa Aulia' in text and '13-07-2026' in text
-        assert c.js("document.querySelector('.attendance-question-table tbody td:nth-child(2)').textContent")=='3'
+        assert c.js("document.querySelector('[data-total-status=Terlambat] .attendance-question-total-number').textContent")=='3'
         assert c.js("document.querySelectorAll('#helpAnswer img').length")==0
         assert '06:45:00 WIB' in text and 'Catatan <img' in text
+        assert c.js("document.querySelector('.attendance-question-totals').compareDocumentPosition(document.querySelector('.attendance-question-details')) & Node.DOCUMENT_POSITION_FOLLOWING")
+        assert c.js("document.querySelectorAll('.attendance-question-dates li').length")==3
+        text=ask('Rekap absen sakit Kanaya')
+        assert 'Total Sakit Kanaya Safa Aulia: 2 kali.' in text
+        assert c.js("[...document.querySelectorAll('.attendance-question-dates [data-attendance-date]')].map(n=>n.textContent)")==['13-07-2026','14-07-2026']
+        sick_lines=c.js("[...document.querySelectorAll('.attendance-question-date-line')].map(n=>n.textContent)")
+        assert '(surat sakit terlampir)' in sick_lines[0] and '(surat' not in sick_lines[1]
+        assert c.js("(()=>{let r=[...document.querySelectorAll('.attendance-question-dates li')].map(n=>n.getBoundingClientRect());return r[1].top>r[0].top&&r[1].top>=r[0].bottom-0.5})()")
+
+        text=ask('Rekap absen izin Kanaya')
+        assert 'Total Izin Kanaya Safa Aulia: 2 kali.' in text
+        assert c.js("[...document.querySelectorAll('.attendance-question-dates [data-attendance-date]')].map(n=>n.textContent)")==['15-07-2026','03-08-2026']
+        izin_lines=c.js("[...document.querySelectorAll('.attendance-question-date-line')].map(n=>n.textContent)")
+        assert '(surat' not in izin_lines[0] and '(surat izin terlampir)' in izin_lines[1]
+
+        text=ask('Rekap sakit Timothy')
+        assert 'Total Sakit Timothy Santoso: 0 kali.' in text and 'Tidak ada catatan Sakit' in text
+        assert c.js("document.querySelectorAll('.attendance-question-dates [data-attendance-date]').length")==0
+        text=ask('Rekap sakit dan izin Kanaya')
+        assert c.js("document.querySelectorAll('.attendance-question-total').length")==2
+        assert c.js("document.querySelector('.attendance-question-totals').compareDocumentPosition(document.querySelector('.attendance-question-details')) & Node.DOCUMENT_POSITION_FOLLOWING")
         # The next question must fetch fresh corrected data, not reuse a page-load snapshot.
         wali.call('api/absensi',{'siswa_id':int(pupils[0]),'kelas_id':int(classes[0]),'tanggal':'2026-10-01','semester':'Ganjil','status':'Izin'})
         ask('Berapa kali Kanaya terlambat?')
-        assert c.js("document.querySelector('.attendance-question-table tbody td:nth-child(2)').textContent")=='2'
+        assert c.js("document.querySelector('[data-total-status=Terlambat] .attendance-question-total-number').textContent")=='2'
         text=ask('Rekap izin Kanaya per bulan');assert 'Rekap Bulanan Kanaya Safa Aulia' in text and 'juli 2026' in text
         text=ask('Rekap sakit izin keterlambatan seluruh siswa');assert c.js("document.querySelectorAll('.attendance-question-table tbody tr').length")==4
+        assert c.js("document.querySelectorAll('.attendance-question-details details[open]').length")==4
         c.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True})
         assert c.js('document.documentElement.scrollWidth<=innerWidth');c.call('Emulation.clearDeviceMetricsOverride')
         assert c.js("fetch('assets/attendance-questions.js').then(r=>r.text()).then(s=>{new Function(s);return true})")
@@ -116,7 +158,12 @@ finally:
         try:c.js("closeModal();authRequest('api/auth/logout',{method:'POST',body:'{}'})")
         except Exception:pass
     if classes:
-        ids=','.join(classes);sql(f"DELETE FROM pengguna WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ({ids}));DELETE FROM absensi WHERE kelas_id IN ({ids});DELETE FROM catatan_kedisiplinan WHERE kelas_id IN ({ids});DELETE FROM pengampu_mapel WHERE kelas_id IN ({ids});DELETE FROM siswa WHERE kelas_id IN ({ids});DELETE FROM kelas WHERE id IN ({ids});")
+        ids=','.join(classes)
+        for table,folder in [('pengajuan_sakit','pengajuan-sakit'),('pengajuan_izin','pengajuan-izin')]:
+            for filename in sql(f'SELECT berkas_lampiran FROM {table} WHERE kelas_id IN ({ids}) AND berkas_lampiran IS NOT NULL').splitlines():
+                path=ROOT/'writable'/folder/filename
+                if path.is_file():path.unlink()
+        sql(f"DELETE FROM absensi WHERE kelas_id IN ({ids});DELETE FROM pengguna WHERE siswa_id IN (SELECT id FROM siswa WHERE kelas_id IN ({ids}));DELETE FROM catatan_kedisiplinan WHERE kelas_id IN ({ids});DELETE FROM pengampu_mapel WHERE kelas_id IN ({ids});DELETE FROM siswa WHERE kelas_id IN ({ids});DELETE FROM kelas WHERE id IN ({ids});")
     if users:sql('DELETE FROM pengguna WHERE id IN ('+','.join(users)+')')
     if teachers:sql('DELETE FROM guru WHERE id IN ('+','.join(teachers)+')')
     if year:sql('DELETE FROM tahun_ajaran WHERE id='+year)

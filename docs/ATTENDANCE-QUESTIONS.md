@@ -4,6 +4,8 @@ Pada login Wali Kelas, Tanya AIWalas dapat menjawab pertanyaan kehadiran berdasa
 
 Periode default selalu 13 Juli 2026 sampai tanggal pertanyaan diajukan dalam WIB, tanpa dibatasi semester pada panel samping. Setiap pertanyaan membaca ulang data terkini. Tanggal mendatang dan catatan sebelum periode tidak ikut dihitung.
 
+Jawaban diawali jumlah total status yang ditanyakan, kemudian rincian tanggal-tanggalnya dalam format dd-mm-yyyy. Pertanyaan satu siswa langsung menampilkan total atas nama siswa tersebut; pertanyaan kelompok menampilkan total kelompok, tabel per siswa, lalu rincian tanggal yang terbuka. Setiap tanggal kejadian ditampilkan pada baris tersendiri. Tanggal dengan lampiran yang sesuai diberi teks `(surat sakit terlampir)` atau `(surat izin terlampir)` di sebelah tanggal tersebut; tanggal tanpa surat tidak diberi keterangan dalam kurung. Penanda mengikuti siswa, kelas, tanggal, status, dan keberadaan berkas yang tersimpan. Catatan absensi ditampilkan terpisah di bawah tanggal agar mudah dibaca. Nilai nol tetap disebutkan dengan keterangan tidak ada catatan. Rekap bulanan (jika diminta) ditampilkan setelah rincian tanggal.
+
 ## Penggolongan
 
 - Per siswa aktif: nama, NIS, jumlah tiap status, riwayat tanggal dan waktu scan, keterangan yang tersimpan.

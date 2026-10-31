@@ -15,6 +15,7 @@ final class AttendanceQuestionSummary
         }
         if($students&&$end>=self::START){
             $rows=$db->table('absensi')->select('siswa_id,tanggal,semester,status,waktu_scan,keterangan')->where('kelas_id',$class)->whereIn('siswa_id',array_keys($students))->where('tanggal >=',self::START)->where('tanggal <=',$end)->orderBy('tanggal')->orderBy('id')->get()->getResultArray();
+            $attachments=new AttendanceAttachmentDetails($class,array_keys($students),self::START,$end);
             foreach($rows as $row){
                 // A date belongs to one semester, even if a legacy duplicate exists in the other.
                 $semester=(int)substr($row['tanggal'],5,2)<=6?'Genap':'Ganjil';
@@ -25,7 +26,7 @@ final class AttendanceQuestionSummary
                 $students[$id]['jumlah'][$status]++;
                 if(!isset($students[$id]['bulanan'][$month]))$students[$id]['bulanan'][$month]=$empty;
                 $students[$id]['bulanan'][$month][$status]++;
-                $students[$id]['riwayat'][]=['tanggal'=>$row['tanggal'],'status'=>$status,'waktu_scan'=>in_array($status,['Libur','PJJ'],true)?null:$row['waktu_scan'],'keterangan'=>$row['keterangan']??''];
+                $students[$id]['riwayat'][]=['tanggal'=>$row['tanggal'],'status'=>$status,'waktu_scan'=>in_array($status,['Libur','PJJ'],true)?null:$row['waktu_scan'],'keterangan'=>$row['keterangan']??'']+$attachments->forAttendance($id,$row['tanggal'],$status);
             }
         }
         $total=$empty;$groups=[];

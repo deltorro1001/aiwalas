@@ -1,4 +1,10 @@
 (function(){
+  // Shared entry point for assessment and attendance notifications. authRequest
+  // supplies authentication/CSRF; the server selects the connected SIMS session.
+  window.sendWhatsAppGateway=function(payload){
+    if(typeof window.authRequest!=='function')return Promise.reject(new Error('Sesi AIWalas belum siap. Silakan muat ulang halaman.'));
+    return window.authRequest('api/whatsapp/send',{method:'POST',body:JSON.stringify(payload)});
+  };
   var previous=window.render;
   window.names=window.names||{}; window.names.whatsappGateway='WhatsApp Gateway';
   if(window.roleAccess){['walas'].forEach(function(role){if(window.roleAccess[role]&&window.roleAccess[role].indexOf('whatsappGateway')<0)window.roleAccess[role].push('whatsappGateway')})}

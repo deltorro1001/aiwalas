@@ -4,6 +4,10 @@
   <nav class="nav-group">
     <span class="nav-label">WORKSPACE</span>
     <button class="nav-item active" data-page="dashboard"><span></span> Beranda <b class="nav-badge">4</b></button>
+    <button class="nav-item" data-page="guestSchedule" style="display:none"><span></span> Jadwal Mapel</button>
+    <button class="nav-item" data-page="guestAnnouncements" style="display:none"><span></span> Pengumuman</button>
+    <button class="nav-item" data-page="guestCalendar" style="display:none"><span></span> Kalender Akademik</button>
+    <button class="nav-item" data-page="publicAnnouncements" style="display:none"><span></span> Pengumuman Tamu</button>
     <button class="nav-item" data-page="schedule"><span></span> Jadwal Kelas</button>
     <button class="nav-item" data-page="students"><span></span> Daftar Siswa</button>
     <button class="nav-item" data-page="teachers"><span></span> Guru Mapel</button>

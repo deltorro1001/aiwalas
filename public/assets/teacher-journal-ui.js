@@ -40,7 +40,7 @@
       document.querySelectorAll('[data-journal-edit]').forEach(function(button){button.onclick=function(){edit(records.find(function(r){return String(r.id)===button.dataset.journalEdit}))}});
     }).catch(function(error){if(active()){document.getElementById('journalLoadError').textContent=error.message;document.getElementById('journalRows').innerHTML='<tr><td colspan="'+(writer()?6:5)+'">Jurnal belum dapat dimuat. Tekan Muat ulang untuk mencoba lagi.</td></tr>'}});
   }
-  ['student','guest'].forEach(function(role){if(window.roleAccess&&window.roleAccess[role]&&window.roleAccess[role].indexOf('journal')<0)window.roleAccess[role].push('journal')});
-  var apply=window.applyRoleAccess;window.applyRoleAccess=function(){apply.apply(this,arguments);if(['student','guest'].indexOf(window.currentRole)>=0){var button=document.querySelector('.sidebar [data-page="journal"]');if(button)button.style.display='flex'}};
+  ['student'].forEach(function(role){if(window.roleAccess&&window.roleAccess[role]&&window.roleAccess[role].indexOf('journal')<0)window.roleAccess[role].push('journal')});
+  var apply=window.applyRoleAccess;window.applyRoleAccess=function(){apply.apply(this,arguments);if(['student'].indexOf(window.currentRole)>=0){var button=document.querySelector('.sidebar [data-page="journal"]');if(button)button.style.display='flex'}};
   window.AIWalasPages=window.AIWalasPages||{};window.AIWalasPages.journal=renderJournal;
 })();

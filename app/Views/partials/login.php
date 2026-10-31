@@ -12,6 +12,7 @@
             <option value="student">Siswa</option>
             <option value="parent">Orangtua/Wali Murid</option>
             <option value="teacher">Guru</option>
+            <option value="guest">Tamu</option>
 
           </select>
         </label>

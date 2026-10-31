@@ -12,7 +12,7 @@ class JurnalController extends BaseApiController
         if(($user['peran']??'')==='wali_kelas')return (int)$row['wali_kelas_id']===(int)$user['id'];
         if(in_array($user['peran']??'',['sekretaris','siswa'],true))return $db->table('siswa')->where(['kelas_id'=>$class,'nis'=>$user['nis']??'','aktif'=>1])->countAllResults()>0;
         if(($user['peran']??'')==='guru')return \App\Libraries\TeacherAssignments::has($class,(int)($user['guru_id']??0),$subject);
-        return ($user['peran']??'')==='guest'&&$db->table('tahun_ajaran')->where(['id'=>$row['tahun_ajaran_id'],'aktif'=>1])->countAllResults()>0;
+        return false;
     }
     public function index()
     {

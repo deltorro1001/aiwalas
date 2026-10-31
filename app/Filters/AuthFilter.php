@@ -15,6 +15,13 @@ class AuthFilter implements FilterInterface
             session()->remove('pengguna');
         }
         if(($user['peran']??'')==='orang_tua'&&!\App\Libraries\ParentAccounts::sessionValid($user))session()->remove('pengguna');
+        if(($user['peran']??'')==='guest'){
+            $account=db_connect()->table('pengguna')->where(['id'=>(int)$user['id'],'peran'=>'guest','aktif'=>1])->countAllResults();
+            if(!$account){session()->remove('pengguna');}
+            elseif(strtoupper($request->getMethod())!=='GET'||!preg_match('#/api/(bootstrap|tamu)$#',$request->getUri()->getPath())){
+                return service('response')->setStatusCode(403)->setJSON(['ok'=>false,'message'=>'Akun tamu hanya dapat membaca informasi publik.','csrfHash'=>service('security')->getHash()]);
+            }
+        }
         if (session()->has('pengguna')) {
             return null;
         }

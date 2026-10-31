@@ -19,6 +19,8 @@ class Auth extends BaseController
 
         if(($pengguna['peran']??'')==='orang_tua'&&!\App\Libraries\ParentAccounts::sessionValid($pengguna)){session()->remove('pengguna');$pengguna=null;}
 
+        if(($pengguna['peran']??'')==='guest'&&!db_connect()->table('pengguna')->where(['id'=>(int)$pengguna['id'],'peran'=>'guest','aktif'=>1])->countAllResults()){session()->remove('pengguna');$pengguna=null;}
+
         return $this->json([
             'authenticated' => $pengguna !== null,
             'user' => $pengguna === null ? null : $this->frontendUser($pengguna),
@@ -129,6 +131,7 @@ class Auth extends BaseController
     {
         $user = session()->get('pengguna');
         if(($user['peran']??'')==='orang_tua'&&!\App\Libraries\ParentAccounts::sessionValid($user)){session()->remove('pengguna');return $this->json(['ok'=>false,'message'=>'Silakan masuk kembali.'],401);}
+        if(($user['peran']??'')==='guest')return $this->json(['message'=>'Akun tamu hanya dapat membaca informasi publik.'],403);
         $payload = $this->request->getJSON(true) ?? $this->request->getPost();
         $password = (string) ($payload['password'] ?? '');
         $confirmation = (string) ($payload['confirmation'] ?? '');

@@ -42,7 +42,8 @@ try:
     today_note=secretary.call('api/jurnal',dict(payload,tanggal=today,materi='Materi hari ini'))['id']
     endpoint='api/jurnal?kelas_id='+classes[0]
     Client().call(endpoint,status=401)
-    for client in [wali,secretary,student,parent,guest]:
+    guest.call(endpoint,status=403)
+    for client in [wali,secretary,student,parent]:
         january=client.call(endpoint+'&tanggal=2026-01-01');assert len(january['data'])==2 and january['minimum_date']=='2026-01-01'
         assert {row['tanggal'] for row in january['data']}=={'2026-01-01'}
         assert len(client.call(endpoint+'&tanggal=2026-01-02')['data'])==1
@@ -50,7 +51,7 @@ try:
     mine=guru.call(endpoint+'&tanggal=2026-01-01');assert len(mine['data'])==1 and mine['data'][0]['can_edit'] is True
     assert guru.call(endpoint+'&tanggal=2026-01-02')['data'][0]['can_edit'] is False
     guru.call('api/jurnal/'+str(wali_note),dict(payload,tanggal='2026-01-02'),method='PUT',status=403)
-    for client in [student,parent,guest]:
+    for client in [student,parent]:
         result=client.call(endpoint+'&tanggal=2026-01-01');assert result['can_create'] is False and result['assignments']==[] and all(not r['can_edit'] for r in result['data'])
         for method,path in [('POST','api/jurnal'),('PUT','api/jurnal/'+str(first)),('DELETE','api/jurnal/'+str(first))]:client.call(path,payload,method=method,status=403)
     for client in [student,parent,secretary,guru]:client.call('api/jurnal?kelas_id='+classes[1],status=403)
@@ -67,7 +68,7 @@ try:
     sql(f'DELETE FROM pengampu_mapel WHERE guru_id={teachers[1]} AND kelas_id={classes[0]}')
     archived=dict(payload,mata_pelajaran_id=int(subjects[1]),guru_id=int(teachers[1]),materi='Koreksi penugasan lama')
     wali.call('api/jurnal/'+str(second),archived,method='PUT')
-    print('PASS: Exact date filtering from Jan 1 2026, historic editing with original author/date isolation, archived assignments, writer permissions, read-only student/parent/guest, class isolation and date validation.')
+    print('PASS: Exact date filtering from Jan 1 2026, historic editing with original author/date isolation, archived assignments, writer permissions, read-only student/parent and denied guest, class isolation and date validation.')
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies');c.call('Page.navigate',{'url':BASE})
@@ -96,7 +97,7 @@ try:
         select('2026-01-31');assert c.js("document.getElementById('journalRows').textContent.includes('Belum ada jurnal')")
         c.js("document.getElementById('addJournal').click()");assert c.js("document.getElementById('jDate').value")=='2026-01-31'
         c.js("closeModal();document.getElementById('journalToday').click()");c.wait("document.getElementById('journalViewDate')?.value==="+json.dumps(today))
-        for role,username,secret in [('student',tag+'_siswa',password),('parent',tag+'_0',tag+'_0'),('guest',tag+'_guest',password)]:
+        for role,username,secret in [('student',tag+'_siswa',password),('parent',tag+'_0',tag+'_0')]:
             login(role,username,secret);select('2026-01-01')
             assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=journal]')).display")!='none'
             assert c.js("document.querySelectorAll('[data-journal-edit],#addJournal').length")==0

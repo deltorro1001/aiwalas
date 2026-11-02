@@ -67,12 +67,12 @@ try:
         c.js("document.getElementById('communicationStatus').value='sent';document.getElementById('communicationStatus').onchange()")
         c.wait("document.getElementById('communicationCount').textContent==='27 pesan'")
         assert c.js("document.querySelectorAll('[data-delivery-status=\"Pending\"]').length")==0
-        c.js("document.getElementById('showManualMessages').click()")
-        assert c.js("document.getElementById('manualCommunication').hidden") is False
+        c.js("document.getElementById('openAiwalasIntroduction').click()")
+        assert c.js("!!document.getElementById('aiwalasIntroForm') && !document.getElementById('showManualMessages') && !document.getElementById('manualCommunication')")
         sends=[e for e in c.events if e.get('method')=='Network.requestWillBeSent' and '/api/whatsapp/send' in e['params']['request']['url']]
         errors=[e for e in c.events if e.get('method')=='Runtime.exceptionThrown'];assert not sends and not errors,(sends,errors)
         c.js("window.page='dashboard';window.render()")
-        print('PASS: Browser communication history, Terkirim/Pending filters, paging, polling status updates, escaped bodies, manual drafts retained; no sends.')
+        print('PASS: Browser communication history, Terkirim/Pending filters, paging, polling status updates, escaped bodies, reusable introduction replaces old manual teacher drafts; no sends.')
     print('PASS: History totals/status details, pending outcomes, owner/role isolation, sent status preserved when opened.')
 finally:
     if class_id:sql('DELETE FROM teacher_schedule_dispatches WHERE kelas_id='+class_id+';DELETE FROM pesan_komunikasi WHERE kelas_id='+class_id+';DELETE FROM kelas WHERE id='+class_id+';')

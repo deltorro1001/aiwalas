@@ -416,7 +416,6 @@
 /* Fallback ikon sidebar untuk mencegah karakter encoding tampil sebagai teks */
 .sidebar .nav-item>span{font-size:0}.sidebar .nav-item>span:after{content:'•';font-size:14px;line-height:1}.sidebar .chevron{font-size:0}.sidebar .chevron:after{content:'⌄';font-size:16px}
 .assistant-initial-avatar{display:grid!important;place-items:center;width:33px;height:33px;border-radius:50%;font-weight:700;font-size:11px;color:#087e76;background:#c6f2ec;text-transform:uppercase}.top-avatar.assistant-initial-avatar{width:32px;height:32px}
-.teacher-message-list{display:flex;flex-direction:column;gap:12px}.teacher-message-item{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fbfdfd}.teacher-message-item>div{min-width:0;flex:1}.teacher-message-item strong{display:block;font-size:12px;color:var(--ink)}.teacher-message-item small{display:block;color:var(--teal-dark);font-size:10px;margin-top:3px}.teacher-message-item p{margin-top:9px;font-size:11px;line-height:1.5;color:#5e6d7c}.teacher-message-item .primary-btn{white-space:nowrap;text-decoration:none}@media(max-width:650px){.teacher-message-item{flex-direction:column}.teacher-message-item .primary-btn{width:100%;text-align:center}}
 
 /* Sidebar dapat digulir saat daftar menu melebihi tinggi layar */
 .sidebar{height:100vh;min-height:100vh;max-height:100vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#40506a transparent}.sidebar::-webkit-scrollbar{width:6px}.sidebar::-webkit-scrollbar-track{background:transparent}.sidebar::-webkit-scrollbar-thumb{background:#40506a;border-radius:8px}.sidebar-bottom{padding-bottom:18px;flex-shrink:0}
@@ -684,3 +683,8 @@
 :root{--attendance-report:#2563eb}
 .status.report,.attendance-report-text,.student-attendance-value[data-status="Pengambilan Raport"],[data-attendance-status="Pengambilan Raport"][data-attendance-date],[data-attendance-status="Pengambilan Raport"][data-attendance-time],[data-attendance-status="Pengambilan Raport"] [data-attendance-date],[data-attendance-status="Pengambilan Raport"] [data-attendance-time],[data-calendar-date].attendance-calendar-report,#pageContent input.attendance-calendar-report,#modalContent input.attendance-calendar-report{color:var(--attendance-report)!important}
 .school-holiday-banner[data-status="Pengambilan Raport"]{color:var(--attendance-report);background:#eff6ff;border-color:#bfdbfe}
+
+.aiwalas-intro-form{display:grid;gap:14px;margin-top:18px}.aiwalas-intro-form>label{display:grid;gap:7px}.aiwalas-intro-form textarea{width:100%;box-sizing:border-box;min-height:220px;resize:vertical;line-height:1.6}.aiwalas-intro-form .stat-note{line-height:1.6}.aiwalas-intro-form .modal-actions{flex-wrap:wrap}.aiwalas-intro-form .modal-actions button{white-space:normal}
+.modal:has(>.aiwalas-intro-form){max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
+
+.aiwalas-intro-form>[hidden]{display:none!important}

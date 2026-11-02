@@ -56,5 +56,32 @@ assert c.js("document.querySelector('[data-wa-parent]').textContent==='Terkirim'
 assert c.js("(()=>{var p=JSON.parse(calls[calls.length-1].options.body);return p.kelas_id===12&&p.nomor_tujuan==='6281234567890'&&p.isi_pesan.includes('Sakit')})()"), 'Wrong attendance payload'
 c.js("outcome='failed';document.querySelector('[data-wa-parent]').textContent='Kirim via Gateway';document.querySelector('[data-wa-parent]').click()")
 assert c.js("lastToast==='Gateway menolak permintaan.'&&document.querySelector('[data-wa-parent]').textContent==='Kirim via Gateway'"), 'Attendance failure reported as sent'
+# All parent attendance narratives, removed fallback, and WIB greetings at each boundary.
+c.js("""
+window.__NarrativeDate=Date;window.__narrativeNow='2026-11-02T03:59:00Z';
+window.Date=class extends __NarrativeDate{constructor(...args){super(...(args.length?args:[__narrativeNow]))}static now(){return new __NarrativeDate(__narrativeNow).getTime()}};
+window.mountParentAttendance=function(status,name){students[0][0]=name;page='attendance';document.getElementById('pageContent').innerHTML='<section class="table-panel"><table><tbody><tr data-attendance-student="21"><td></td><td></td><td></td><td></td></tr></tbody></table></section>';document.querySelector('tr').dataset.attendanceStatus=status;render()};
+""")
+checks={'Menunggu keterangan':'Mohon konfirmasi kehadirannya.','Terlambat':'Mohon menjadi perhatian.','Sakit':'Semoga ananda lekas pulih dan dapat kembali bersekolah dalam keadaan sehat.','Izin':'Terima kasih atas informasi yang Bapak/Ibu sampaikan.'}
+import json
+for status,expected in checks.items():
+    c.js("outcome='sent';mountParentAttendance("+json.dumps(status)+",'Fixture Siswa');document.querySelector('[data-wa-parent]').click()")
+    text=c.js("JSON.parse(calls[calls.length-1].options.body).isi_pesan")
+    assert text.startswith('Assalamualaikum, Bapak/Ibu Orangtua Fixture Siswa.') and expected in text,(status,text)
+    if status in ['Sakit','Izin']:assert 'konfirmasi' not in text.lower(),text
+for status in ['Alpha','PJJ','Pengambilan Raport','Tanpa absensi','Hadir','Libur']:
+    count=c.js('calls.length');c.js('mountParentAttendance('+json.dumps(status)+",'Fixture Siswa')")
+    assert c.js("!document.querySelector('[data-wa-parent]') && calls.length==="+str(count)),status
+for instant,greeting in [('2026-11-02T03:59:00Z','Selamat Pagi'),('2026-11-02T04:00:00Z','Selamat Siang'),('2026-11-02T08:00:00Z','Selamat Sore'),('2026-11-02T11:00:00Z','Selamat Malam'),('2026-11-02T17:00:00Z','Selamat Pagi')]:
+    c.js('__narrativeNow='+json.dumps(instant))
+    for status in checks:
+        c.js('mountParentAttendance('+json.dumps(status)+",'Timothy Frans');document.querySelector('[data-wa-parent]').click()")
+        text=c.js("JSON.parse(calls[calls.length-1].options.body).isi_pesan")
+        assert text.startswith(greeting+', Bapak/Ibu Orangtua Timothy Frans.'),(instant,status,text)
+    c.js("page='walasAssessment';renderWalasAssessmentPage()")
+    c.wait("!!document.querySelector('.gateway-grade-action')")
+    c.js("document.querySelector('.gateway-grade-action').click()")
+    assert c.js("document.getElementById('gatewayGradeMessage').value").startswith(greeting+', Bapak/Ibu Orangtua/Wali Timothy Frans.'),instant
+c.js('window.Date=__NarrativeDate')
 assert c.js("(async()=>{window.authRequest=undefined;try{await sendWhatsAppGateway({});return false}catch(e){return e.message.includes('Sesi AIWalas belum siap')}})()"), 'Missing session not handled'
-print('PASS: Actual assessment confirmation and attendance buttons call shared send API; zero scores, correct payload, duplicate-click guard, rejection/unknown errors, missing session and no automatic sends. All HTTP mocked.')
+print('PASS: Actual assessment confirmation and attendance buttons call shared send API; zero scores, correct payload, duplicate-click guard, rejection/unknown errors, missing session, revised Sakit/Izin, removed fallback, all parent WIB greetings and no automatic sends. All HTTP mocked.')

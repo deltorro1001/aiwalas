@@ -30,12 +30,14 @@
    if(!active())return;
    var row=(result.data||[])[0],status=document.getElementById('studentAttendanceStatus'),time=document.getElementById('studentAttendanceScan');
    var holiday=result.kalender&&result.kalender.hari_libur;
+   var scanButton=document.getElementById('studentQrButton'),calendarStatus=result.kalender&&result.kalender.status;
+   if(scanButton){scanButton.disabled=calendarStatus==='Libur'||calendarStatus==='PJJ'||(calendarStatus==='Tanpa absensi'||calendarStatus==='Pengambilan Raport');scanButton.textContent=scanButton.disabled?'Status '+calendarStatus+' — scan tidak diperlukan':'Buka Scanner QR';}
    status.textContent=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'Belum tercatat');
    var attachment=document.getElementById('studentAttendanceAttachment');attachment.textContent=window.AIWalasAttendanceDisplay.note(status.textContent,row&&row.keterangan_lampiran);attachment.hidden=!attachment.textContent;attachment.dataset.attendanceStatus=status.textContent;
    status.dataset.status=row?row.status:(result.kalender&&result.kalender.status)||(holiday?'Libur':'');
    time.dataset.attendanceStatus=status.dataset.status;
    time.setAttribute('data-attendance-time','');
-   time.textContent=row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan';
+   time.textContent=(calendarStatus==='Tanpa absensi'||calendarStatus==='Pengambilan Raport')?'Tidak diperlukan':(row&&row.waktu_scan?row.waktu_scan+' WIB':'Belum ada scan');
    document.getElementById('studentAttendanceDate').dataset.attendanceStatus=status.dataset.status;
    document.getElementById('studentAttendanceDate').setAttribute('data-attendance-date','');
    document.getElementById('studentAttendanceDate').dataset.calendarDate=row?row.tanggal:(result.kalender&&result.kalender.tanggal)||window.AIWalasCalendar.today();

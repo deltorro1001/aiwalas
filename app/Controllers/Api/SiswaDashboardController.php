@@ -34,7 +34,7 @@ class SiswaDashboardController extends BaseApiController
         $weekStart = (new \DateTimeImmutable($today))->modify('monday this week');
         $weekRows = $db->table('absensi a')->select('a.tanggal,a.status,COUNT(*) AS jumlah')
             ->join('siswa s', 's.id=a.siswa_id')->where(['s.kelas_id' => $classId, 's.aktif' => 1, 'a.semester' => $semester])
-            ->whereNotIn('a.tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())->where('a.tanggal >=', $weekStart->format('Y-m-d'))->where('a.tanggal <=', $today)
+            ->where(\App\Libraries\SchoolCalendar::attendanceFilterSql('a.tanggal'),null,false)->where('a.tanggal >=', $weekStart->format('Y-m-d'))->where('a.tanggal <=', $today)
             ->whereIn('a.status', ['Sakit', 'Izin', 'Terlambat'])->groupBy('a.tanggal,a.status')->get()->getResultArray();
         for ($i = 0; $i < 5; $i++) {
             $date = $weekStart->modify('+' . $i . ' days')->format('Y-m-d');
@@ -44,10 +44,10 @@ class SiswaDashboardController extends BaseApiController
         }
         $attendance = $db->table('absensi')->where(['siswa_id' => $student['id'], 'kelas_id'=>$classId, 'semester'=>$semester, 'tanggal' => $today])->get()->getRowArray();
         if(\App\Libraries\SchoolCalendar::attendanceOverride($today)!==null)$attendance=['status'=>$calendar['status'],'waktu_scan'=>null];
-        $counts = $db->table('absensi')->select('status, COUNT(*) jumlah')->where('siswa_id', $student['id'])->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->groupBy('status')->get()->getResultArray();
+        $counts = $db->table('absensi')->select('status, COUNT(*) jumlah')->where('siswa_id', $student['id'])->where(\App\Libraries\SchoolCalendar::attendanceFilterSql('tanggal'),null,false)->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->groupBy('status')->get()->getResultArray();
         $summary = ['Sakit' => 0, 'Izin' => 0, 'Alpha' => 0];
         foreach ($counts as $row) if (array_key_exists($row['status'], $summary)) $summary[$row['status']] = (int) $row['jumlah'];
-        $lateRows = $db->table('absensi')->select('tanggal,keterangan')->where(['siswa_id' => $student['id'], 'status' => 'Terlambat'])->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->orderBy('tanggal', 'DESC')->get()->getResultArray();
+        $lateRows = $db->table('absensi')->select('tanggal,keterangan')->where(['siswa_id' => $student['id'], 'status' => 'Terlambat'])->where(\App\Libraries\SchoolCalendar::attendanceFilterSql('tanggal'),null,false)->where('tanggal >=', '2026-07-13')->where('tanggal <=', $today)->orderBy('tanggal', 'DESC')->get()->getResultArray();
         $day = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'][date('l')] ?? 'Senin';
         $schedule = $db->table('jadwal_kelas')->select('jadwal_kelas.jam_mulai,jadwal_kelas.jam_selesai,jadwal_kelas.keterangan,mata_pelajaran.nama_mata_pelajaran,guru.nama_lengkap')->join('mata_pelajaran', 'mata_pelajaran.id=jadwal_kelas.mata_pelajaran_id')->join('guru', 'guru.id=jadwal_kelas.guru_id', 'left')->where(['jadwal_kelas.kelas_id' => $classId, 'jadwal_kelas.hari' => $day])->orderBy('jadwal_kelas.jam_mulai')->get()->getResultArray();
         if($calendar['hari_libur'])$schedule=[];

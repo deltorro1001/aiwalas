@@ -6,11 +6,12 @@
   <meta name='csrf-token' content='<?= csrf_hash() ?>'>
   <title>AIWalas</title>
   <link rel='stylesheet' href='<?= base_url('assets/photo-uploads.css?v=20261028-single-page') ?>'>
-  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261031-question-attachments') ?>'>
+  <link rel='stylesheet' href='<?= base_url('assets/styles.css?v=20261102-report-attendance-blue') ?>'>
 <style>.workspace-switch .chevron{display:none!important}</style>
 <style>@media print{#sendReportToTeacher,#modalBackdrop{display:none!important}}</style>
 <style>.grid-stats .absence-summary-card{min-height:190px!important;padding:15px 16px!important}.grid-stats .absence-summary-card .stat-number{font-size:25px!important;margin-top:6px!important}.grid-stats .absence-summary-card .stat-note{font-size:9px!important;white-space:nowrap}.grid-stats .absence-summary-card .absence-summary-list{margin-top:7px!important;gap:4px!important}.grid-stats .absence-summary-card .absence-summary-row{font-size:8px!important;line-height:1.15!important}.grid-stats .absence-summary-card .absence-summary-row strong{font-size:8px!important;white-space:nowrap!important}</style>
 <style>.grid-stats .absence-summary-card{overflow:visible!important}.grid-stats .absence-summary-card .absence-summary-list{display:grid!important;grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;position:relative!important;z-index:3!important}.grid-stats .absence-summary-card .absence-summary-row{display:flex!important;visibility:visible!important;opacity:1!important;min-height:10px!important}</style>
+<link rel='stylesheet' href='<?= base_url('assets/academic-calendar.css?v=20261102-report-attendance-blue') ?>'>
 </head>
 <style>
 .assessment-table .score-name small{display:block;font-size:10px;font-weight:400;color:var(--muted);line-height:1.25;margin-top:2px}
@@ -21,16 +22,16 @@
 <body>
 <?= $this->renderSection('content') ?>
 <script src='<?= base_url('assets/student-details.js?v=20260911') ?>'></script>
-<script>window.AIWalasSchoolHolidays=<?= json_encode(\App\Libraries\SchoolCalendar::SPECIAL_HOLIDAYS, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;window.AIWalasSchoolPjjDates=<?= json_encode(\App\Libraries\SchoolCalendar::PJJ_DATES) ?>;</script>
-<script src='<?= base_url('assets/school-calendar.js?v=20261031-attendance-date-colors') ?>'></script>
+<script>window.AIWalasSchoolCalendar=<?= json_encode(\App\Libraries\SchoolCalendar::clientData(), JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
+<script src='<?= base_url('assets/school-calendar.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/academic-subjects.js?v=20261028-wahyu-grade-source') ?>'></script>
 <script>window.AIWalasGradeComponentLabels=<?= json_encode(\App\Libraries\GradeComponents::labels()) ?>;</script>
 <script src='<?= base_url('assets/grade-components.js?v=20261029-tasks-six') ?>'></script>
-<script src='<?= base_url('assets/attendance-status-display.js?v=20261031-attachment-notes') ?>'></script>
+<script src='<?= base_url('assets/attendance-status-display.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20261031-guest-portal') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261029-tasks-six') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
-<script src='<?= base_url('assets/student-qr-attendance.js?v=20261031-present-black') ?>'></script>
+<script src='<?= base_url('assets/student-qr-attendance.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-notifications.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/whatsapp-gateway.js?v=20261031-sims-send-helper') ?>'></script>
@@ -48,7 +49,7 @@
 <script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
 <script src='<?= base_url('assets/dashboard-summary.js?v=20261031-attachment-notes') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
-<script src='<?= base_url('assets/attendance-ui.js?v=20261031-present-black') ?>'></script>
+<script src='<?= base_url('assets/attendance-ui.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261030-teacher-read') ?>'></script>
 <script src='<?= base_url('assets/assistant-attendance-hide.js?v=20260924-hide-controls') ?>'></script>
 <script src='<?= base_url('assets/assistant-sidebar.js?v=20261028-secretary-menus') ?>'></script>
@@ -141,10 +142,11 @@
 <script src='<?= base_url('assets/parent-leave-request.js?v=20261031-attendance-date-colors') ?>'></script>
 <script src='<?= base_url('assets/photo-uploads.js?v=20261028-single-page') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261029-tasks-six') ?>'></script>
-<script src='<?= base_url('assets/attendance-status-colors.js?v=20261031-present-black') ?>'></script>
+<script src='<?= base_url('assets/attendance-status-colors.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/dashboard-attendance-live.js?v=20261031-present-black') ?>'></script>
 <script src='<?= base_url('assets/guest-portal.js?v=20261031-guest-portal') ?>'></script>
 <script src='<?= base_url('assets/attendance-questions.js?v=20261031-question-attachments') ?>'></script>
+<script src='<?= base_url('assets/academic-calendar.js?v=20261102-report-attendance-blue') ?>'></script>
 </body>
 </html>
 

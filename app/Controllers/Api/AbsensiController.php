@@ -65,7 +65,8 @@ class AbsensiController extends BaseApiController
   }
   $errors=$this->validatePayload($p,['siswa_id'=>'required|is_natural_no_zero','kelas_id'=>'required|is_natural_no_zero','tanggal'=>'required|valid_date[Y-m-d]','semester'=>'required|in_list[Ganjil,Genap]','waktu_scan'=>'permit_empty|valid_date[H:i:s]','status'=>'required|in_list[Hadir,Terlambat,Sakit,Izin,Alpha,PJJ,Menunggu keterangan]','keterangan'=>'permit_empty|max_length[2000]']);
   if($errors)return $this->respond(['ok'=>false,'errors'=>$errors],422);
-  if(\App\Libraries\SchoolCalendar::isSpecialHoliday($p['tanggal']))return $this->respond(['ok'=>false,'message'=>'Tanggal ini ditetapkan sebagai Libur. Absensi tidak perlu diisi.'],422);
+  if(\App\Libraries\SchoolCalendar::isHoliday($p['tanggal']))return $this->respond(['ok'=>false,'message'=>'Tanggal ini ditetapkan sebagai Libur. Absensi tidak perlu diisi.'],422);
+  if(\App\Libraries\SchoolCalendar::isWithoutAttendance($p['tanggal']))return $this->respond(['ok'=>false,'message'=>'Tanggal ini adalah Hari Sekolah (tanpa absensi) sesuai Kalender Akademik. Tidak perlu mencatat kehadiran.'],422);
   if(\App\Libraries\SchoolCalendar::isPjj($p['tanggal'])){$p['status']='PJJ';$p['waktu_scan']=null;}
   $student=db_connect()->table('siswa')->where(['id'=>(int)$p['siswa_id'],'kelas_id'=>(int)$p['kelas_id'],'aktif'=>1])->get()->getRowArray();
   if(!$student)return $this->respond(['ok'=>false,'message'=>'Siswa tidak terdaftar pada kelas tersebut.'],422);

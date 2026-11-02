@@ -51,7 +51,7 @@ class TeacherScheduleAutomation
         $events=[];$days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
         foreach([$now->setTime(0,0),$now->modify('+1 day')->setTime(0,0)] as $day){
             $date=$day->format('Y-m-d');
-            if(($start!==''&&$date<$start)||$date>$end||in_array($date,$excluded,true))continue;
+            if(($start!==''&&$date<$start)||$date>$end||in_array($date,$excluded,true)||SchoolCalendar::isHoliday($date))continue;
             $query=$this->db->table('jadwal_kelas j')->select('j.*,k.nama_kelas,k.wali_kelas_id,g.nama_lengkap AS teacher_name,g.nama_panggilan,g.nomor_hp,g.jenis_kelamin,m.nama_mata_pelajaran,u.aktif AS owner_active,u.peran AS owner_role')
                 ->join('kelas k','k.id=j.kelas_id')->join('tahun_ajaran t','t.id=k.tahun_ajaran_id')
                 ->join('guru g','g.id=j.guru_id')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('pengguna u','u.id=k.wali_kelas_id','left')

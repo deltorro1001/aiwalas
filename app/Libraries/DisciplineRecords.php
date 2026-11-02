@@ -34,7 +34,7 @@ class DisciplineRecords
         if(!$students)return [];
         $ids=array_column($students,'id');$records=[];$late=[];
         foreach($db->table('catatan_kedisiplinan')->where('kelas_id',$classId)->whereIn('siswa_id',$ids)->get()->getResultArray() as $row)$records[$row['siswa_id']][$row['kategori']]=$row;
-        foreach($db->table('absensi')->select('siswa_id,tanggal')->where(['kelas_id'=>$classId,'status'=>'Terlambat'])->whereNotIn('tanggal',\App\Libraries\SchoolCalendar::attendanceOverrideDates())->where('tanggal <=',date('Y-m-d'))->whereIn('siswa_id',$ids)->orderBy('tanggal')->get()->getResultArray() as $row){
+        foreach($db->table('absensi')->select('siswa_id,tanggal')->where(['kelas_id'=>$classId,'status'=>'Terlambat'])->where(\App\Libraries\SchoolCalendar::attendanceFilterSql('tanggal'),null,false)->where('tanggal <=',date('Y-m-d'))->whereIn('siswa_id',$ids)->orderBy('tanggal')->get()->getResultArray() as $row){
             $id=$row['siswa_id'];
             $late[$id]['jumlah']=($late[$id]['jumlah']??0)+1;
             $late[$id]['tanggal']=$row['tanggal'];

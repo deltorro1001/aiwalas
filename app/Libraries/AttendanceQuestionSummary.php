@@ -5,7 +5,7 @@ namespace App\Libraries;
 final class AttendanceQuestionSummary
 {
     public const START='2026-07-13';
-    public const STATUSES=['Hadir','Sakit','Izin','Alpha','Terlambat','PJJ','Libur','Menunggu keterangan'];
+    public const STATUSES=['Hadir','Sakit','Izin','Alpha','Terlambat','PJJ','Libur','Pengambilan Raport','Tanpa absensi','Menunggu keterangan'];
     public function forClass(int $class,\DateTimeImmutable $now): array
     {
         $now=$now->setTimezone(new \DateTimeZone('Asia/Jakarta'));$end=$now->format('Y-m-d');$db=db_connect();
@@ -26,7 +26,7 @@ final class AttendanceQuestionSummary
                 $students[$id]['jumlah'][$status]++;
                 if(!isset($students[$id]['bulanan'][$month]))$students[$id]['bulanan'][$month]=$empty;
                 $students[$id]['bulanan'][$month][$status]++;
-                $students[$id]['riwayat'][]=['tanggal'=>$row['tanggal'],'status'=>$status,'waktu_scan'=>in_array($status,['Libur','PJJ'],true)?null:$row['waktu_scan'],'keterangan'=>$row['keterangan']??'']+$attachments->forAttendance($id,$row['tanggal'],$status);
+                $students[$id]['riwayat'][]=['tanggal'=>$row['tanggal'],'status'=>$status,'waktu_scan'=>in_array($status,['Libur','PJJ','Tanpa absensi','Pengambilan Raport'],true)?null:$row['waktu_scan'],'keterangan'=>$row['keterangan']??'']+$attachments->forAttendance($id,$row['tanggal'],$status);
             }
         }
         $total=$empty;$groups=[];

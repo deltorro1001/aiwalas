@@ -28,7 +28,7 @@ c.js("window.__calendarTestNow='2026-10-31T08:00:00+07:00';window.activeClassId=
 c.wait("document.getElementById('studentAttendanceStatus')?.textContent==='Libur'")
 c.wait("document.querySelectorAll('#studentAttendanceRecapRows tr').length===31")
 rows=c.js("Array.from(document.querySelectorAll('#studentAttendanceRecapRows tr')).map(row=>Array.from(row.children).map(cell=>cell.textContent))")
-assert rows[2][3]=='Hadir' and rows[3][3]=='Libur' and rows[4][3]=='Belum ada catatan',rows[:5]
+assert rows[2][3]=='Libur' and rows[3][3]=='Libur' and rows[4][3]=='Belum ada catatan',rows[:5]
 for parent in [True,False]:
     c.js("window.currentUser.isParent="+str(parent).lower()+";window.authRequest=function(path){if(path.includes('rekap-absensi'))return Promise.resolve({data:[{tanggal:'2026-08-17',status:'Alpha',waktu_scan:'06:50:00'},{tanggal:'2026-08-18',status:'Terlambat',waktu_scan:'06:50:00'},{tanggal:'2026-08-27',status:'Alpha',waktu_scan:'06:50:00'}],bulan:'2026-08',nomor_bulan:8,tahun:2026,jumlah_hari:31,label_bulan:'Agustus 2026'});return Promise.resolve({data:[],kalender:{hari_libur:true}})};window.render()")
     c.wait("document.getElementById('studentAttendanceRecapMonthLabel')?.textContent==='Agustus 2026'")
@@ -50,4 +50,4 @@ assert c.js('document.documentElement.scrollWidth<=window.innerWidth')
 c.call('Emulation.clearDeviceMetricsOverride')
 c.js("window.currentRole=null;window.AIWalasCalendar.refresh()")
 assert c.js("document.getElementById('schoolHolidayBanner').hidden")
-print('PASS: Holiday/PJJ indication for every role, Jakarta day rollover, parent/student missing attendance, weekend calendar rows with preserved actual records, wali status and mobile layout.')
+print('PASS: Holiday/PJJ indication for every role, Jakarta day rollover, parent/student missing attendance, effective weekend calendar overrides without changing stored records, wali status and mobile layout.')

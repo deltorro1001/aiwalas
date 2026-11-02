@@ -13,7 +13,7 @@ final class ParentRequestAttendance
         $result=['diisi'=>0,'dilewati'=>0];
         for($day=$start;$day<=$end;$day=$day->modify('+1 day')){
             $date=$day->format('Y-m-d');
-            if(SchoolCalendar::isHoliday($date)||SchoolCalendar::isPjj($date)){$result['dilewati']++;continue;}
+            if(SchoolCalendar::attendanceOverride($date)!==null){$result['dilewati']++;continue;}
             $semester=(int)$day->format('n')<=6?'Genap':'Ganjil';
             $keys=['siswa_id'=>(int)$request['siswa_id'],'kelas_id'=>(int)$request['kelas_id'],'tanggal'=>$date,'semester'=>$semester];
             $existing=$db->table('absensi')->where($keys)->get()->getRowArray();

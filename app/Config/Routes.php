@@ -132,3 +132,8 @@ $routes->post('api/upload-foto/kolase', 'Api\UploadFotoController::build', ['fil
 $routes->get('api/upload-foto/kolase/halaman/(:num)', 'Api\UploadFotoController::collageImage/$1', ['filter' => ['auth','role:wali_kelas']]);
 $routes->post('api/upload-foto/kolase/halaman/(:num)/kirim', 'Api\UploadFotoController::send/$1', ['filter' => ['auth','role:wali_kelas']]);
 $routes->get('media/kolase/(:segment)', 'Api\UploadFotoController::media/$1');
+
+// Read calendar effects across roles; only Wali Kelas can change school dates.
+$routes->get('api/kalender-akademik', 'Api\KalenderAkademikController::index', ['filter'=>'auth']);
+$routes->post('api/kalender-akademik', 'Api\KalenderAkademikController::save', ['filter'=>['auth','role:wali_kelas']]);
+$routes->delete('api/kalender-akademik/(:segment)', 'Api\KalenderAkademikController::delete/$1', ['filter'=>['auth','role:wali_kelas']]);

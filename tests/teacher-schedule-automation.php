@@ -6,7 +6,7 @@ define('ENVIRONMENT','development');define('FCPATH',$root.'/public/');require $r
 use App\Libraries\TeacherScheduleAutomation;
 use DateTimeImmutable as Time;
 use DateTimeZone as Zone;
-$db=db_connect();$owner=null;$teacher=null;$subject=null;$class=null;$year=null;
+$db=db_connect();$owner=null;$teacher=null;$subject=null;$class=null;$year=null;$calendarFixture=null;
 function ensure($value,$message){if(!$value)throw new RuntimeException($message);}
 $prefix='auto_'.bin2hex(random_bytes(5));$settings=['enabled'=>true,'start'=>'2026-07-01','end'=>'2027-06-30','excluded'=>''];
 $zone=new Zone('Asia/Jakarta');$at=static fn($text)=>new Time($text,$zone);
@@ -68,9 +68,21 @@ try{
     $slow=new TeacherScheduleAutomation($db,static function()use(&$elapsed,&$slowCalls){$slowCalls++;$elapsed=70;return ['ok'=>true,'response'=>['status'=>true]];},$settings,static function()use(&$elapsed){return $elapsed;});
     $slowResult=$slow->run($at('2026-12-03 07:50:00'),false,$class);
     ensure($slowCalls===1&&$slowResult['missed']===1,'Slow gateway caused a stale reminder send');
-    echo "PASS: Teacher exclusions, pending-before-send history, timing H-10/end, dry run, disabled state, idempotency/reimport, missed windows, holidays, timezone/midnight, inactive data, missing phone, gateway rejection/unknown/timeout, concurrent claims, history and notifications. No real gateway calls.\n";
+    $calendarDate='2099-02-05';
+    ensure(!$db->table('kalender_akademik')->where('tanggal',$calendarDate)->countAllResults(),'Calendar fixture date already configured');
+    $future=new TeacherScheduleAutomation($db,$send,array_replace($settings,['end'=>'2099-12-31']));
+    $normalDue=$future->run($at($calendarDate.' 07:50:00'),true,$class)['due'];
+    ensure($normalDue>0,'Fixture schedule missing');
+    $db->table('kalender_akademik')->insert(['tanggal'=>$calendarDate,'jenis'=>'Hari Libur','judul'=>'Fixture scheduler calendar','dampak_absensi'=>'Libur']);$calendarFixture=$calendarDate;
+    \App\Libraries\SchoolCalendar::reset();
+    ensure($future->run($at($calendarDate.' 07:50:00'),true,$class)['due']===0,'Calendar holiday triggered teacher reminder');
+    $db->table('kalender_akademik')->where('tanggal',$calendarDate)->update(['jenis'=>'PJJ','dampak_absensi'=>'PJJ']);\App\Libraries\SchoolCalendar::reset();
+    ensure($future->run($at($calendarDate.' 07:50:00'),true,$class)['due']===$normalDue,'PJJ unexpectedly cancelled online teaching');
+    $db->table('kalender_akademik')->where('tanggal',$calendarDate)->delete();$calendarFixture=null;\App\Libraries\SchoolCalendar::reset();
+    echo "PASS: Teacher exclusions, pending-before-send history, timing H-10/end, dry run, disabled state, idempotency/reimport, missed windows, academic-calendar holidays/PJJ, timezone/midnight, inactive data, missing phone, gateway rejection/unknown/timeout, concurrent claims, history and notifications. No real gateway calls.\n";
 }catch(Throwable $error){fwrite(STDERR,$error->getMessage()."\n");$failed=true;}
 finally{
+    if($calendarFixture){$db->table('kalender_akademik')->where('tanggal',$calendarFixture)->delete();\App\Libraries\SchoolCalendar::reset();}
     if($class){$db->table('teacher_schedule_dispatches')->where('kelas_id',$class)->delete();$db->table('pesan_komunikasi')->where('kelas_id',$class)->delete();$db->table('jadwal_kelas')->where('kelas_id',$class)->delete();$db->table('kelas')->where('id',$class)->delete();}
     if($owner){$db->table('notifikasi')->where('pengguna_id',$owner)->delete();$db->table('pengguna')->where('id',$owner)->delete();}
     if($year)$db->table('tahun_ajaran')->where('id',$year)->delete();

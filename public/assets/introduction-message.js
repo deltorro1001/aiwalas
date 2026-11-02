@@ -4,20 +4,31 @@
     return hour<11?'Selamat Pagi':hour<15?'Selamat Siang':hour<18?'Selamat Sore':'Selamat Malam';
   }
   function text(name,salutation){
-    return greeting()+', '+(salutation?salutation+' ':'')+name+'.\n\n'+
+    return greeting()+', '+([salutation,name].filter(Boolean).join(' ')||'Bapak/Ibu')+'.\n\n'+
       'Perkenalkan, saya AIWalas, asisten digital yang membantu pengelolaan kegiatan akademik dan komunikasi antara wali kelas, guru, siswa, serta orangtua/wali murid.\n\n'+
       'AIWalas membantu pencatatan kehadiran dan kedisiplinan siswa, penyajian jadwal pelajaran dan nilai, pengelolaan jurnal kelas, serta penyampaian informasi akademik melalui WhatsApp.\n\n'+
       'Aiwalas hadir untuk dapat memudahkan akses informasi akademik dan mendukung pendampingan belajar siswa. Terima kasih.';
   }
   function phone(value){var n=String(value||'').replace(/\D/g,'');if(n.indexOf('0')===0)n='62'+n.slice(1);return /^62\d{8,15}$/.test(n)?n:''}
-  function contacts(){
+  function contacts(includeMissing){
     var rows=[],seen={};
-    function add(label,name,number,salutation){var normalized=phone(number);if(!normalized)return;var key=label+'|'+normalized;if(seen[key])return;seen[key]=true;rows.push({label:label,name:name,phone:normalized,salutation:salutation})}
-    (window.schoolTeachers||[]).forEach(function(t){add('Guru — '+t.name,t.name,t.phone,t.gender==='L'?'Bapak':t.gender==='P'?'Ibu':'Bapak/Ibu')});
+    function add(label,name,number,salutation,aliases){var normalized=phone(number);if(!normalized&&!includeMissing)return;var key=label+'|'+normalized;if(seen[key])return;seen[key]=true;rows.push({label:label,name:name,phone:normalized,salutation:salutation,aliases:[name].concat(aliases||[])})}
+    (window.schoolTeachers||[]).forEach(function(t){add('Guru — '+t.name,t.name,t.phone,t.gender==='L'?'Bapak':t.gender==='P'?'Ibu':'Bapak/Ibu',[t.call||''])});
     (window.students||[]).forEach(function(t){add('Siswa — '+t[0],t[0],t[5],'');add('Orangtua — '+t[0],'Orangtua '+t[0],t[6],'Bapak/Ibu')});
     return rows.sort(function(a,b){return a.label.localeCompare(b.label,'id')});
   }
-  function open(){
+  function normalizeName(value){return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/^(?:bapak|ibu|pak|bu|bpk|sdr|sdri)\s+/,'').replace(/\s+/g,' ')}
+  function resolve(target){
+    if(window.currentRole!=='walas')return [];
+    var rows=contacts(true);
+    if(/^[+\d][\d\s().-]*$/.test(target)){var number=phone(target);return number?rows.filter(function(item){return item.phone===number}):[]}
+    var key=normalizeName(target);if(!key)return [];
+    var exact=rows.filter(function(item){return item.aliases.some(function(alias){return normalizeName(alias)===key})});
+    if(exact.length)return exact;
+    return rows.filter(function(item){return item.aliases.some(function(alias){return (' '+normalizeName(alias)+' ').indexOf(' '+key+' ')>=0})});
+  }
+  function open(prefill){
+    prefill=prefill&&typeof prefill==='object'?prefill:{};
     if(window.currentRole!=='walas')return;
     var owner=(window.currentUser||{}).id,saved=contacts();
     modal('Perkenalan AIWalas','Isi nama penerima terlebih dahulu, lalu buat dan periksa narasinya. Pesan dapat disalin untuk digunakan kapan pun.',
@@ -52,7 +63,12 @@
       }catch(failure){if(active())error.textContent=failure.message||'Pengiriman belum terkonfirmasi. Periksa histori Komunikasi sebelum mengirim ulang.';}
       finally{if(active()){busy=false;state();send.textContent='Kirim via Gateway'}}
     };
-    name.focus();
+    if(prefill.name)name.value=String(prefill.name).slice(0,120);
+    if(['Bapak/Ibu','Bapak','Ibu',''].indexOf(prefill.salutation)>=0)salutation.value=prefill.salutation;
+    if(prefill.phone)number.value=phone(prefill.phone);
+    if(prefill.generate&&name.value.trim())form.onsubmit({preventDefault:function(){}});
+    if(prefill.notice)feedback.textContent=prefill.notice;
+    state();name.focus();
   }
-  window.AIWalasIntroduction={open:open};
+  window.AIWalasIntroduction={open:open,resolve:resolve,normalizePhone:phone,buildText:text};
 })();

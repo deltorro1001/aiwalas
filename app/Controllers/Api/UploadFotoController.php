@@ -128,7 +128,16 @@ class UploadFotoController extends BaseApiController
     {
         if(($this->user()['peran']??'')!=='wali_kelas')return $this->respond(['message'=>'Pengiriman hanya untuk wali kelas.'],403);
         $p=$this->payload();
-        try{$result=(new PhotoCollageDelivery())->send($id,(int)($p['guru_id']??0),(int)$this->user()['id']);return $this->respond($result,$result['ok']?200:($result['already']?409:502));}
+        try{
+            $service=new PhotoCollageDelivery();$owner=(int)$this->user()['id'];
+            if(array_key_exists('nomor_tujuan',$p)){
+                if(isset($p['guru_id']))return $this->respond(['message'=>'Pilih satu tujuan: guru atau nomor WhatsApp.'],422);
+                $phone=WhatsAppGateway::phone($p['nomor_tujuan']);$name=$p['nama_penerima']??'';
+                if(!$phone||!is_string($name)||mb_strlen($name)>180)return $this->respond(['message'=>'Nomor tujuan atau nama penerima tidak valid.'],422);
+                $result=$service->sendTo($id,$phone,$owner,$name);
+            }else $result=$service->send($id,(int)($p['guru_id']??0),$owner);
+            return $this->respond($result,$result['ok']?200:($result['already']?409:502));
+        }
         catch(InvalidArgumentException $error){return $this->respond(['message'=>$error->getMessage()],422);}
         catch(\Throwable $error){log_message('error','Photo collage send failed: {type}',['type'=>get_class($error)]);return $this->respond(['message'=>'Pengiriman belum terkonfirmasi. Periksa Komunikasi sebelum mencoba lagi.'],500);}
     }

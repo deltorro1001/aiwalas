@@ -12,7 +12,7 @@ try{
     $db->table('tahun_ajaran')->insert(['nama_tahun_ajaran'=>$prefix,'semester'=>'Ganjil','aktif'=>1]);$year=$db->insertID();
     $db->table('kelas')->insert(['nama_kelas'=>$prefix,'tingkat'=>11,'jurusan'=>'Test','tahun_ajaran_id'=>$year,'wali_kelas_id'=>$owner]);$class=$db->insertID();
     $db->table('siswa')->insert(['nis'=>$prefix,'nama_lengkap'=>'Fixture Siswa','jenis_kelamin'=>'L','kelas_id'=>$class]);$student=$db->insertID();
-    for($i=0;$i<6;$i++){$db->table('guru')->insert(['nama_lengkap'=>$prefix.' Guru '.$i,'jenis_kelamin'=>'L','nomor_hp'=>$i===5?'':'081234567890','aktif'=>1]);$teachers[]=$db->insertID();}
+    for($i=0;$i<6;$i++){$db->table('guru')->insert(['nama_lengkap'=>$prefix.' Guru '.$i,'jenis_kelamin'=>'L','nomor_hp'=>$i===5?'':'08123456789'.$i,'aktif'=>1]);$teachers[]=$db->insertID();}
     $now=new DateTimeImmutable('now',new DateTimeZone('Asia/Jakarta'));$date=$now->format('Y-m-d');
     $file=bin2hex(random_bytes(24)).'.jpg';$files[]=$file;$image=imagecreatetruecolor(320,240);imagefill($image,0,0,imagecolorallocate($image,0,125,120));imagejpeg($image,StudentPhotoImages::path($file));imagedestroy($image);
     $db->table('foto_siswa')->insert(['siswa_id'=>$student,'kelas_id'=>$class,'tanggal'=>$date,'diunggah_pada'=>$now->format('Y-m-d H:i:s'),'keterangan'=>'Kegiatan fixture','berkas'=>$file,'lebar'=>320,'tinggi'=>240,'request_key'=>'11111111-1111-4111-8111-111111111111']);$photo=$db->insertID();
@@ -49,22 +49,52 @@ try{
     photoAssert($calls===1,'Blocked dispatch contacted transport');
     photoAssert($db->table('pesan_komunikasi')->where(['kelas_id'=>$class,'status_pengiriman'=>'Terkirim'])->countAllResults()===2,'Sent history mismatch');
     $jar=tempnam(sys_get_temp_dir(),'photo-history-');$csrf='';$authenticated=false;
-    $api=static function($path,$payload=null)use($jar,&$csrf){
+    $api=static function($path,$payload=null,$expectedStatus=200)use($jar,&$csrf){
         $curl=curl_init('http://localhost:8080/'.$path);$options=[CURLOPT_RETURNTRANSFER=>true,CURLOPT_COOKIEFILE=>$jar,CURLOPT_COOKIEJAR=>$jar,CURLOPT_TIMEOUT=>15];
         if($payload!==null)$options+=[CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>json_encode($payload),CURLOPT_HTTPHEADER=>['Content-Type: application/json','X-CSRF-TOKEN: '.$csrf]];
-        curl_setopt_array($curl,$options);$body=curl_exec($curl);$status=curl_getinfo($curl,CURLINFO_HTTP_CODE);curl_close($curl);photoAssert($status===200,'History API request failed');
+        curl_setopt_array($curl,$options);$body=curl_exec($curl);$status=curl_getinfo($curl,CURLINFO_HTTP_CODE);curl_close($curl);photoAssert($status===$expectedStatus,'Photo API response status mismatch');
         if($path===''){preg_match('/name=[\'\"]csrf-token[\'\"] content=[\'\"]([^\'\"]+)/',$body,$match);$csrf=$match[1];return [];}
         $data=json_decode($body,true);$csrf=$data['csrfHash']??$csrf;return $data;
     };
     try{
         $api('');$api('api/auth/login',['role'=>'walas','username'=>$prefix,'password'=>'fixture']);$authenticated=true;
+        $built=$api('api/upload-foto/kolase',['kelas_id'=>$class,'tanggal'=>$date]);
+        photoAssert($built['ok']&&count($built['data']['halaman'])===1&&(int)$built['data']['halaman'][0]['id']===(int)$page,'Build command did not reuse the latest snapshot');
+        $api('api/upload-foto/kolase',['kelas_id'=>$class,'tanggal'=>'2026-02-31'],422);
+        $api('api/upload-foto/kolase',['kelas_id'=>$class,'tanggal'=>'2099-12-31'],422);
+        foreach([['nomor_tujuan'=>[]],['nomor_tujuan'=>'invalid'],['nomor_tujuan'=>'081234567890','guru_id'=>$teachers[0]],['nomor_tujuan'=>'081234567890','nama_penerima'=>[]]] as $invalid)$api('api/upload-foto/kolase/halaman/'.$page.'/kirim',$invalid,422);
+        $api('api/upload-foto/kolase/halaman/'.($page+1000000000).'/kirim',['nomor_tujuan'=>'081234567890'],422);
         $sent=$api('api/pesan?kelas_id='.$class.'&status=sent')['data'];$pending=$api('api/pesan?kelas_id='.$class.'&status=pending')['data'];
         photoAssert(count($sent)===2&&count($pending)===3,'Communication sent/pending history missing');
         foreach($pending as $entry)photoAssert($entry['delivery_status']==='Pending'&&$entry['result_note']&&$entry['attempted_at'],'Photo delivery note/timestamp missing from communication');
+        $numberCalls=0;
+        $direct=new PhotoCollageDelivery($db,static function($phone,$text,$url)use(&$numberCalls,$db,$class){
+            $numberCalls++;photoAssert($phone==='6287777777777','Manual phone normalization failed');
+            photoAssert($db->table('pesan_komunikasi')->where('kelas_id',$class)->orderBy('id','DESC')->get()->getRowArray()['status_pengiriman']==='Disiapkan','Manual pending history missing');
+            return ['ok'=>true,'response'=>['status'=>true]];
+        },'https://aiwalas.test/');
+        photoAssert($direct->sendTo($page,'081234567890',$owner,'Teacher by phone')['already']&&$numberCalls===0,'Phone command resent a manual teacher delivery');
+        foreach([['invalid',$owner],['087777777777',$owner+1000000]] as [$phone,$actor]){
+            try{$direct->sendTo($page,$phone,$actor);throw new RuntimeException('Invalid manual target/owner accepted');}catch(InvalidArgumentException $expected){}
+        }
+        $directNested=null;
+        $concurrentNumber=new PhotoCollageDelivery($db,static function()use(&$directNested,$direct,$page,$owner){$directNested=$direct->sendTo($page,'087777777777',$owner,'Manual Fixture');return ['ok'=>true,'response'=>['status'=>true]];},'https://aiwalas.test/');
+        photoAssert($concurrentNumber->sendTo($page,'087777777777',$owner,'Manual Fixture')['ok']&&$directNested['already']&&!$directNested['ok']&&$numberCalls===0,'Concurrent manual number dispatched twice');
+        $stored=$db->table('foto_kolase_pengiriman')->where(['halaman_id'=>$page,'nomor_tujuan'=>'6287777777777'])->get()->getRowArray();
+        photoAssert($stored['guru_id']===null&&$stored['status']==='sent','Manual recipient requires a teacher');
+        photoAssert($direct->sendTo($page,'087777777777',$owner)['already']&&$numberCalls===0,'Repeated number delivery was resent');
+        $db->table('guru')->where('id',$teachers[5])->update(['nomor_hp'=>'087777777777']);
+        photoAssert($service->send($page,$teachers[5],$owner)['already'],'Manual teacher route resent a phone command');
+        $rejectedNumber=new PhotoCollageDelivery($db,static fn()=>['ok'=>false,'response'=>['status'=>false]],'https://aiwalas.test/');
+        photoAssert($rejectedNumber->sendTo($page,'088888888888',$owner)['status']==='failed','Manual number rejection reported sent');
+        photoAssert($direct->sendTo($page,'088888888888',$owner)['already']&&$numberCalls===0,'Failed manual number retried');
+        $manualHistory=$api('api/pesan?kelas_id='.$class.'&status=all')['data'];
+        $manual=array_values(array_filter($manualHistory,static fn($entry)=>$entry['nomor_tujuan']==='6287777777777'));
+        photoAssert(count($manual)===1&&$manual[0]['penerima']==='Manual Fixture'&&$manual[0]['delivery_status']==='Terkirim'&&$manual[0]['result_note'],'Manual delivery missing from Communication');
     }finally{if($authenticated)$api('api/auth/logout',[]);unlink($jar);}
     $db->table('foto_siswa')->insert(['siswa_id'=>$student,'kelas_id'=>$class,'tanggal'=>$date,'diunggah_pada'=>$now->format('Y-m-d H:i:s'),'keterangan'=>'New photo','berkas'=>$file,'lebar'=>320,'tinggi'=>240,'request_key'=>'22222222-2222-4222-8222-222222222222']);
     try{$service->send($page,$teachers[0],$owner);throw new RuntimeException('Stale collage accepted');}catch(InvalidArgumentException $expected){}
-    echo "PASS: Teacher phone validation, ownership, private-image token/hash/expiry, pending-before-send history, confirmed/rejected/unknown/timeout responses, double-click and concurrent claims, no blind retries, stale snapshot rejected. All gateway requests injected fakes.\n";
+    echo "PASS: Teacher/manual phone validation, cross-route/concurrent deduplication, manual history, ownership, private-image token/hash/expiry, pending-before-send history, confirmed/rejected/unknown/timeout responses, double-click and concurrent claims, no blind retries, stale snapshot rejected. All gateway requests injected fakes.\n";
 }catch(Throwable $error){fwrite(STDERR,$error->getMessage()."\n");$failed=true;}
 finally{
     if($class){$db->table('pesan_komunikasi')->where('kelas_id',$class)->delete();$db->table('siswa')->where('kelas_id',$class)->delete();$db->table('kelas')->where('id',$class)->delete();}

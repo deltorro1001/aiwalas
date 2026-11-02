@@ -20,12 +20,23 @@ final class PhotoCollageDelivery
     }
     public function send(int $page,int $teacher,int $owner): array
     {
+        $recipient=$this->db->table('guru')->where(['id'=>$teacher,'aktif'=>1])->get()->getRowArray();
+        $phone=WhatsAppGateway::phone($recipient['nomor_hp']??'');
+        if(!$recipient||!$phone)throw new InvalidArgumentException('Pilih guru dengan nomor WhatsApp yang valid.');
+        return $this->deliver($page,$phone,$owner,$recipient['nama_lengkap'],$teacher);
+    }
+    public function sendTo(int $page,string $number,int $owner,string $name=''): array
+    {
+        $phone=WhatsAppGateway::phone($number);
+        if($phone==='')throw new InvalidArgumentException('Nomor WhatsApp tujuan tidak valid.');
+        $name=trim($name);if(mb_strlen($name)>180)throw new InvalidArgumentException('Nama penerima maksimal 180 karakter.');
+        return $this->deliver($page,$phone,$owner,$name?:$phone,null);
+    }
+    private function deliver(int $page,string $phone,int $owner,string $recipient,?int $teacher): array
+    {
         $db=$this->db;
         $row=$db->table('foto_kolase_halaman h')->select('h.*,f.kelas_id,f.tanggal,f.snapshot,f.jumlah_foto,f.dibuat_pada,k.nama_kelas')->join('foto_kolase f','f.id=h.kolase_id')->join('kelas k','k.id=f.kelas_id')->where(['h.id'=>$page,'k.wali_kelas_id'=>$owner])->get()->getRowArray();
         if(!$row)throw new InvalidArgumentException('Kolase tidak ditemukan pada kelas Anda.');
-        $recipient=$db->table('guru')->where(['id'=>$teacher,'aktif'=>1])->get()->getRowArray();
-        $phone=WhatsAppGateway::phone($recipient['nomor_hp']??'');
-        if(!$recipient||!$phone)throw new InvalidArgumentException('Pilih guru dengan nomor WhatsApp yang valid.');
         $photos=$db->table('foto_siswa')->select('id')->where(['kelas_id'=>$row['kelas_id'],'tanggal'=>$row['tanggal']])->orderBy('id')->get()->getResultArray();
         if(!hash_equals($row['snapshot'],StudentPhotoImages::snapshot($photos)))throw new InvalidArgumentException('Ada foto baru. Tekan Buat Kolase kembali agar seluruh foto ikut terkirim.');
         if(!is_file(StudentPhotoImages::path($row['berkas'])))throw new InvalidArgumentException('Berkas kolase tidak ditemukan. Hubungi pengelola aplikasi.');
@@ -40,14 +51,16 @@ final class PhotoCollageDelivery
         $db->transBegin();
         try{
             $db->query('SELECT id FROM foto_kolase_halaman WHERE id=? FOR UPDATE',[$page]);
-            $existing=$db->table('foto_kolase_pengiriman')->where(['halaman_id'=>$page,'guru_id'=>$teacher])->get()->getRowArray();
+            $query=$db->table('foto_kolase_pengiriman')->where('halaman_id',$page)->groupStart()->where('nomor_tujuan',$phone);
+            if($teacher!==null)$query->orWhere('guru_id',$teacher);
+            $existing=$query->groupEnd()->orderBy("CASE WHEN status = 'sent' THEN 0 ELSE 1 END",'ASC',false)->orderBy('id','DESC')->get()->getRowArray();
             if($existing){
                 $db->transCommit();
-                if($existing['status']==='sent')return ['ok'=>true,'status'=>'sent','already'=>true,'message'=>'Kolase ini sudah diterima gateway untuk guru tersebut.'];
+                if($existing['status']==='sent')return ['ok'=>true,'status'=>'sent','already'=>true,'message'=>'Kolase ini sudah diterima gateway untuk penerima tersebut.'];
                 return ['ok'=>false,'status'=>$existing['status'],'already'=>true,'message'=>'Kolase ini pernah atau sedang diproses. Periksa status di Komunikasi sebelum mengirim ulang.'];
             }
-            $db->table('pesan_komunikasi')->insert(['kelas_id'=>$row['kelas_id'],'pengirim'=>'AIWalas','penerima'=>$recipient['nama_lengkap'],'nomor_tujuan'=>$phone,'isi_pesan'=>$text,'kategori'=>'Kolase Foto Siswa','status_pengiriman'=>'Disiapkan','dibuat_oleh'=>$owner]);$message=$db->insertID();
-            $db->table('foto_kolase_pengiriman')->insert(['halaman_id'=>$page,'guru_id'=>$teacher,'status'=>'processing','result_note'=>'Sedang dikirim ke gateway.','token_hash'=>hash('sha256',$token),'berlaku_sampai'=>$now->modify('+24 hours')->format('Y-m-d H:i:s'),'dicoba_pada'=>$stamp,'message_id'=>$message]);$dispatch=$db->insertID();
+            $db->table('pesan_komunikasi')->insert(['kelas_id'=>$row['kelas_id'],'pengirim'=>'AIWalas','penerima'=>$recipient,'nomor_tujuan'=>$phone,'isi_pesan'=>$text,'kategori'=>'Kolase Foto Siswa','status_pengiriman'=>'Disiapkan','dibuat_oleh'=>$owner]);$message=$db->insertID();
+            $db->table('foto_kolase_pengiriman')->insert(['halaman_id'=>$page,'guru_id'=>$teacher,'nomor_tujuan'=>$phone,'status'=>'processing','result_note'=>'Sedang dikirim ke gateway.','token_hash'=>hash('sha256',$token),'berlaku_sampai'=>$now->modify('+24 hours')->format('Y-m-d H:i:s'),'dicoba_pada'=>$stamp,'message_id'=>$message]);$dispatch=$db->insertID();
             if(!$db->transStatus())throw new RuntimeException('Pencatatan pengiriman gagal.');
             $db->transCommit();
         }catch(\Throwable $error){$db->transRollback();throw $error;}

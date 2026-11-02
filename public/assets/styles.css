@@ -688,3 +688,5 @@
 .modal:has(>.aiwalas-intro-form){max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
 
 .aiwalas-intro-form>[hidden]{display:none!important}
+
+.modal:has(#helpQuestionText){max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}

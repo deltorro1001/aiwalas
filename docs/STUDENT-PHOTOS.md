@@ -9,8 +9,21 @@
 - Maksimal **35 foto per kelas pada tanggal yang sama**. Unggahan ke-36 ditolak; tanggal dan kelas lain mempunyai kuota sendiri. Batas dilindungi transaksi dan kunci kelas agar unggahan bersamaan tidak melewatinya.
 - **Buat Kolase** memasukkan seluruh foto kelas pada tanggal tersebut, termasuk foto di halaman galeri berikutnya, dalam **satu halaman JPEG 2480 × 3508 piksel**. Jumlah baris/kolom dan ukuran foto menyesuaikan jumlah serta proporsi foto. Foto tetap utuh dengan skala proporsional.
 - Semua teks kolase menggunakan **Segoe UI**. Judul kapital tebal berada di tengah blok teal gelap selebar halaman, tanpa tanggal atau jumlah foto di bagian atas. Nama, NIS, keterangan, dan teks pembuat menggunakan Segoe UI Regular.
-- Periksa pratinjau kolase satu halaman. Pilih guru dari Data Guru, lalu **Kirim Kolase** dan konfirmasikan. Nomor dibaca ulang dari data guru aktif, tidak berasal dari nomor bebas di formulir. Kolase dikirim sebagai satu gambar melalui gateway yang sudah dikonfigurasi.
+- Pada menu Upload Foto, periksa pratinjau kolase satu halaman. Pilih guru dari Data Guru, lalu **Kirim Kolase** dan konfirmasikan. Nomor dibaca ulang dari data guru aktif, tidak berasal dari nomor bebas di formulir. Kolase dikirim sebagai satu gambar melalui gateway yang sudah dikonfigurasi.
 - Jika ada foto baru setelah pembuatan kolase, buat kolase kembali. Foto baru tidak ditambahkan secara diam-diam ke dokumen yang sudah dibuat atau dikirim.
+
+## Perintah langsung melalui Butuh bantuan
+
+Khusus wali kelas, perintah berikut menyiapkan dan mengirim kolase tanpa pratinjau atau konfirmasi:
+
+- `Kirim kolase 03-11-2026 ke Ibu Nani`
+- `Kirim kolase 2026-11-03 ke 081234567890`
+- `Kirimkan hasil kolase 3 November 2026 kepada Ibu Nani`
+- `Kirim kolase hari ini ke 081234567890` atau `Kirim kolase kemarin ke Ibu Nani`
+
+Tanggal juga menerima `dd/mm/yyyy`. Hari ini/kemarin mengikuti WIB. Sistem memakai kelas aktif milik wali kelas dan membuat atau mengambil kolase dengan snapshot foto terbaru pada tanggal tersebut; tetap satu halaman dan maksimal 35 foto. Foto kosong, tanggal tidak valid, dan kolase yang berubah sebelum pengiriman menghasilkan keterangan kesalahan tanpa mengirim gambar lama.
+
+Nama dicari dari kontak guru, siswa, dan orangtua yang sudah dimuat pada akun wali kelas, termasuk nama panggilan guru. Nama ganda memerlukan pemilihan penerima, lalu proses langsung berjalan. Nomor baru boleh ditulis langsung tanpa harus membuat kontak guru. Semua pengiriman memakai konfigurasi WhatsApp Gateway dan masuk histori Komunikasi. Perubahan akun/kelas ketika kolase sedang disiapkan menghentikan langkah pengiriman.
 
 ## Penyimpanan dan deployment
 
@@ -24,7 +37,7 @@ Server memvalidasi gambar asli (JPG/PNG/WebP), maksimal 2 MB dan 12 megapiksel, 
 
 Gateway harus dapat mengakses alamat aplikasi publik; pengiriman dari localhost ditolak sebelum transport dijalankan. Pratinjau kolase tetap dapat dibuat dan dibaca secara lokal.
 
-Sebelum menghubungi gateway, server mencatat histori **Kolase Foto Siswa** di Komunikasi. **Terkirim** berarti gateway mengonfirmasi penerimaan. Ditolak, belum ada konfirmasi, atau timeout tetap terlihat **Pending**, disertai catatan hasil. Tombol konfirmasi tidak otomatis mengulangi pengiriman ketika hasil tidak pasti. Klaim unik per kolase/guru mencegah duplikasi akibat klik berulang atau permintaan bersamaan. Kolase yang sudah terkirim tidak dikirim ulang ke guru yang sama; guru tujuan lain dapat dipilih.
+Sebelum menghubungi gateway, server mencatat histori **Kolase Foto Siswa** di Komunikasi. **Terkirim** berarti gateway mengonfirmasi penerimaan. Ditolak, belum ada konfirmasi, atau timeout tetap terlihat **Pending**, disertai catatan hasil. Tombol konfirmasi tidak otomatis mengulangi pengiriman ketika hasil tidak pasti. Kunci halaman dan pemeriksaan riwayat per kolase/nomor tujuan mencegah pengiriman ganda, termasuk antara tombol di Upload Foto dan perintah Butuh bantuan. Kolase yang sudah terkirim tidak dikirim ulang ke nomor yang sama; nomor tujuan lain dapat digunakan. Riwayat lama tetap dipertahankan saat migration menambahkan nomor tujuan dan mengizinkan penerima tanpa akun guru.
 
 Gateway mengambil hanya gambar kolase melalui URL token acak 256-bit yang berlaku 24 jam. Database menyimpan hash token; foto asli tetap memerlukan login. URL token tidak mengizinkan penelusuran daftar foto, dan tautan kedaluwarsa menghasilkan 404. Penerima WhatsApp memperoleh gambar dari gateway.
 
@@ -35,6 +48,7 @@ Jika proses aplikasi terhenti saat mengirim, periksa gateway dan Komunikasi sebe
 ```sh
 php tests/photo-collage-layout.php
 php tests/photo-collage-delivery.php
+python3 tests/help-collage-browser.py
 python3 tests/photo-uploads-local.py
 AIWALAS_BROWSER_TEST=1 python3 tests/photo-uploads-local.py
 ```

@@ -28,7 +28,8 @@
 <script>window.AIWalasGradeComponentLabels=<?= json_encode(\App\Libraries\GradeComponents::labels()) ?>;</script>
 <script src='<?= base_url('assets/grade-components.js?v=20261029-tasks-six') ?>'></script>
 <script src='<?= base_url('assets/attendance-status-display.js?v=20261102-report-attendance-blue') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261031-guest-portal') ?>'></script>
+<script src='<?= base_url('assets/family-questions.js?v=20261103-specific-parents') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261103-specific-parents') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261102-parent-narratives') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261102-report-attendance-blue') ?>'></script>

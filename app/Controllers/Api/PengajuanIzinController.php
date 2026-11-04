@@ -19,10 +19,13 @@ class PengajuanIzinController extends BaseApiController
         $q=$this->visibleQuery();
         if(!$q)return $this->respond(['message'=>'Pengajuan hanya dapat dilihat orangtua dan wali kelas.'],403);
         if(($this->user()['peran']??'')==='wali_kelas')$q->where('p.kelas_id',(int)$this->request->getGet('kelas_id'));
-        $rows=$q->select('p.id,p.tanggal_mulai,p.tanggal_selesai,p.jumlah_hari,p.jenis_izin,p.keterangan,p.nama_lampiran,p.dibuat_pada,s.nama_lengkap,s.nis')->orderBy('p.id','DESC')->get()->getResultArray();
+        $rows=$q->select('p.id,p.tanggal_mulai,p.tanggal_selesai,p.jumlah_hari,p.jenis_izin,p.keterangan,p.nama_lampiran,p.berkas_lampiran,p.mime_lampiran,p.dibuat_pada,s.nama_lengkap,s.nis')->orderBy('p.id','DESC')->get()->getResultArray();
         foreach($rows as &$row){
             $row['status']='Terkirim';
-            $row['lampiran_url']=$row['nama_lampiran']?site_url('api/pengajuan-izin/'.$row['id'].'/lampiran'):null;
+            $hasAttachment=$row['nama_lampiran']&&preg_match('/^[a-f0-9]{48}\.(pdf|jpg|png)$/D',(string)$row['berkas_lampiran'])&&is_file(WRITEPATH.'pengajuan-izin/'.$row['berkas_lampiran']);
+            $row['lampiran_url']=$hasAttachment?site_url('api/pengajuan-izin/'.$row['id'].'/lampiran'):null;
+            $row['preview_url']=$hasAttachment&&in_array($row['mime_lampiran'],['application/pdf','image/jpeg','image/png'],true)?$row['lampiran_url'].'?preview=1':null;
+            unset($row['berkas_lampiran']);
         }
         $this->response->setHeader('Cache-Control','no-store');
         return $this->respond(['data'=>$rows]);
@@ -93,6 +96,11 @@ class PengajuanIzinController extends BaseApiController
         if(!$q)return $this->respond(['message'=>'Anda tidak memiliki akses ke lampiran ini.'],403);
         $row=$q->select('p.berkas_lampiran,p.nama_lampiran,p.mime_lampiran')->where('p.id',$id)->get()->getRowArray();
         if(!$row||!$row['berkas_lampiran']||!is_file(WRITEPATH.'pengajuan-izin/'.$row['berkas_lampiran']))return $this->respond(['message'=>'Lampiran tidak ditemukan.'],404);
-        return $this->response->download(WRITEPATH.'pengajuan-izin/'.$row['berkas_lampiran'],null)->setFileName($row['nama_lampiran'])->setHeader('Cache-Control','private, no-store')->setHeader('X-Content-Type-Options','nosniff');
+        $response=$this->response->download(WRITEPATH.'pengajuan-izin/'.$row['berkas_lampiran'],null)->setFileName($row['nama_lampiran'])->setHeader('Cache-Control','private, no-store')->setHeader('X-Content-Type-Options','nosniff');
+        if($this->request->getGet('preview')==='1'){
+            if(!in_array($row['mime_lampiran'],['application/pdf','image/jpeg','image/png'],true))return $this->respond(['message'=>'Format lampiran tidak mendukung preview.'],415);
+            return $response->setContentType($row['mime_lampiran'])->inline()->setHeader('X-Frame-Options','SAMEORIGIN')->setHeader('Content-Security-Policy',"frame-ancestors 'self'");
+        }
+        return $response;
     }
 }

@@ -11,6 +11,8 @@ Identitas siswa dan kelas ditentukan dari sesi orangtua. Pengajuan tersimpan di 
 
 Lampiran disimpan di writable/pengajuan-izin menggunakan nama acak, diunduh melalui endpoint dengan pemeriksaan kepemilikan dan tanpa cache. Tipe MIME diperiksa di server. Pengajuan sakit/izin dengan rentang tanggal tumpang tindih ditolak, termasuk pengiriman ganda. Pengajuan sakit tetap memiliki alur dan riwayat tersendiri.
 
+Pada login wali kelas, pengajuan yang memiliki berkas surat menampilkan tombol **Preview** di samping tautan unduhan. PDF dan gambar JPG/JPEG/PNG ditampilkan dalam jendela pratinjau dengan tombol **Unduh Surat**, **Buka di tab baru**, dan **Tutup**. Pengajuan tanpa lampiran tidak menampilkan tombol tersebut. Preview menggunakan pemeriksaan sesi dan kepemilikan yang sama dengan unduhan, respons inline, dan header tanpa cache. Endpoint lampiran tetap terlindungi; berkas tidak dipublikasikan di direktori aset. Pengujian kedua jenis surat tersedia melalui `python3 tests/request-attachment-preview-local.py` dengan Chrome pengujian port 9222.
+
 ## Instalasi dan pengujian lokal
 
 ```sh

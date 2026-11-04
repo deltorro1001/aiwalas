@@ -13,13 +13,25 @@ class TamuController extends BaseApiController
         if($selected!==null&&!$class)return $this->respond(['message'=>'Kelas tidak tersedia.'],404);
         $month=$this->request->getGet('bulan')??$now->format('m');$year=$this->request->getGet('tahun')??$now->format('Y');
         if(!is_string($month)||!preg_match('/^(0?[1-9]|1[0-2])$/D',$month)||!is_string($year)||!preg_match('/^[0-9]{4}$/D',$year)||(int)$year<2026||(int)$year>9998)return $this->respond(['message'=>'Pilih bulan dan tahun yang valid mulai 2026.'],422);
-        $date=$now->format('Y-m-d');$semester=(int)$now->format('n')<=6?'Genap':'Ganjil';$schedule=[];$announcements=[];$counts=[];$total=0;
+        $date=$now->format('Y-m-d');$semester=(int)$now->format('n')<=6?'Genap':'Ganjil';$schedule=[];$announcements=[];$counts=[];$total=0;$home=['students'=>[],'notifications'=>[],'attachment_notes'=>[]];
         if($class){
-            $students=$db->table('siswa')->select('id')->where(['kelas_id'=>$class['id'],'aktif'=>1])->get()->getResultArray();$total=count($students);
-            $actual=$total?$db->table('absensi')->select('status,COUNT(*) jumlah')->where(['kelas_id'=>$class['id'],'tanggal'=>$date,'semester'=>$semester])->whereIn('siswa_id',array_column($students,'id'))->groupBy('status')->get()->getResultArray():[];
+            $students=$db->table('siswa')->select('id,nis,nama_lengkap,jenis_kelamin')->where(['kelas_id'=>$class['id'],'aktif'=>1])->orderBy('nama_lengkap')->get()->getResultArray();$total=count($students);
+            $actual=$total?$db->table('absensi')->select('siswa_id,status')->where(['kelas_id'=>$class['id'],'tanggal'=>$date,'semester'=>$semester])->whereIn('siswa_id',array_column($students,'id'))->get()->getResultArray():[];
             $calendar=SchoolCalendar::info($now);
-            if($calendar['status']){if($total)$counts[$calendar['status']]=$total;}
-            else{foreach($actual as $row)$counts[$row['status']]=(int)$row['jumlah'];$missing=$total-array_sum($counts);if($missing)$counts['Menunggu keterangan']=($counts['Menunggu keterangan']??0)+$missing;}
+            $statuses=array_column($actual,'status','siswa_id');
+            $attachments=new \App\Libraries\AttendanceAttachmentDetails((int)$class['id'],array_column($students,'id'),$date,$date,$db);
+            foreach($students as $student){
+                $status=$calendar['status']?:($statuses[$student['id']]??'Menunggu keterangan');
+                $counts[$status]=($counts[$status]??0)+1;
+                $initials='';foreach(array_slice(preg_split('/\s+/u',trim($student['nama_lengkap'])),0,2) as $part)$initials.=mb_substr($part,0,1);
+                $home['students'][]=[$student['nama_lengkap'],$student['nis'],$status,mb_strtoupper($initials),$student['jenis_kelamin'],'','',(int)$student['id']];
+                $home['attachment_notes'][(string)$student['id']]=$attachments->forAttendance((int)$student['id'],$date,$status)['keterangan_lampiran'];
+            }
+            $owner=$db->table('kelas')->select('wali_kelas_id')->where('id',$class['id'])->get()->getRowArray();
+            if(!empty($owner['wali_kelas_id'])){
+                [$start,$end]=\App\Libraries\NotificationDate::range($date);
+                $home['notifications']=$db->table('notifikasi')->select('judul,isi,dibuat_pada')->where('pengguna_id',$owner['wali_kelas_id'])->where('dibuat_pada >=',$start)->where('dibuat_pada <',$end)->orderBy('dibuat_pada','DESC')->orderBy('id','DESC')->limit(10)->get()->getResultArray();
+            }
             $schedule=$db->table('jadwal_kelas j')->select('j.hari,j.jam_mulai,j.jam_selesai,m.nama_mata_pelajaran,g.nama_lengkap AS nama_guru')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('guru g','g.id=j.guru_id','left')->where('j.kelas_id',$class['id'])->whereIn('j.hari',['Senin','Selasa','Rabu','Kamis','Jumat'])->orderBy('j.jam_mulai')->get()->getResultArray();
             $announcements=$db->table('pengumuman_tamu')->select('id,judul,isi,tanggal_agenda,dibuat_pada')->where(['kelas_id'=>$class['id'],'terbit'=>1])->orderBy('id','DESC')->get()->getResultArray();
         }
@@ -30,6 +42,6 @@ class TamuController extends BaseApiController
             $days[]=$entry;
         }
         $this->response->setHeader('Cache-Control','private, no-store');
-        return $this->respond(['sekolah'=>'SMK Negeri 19 Jakarta','kelas'=>$class,'daftar_kelas'=>$classes,'tanggal'=>$date,'jumlah_siswa'=>$total,'kehadiran'=>$counts,'jadwal'=>$schedule,'pengumuman'=>$announcements,'kalender'=>$days,'bulan'=>(int)$month,'tahun'=>(int)$year]);
+        return $this->respond(['sekolah'=>'SMK Negeri 19 Jakarta','kelas'=>$class,'daftar_kelas'=>$classes,'tanggal'=>$date,'jumlah_siswa'=>$total,'kehadiran'=>$counts,'jadwal'=>$schedule,'beranda'=>$home,'pengumuman'=>$announcements,'kalender'=>$days,'bulan'=>(int)$month,'tahun'=>(int)$year]);
     }
 }

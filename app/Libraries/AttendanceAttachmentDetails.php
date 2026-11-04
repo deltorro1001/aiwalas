@@ -5,10 +5,10 @@ namespace App\Libraries;
 final class AttendanceAttachmentDetails
 {
     private array $requests=[];
-    public function __construct(int $class,array $students,string $start,string $end)
+    public function __construct(int $class,array $students,string $start,string $end,$db=null)
     {
         if(!$students)return;
-        $db=db_connect();
+        $db=$db??db_connect();
         foreach(['Sakit'=>'pengajuan_sakit','Izin'=>'pengajuan_izin'] as $status=>$table){
             $folder=$status==='Sakit'?'pengajuan-sakit':'pengajuan-izin';
             $rows=$db->table($table)->select('siswa_id,tanggal_mulai,tanggal_selesai,berkas_lampiran')

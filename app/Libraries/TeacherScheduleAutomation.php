@@ -52,7 +52,7 @@ class TeacherScheduleAutomation
         foreach([$now->setTime(0,0),$now->modify('+1 day')->setTime(0,0)] as $day){
             $date=$day->format('Y-m-d');
             if(($start!==''&&$date<$start)||$date>$end||in_array($date,$excluded,true)||SchoolCalendar::isHoliday($date))continue;
-            $query=$this->db->table('jadwal_kelas j')->select('j.*,k.nama_kelas,k.wali_kelas_id,g.nama_lengkap AS teacher_name,g.nama_panggilan,g.nomor_hp,g.jenis_kelamin,m.nama_mata_pelajaran,u.aktif AS owner_active,u.peran AS owner_role')
+            $query=$this->db->table('jadwal_kelas j')->select('j.*,k.nama_kelas,k.wali_kelas_id,t.semester AS attendance_semester,g.nama_lengkap AS teacher_name,g.nama_panggilan,g.nomor_hp,g.jenis_kelamin,m.nama_mata_pelajaran,u.aktif AS owner_active,u.peran AS owner_role')
                 ->join('kelas k','k.id=j.kelas_id')->join('tahun_ajaran t','t.id=k.tahun_ajaran_id')
                 ->join('guru g','g.id=j.guru_id')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('pengguna u','u.id=k.wali_kelas_id','left')
                 ->where(['t.aktif'=>1,'g.aktif'=>1,'m.aktif'=>1,'j.hari'=>$days[(int)$day->format('w')]]);
@@ -98,6 +98,38 @@ class TeacherScheduleAutomation
         }
         return $result;
     }
+    private function absenceSummary(array $row,string $date): string
+    {
+        // Calendar overrides also apply here, as they do in Absensi Harian.
+        if(SchoolCalendar::attendanceOverride($date)!==null)return '';
+        $rows=$this->db->table('siswa s')->select('s.id AS siswa_id,s.nama_lengkap,a.status')
+            ->join('absensi a','a.siswa_id=s.id AND a.kelas_id=s.kelas_id AND a.tanggal='.$this->db->escape($date).' AND a.semester='.$this->db->escape($row['attendance_semester']),'left')
+            ->where(['s.kelas_id'=>(int)$row['kelas_id'],'s.aktif'=>1])
+            ->orderBy('s.nama_lengkap')->orderBy('s.id')->get()->getResultArray();
+        $label=implode('-',array_reverse(explode('-',$date)));
+        if($rows&&count(array_filter($rows,static fn($student)=>$student['status']==='Hadir'))===count($rows)){
+            return "\n\nSeluruh siswa berstatus Hadir pada hari ini (".$label.').';
+        }
+        $groups=['Sakit'=>[],'Izin'=>[],'Alpha'=>[],'Menunggu keterangan'=>[]];
+        foreach($rows as $student){
+            if(array_key_exists($student['status']??'',$groups))$groups[$student['status']][]=$student;
+        }
+        if(!array_filter($groups))return '';
+        $details=new AttendanceAttachmentDetails((int)$row['kelas_id'],array_column($rows,'siswa_id'),$date,$date,$this->db);
+        $lines=["\n\nStatus kehadiran siswa pada ".$label.' (berdasarkan absensi saat pengingat dikirim):'];
+        $number=0;
+        foreach($groups as $status=>$students){
+            if(!$students)continue;
+            $lines[]=(++$number).'. '.$status.':';
+            foreach($students as $student){
+                $attachment=$details->forAttendance((int)$student['siswa_id'],$date,$status);
+                $name=trim(preg_replace('/\s+/u',' ',$student['nama_lengkap']));
+                $lines[]='- '.$name.($attachment['surat_terlampir']?' '.$attachment['keterangan_lampiran']:'');
+            }
+        }
+        return implode("\n",$lines);
+    }
+
     private function dispatch(array $event,DateTimeImmutable $now): string
     {
         $db=$this->db;$row=$event['schedule'];$token=bin2hex(random_bytes(16));$messageId=null;
@@ -110,6 +142,7 @@ class TeacherScheduleAutomation
                 $db->table('teacher_schedule_dispatches')->where('id',$claim['id'])->update(['status'=>'skipped','finished_at'=>$now->format('Y-m-d H:i:s'),'result_note'=>'Nomor guru atau Wali Kelas aktif tidak tersedia.']);
                 $db->transCommit();return 'skipped';
             }
+            if($event['kind']==='reminder')$event['text'].=$this->absenceSummary($row,$event['date']);
             $db->table('pesan_komunikasi')->insert(['kelas_id'=>$row['kelas_id'],'pengirim'=>'AIWalas Otomatis','penerima'=>$row['teacher_name'],'nomor_tujuan'=>$event['phone'],'isi_pesan'=>$event['text'],'kategori'=>$event['kind']==='reminder'?'Pengingat Guru Otomatis':'Terima Kasih Guru Otomatis','status_pengiriman'=>'Disiapkan','dibuat_oleh'=>$row['wali_kelas_id']]);
             $messageId=$db->insertID();
             $db->table('teacher_schedule_dispatches')->where('id',$claim['id'])->update(['message_id'=>$messageId]);

@@ -14,6 +14,20 @@ Berlaku bagi semua guru mapel pada jadwal aktif, kecuali **Wahyu Lukman Hakim**,
 Contoh pengingat:
 
 > Selamat pagi, Bpk. Budi. Kami mengingatkan bahwa 10 menit lagi Bpk. dijadwalkan mengajar mata pelajaran Editing Film di kelas 11PF1, pukul 08:00–09:00 WIB. Jika berhalangan, mohon informasikan kepada Wali Kelas. Terima kasih.
+>
+> Status kehadiran siswa pada 04-11-2026 (berdasarkan absensi saat pengingat dikirim):
+> 1. Sakit:
+> - Siswa A (surat sakit terlampir)
+> 2. Izin:
+> - Siswa B (surat izin terlampir)
+> 3. Alpha:
+> - Siswa C
+> 4. Menunggu keterangan:
+> - Siswa D
+
+Daftar siswa mengikuti Absensi Harian pada tanggal pelajaran, kelas, dan semester tahun ajaran terkait, diambil saat pengingat akan dikirim. Hanya siswa aktif dengan status Sakit/Izin/Alpha/Menunggu keterangan yang disertakan, dikelompokkan sesuai status dan diurutkan berdasarkan nama. Kelompok kosong tidak ditampilkan; penomoran mengikuti kelompok yang tersedia. Keterangan surat hanya muncul jika berkas pengajuan tersedia, sesuai jenis status, dan rentang tanggalnya mencakup tanggal pelajaran. Pesan memuat keterangan terlampir tanpa mengirim berkas, tautan, atau alasan pribadi pengajuan.
+
+Jika seluruh siswa aktif tercatat **Hadir**, cukup tambahkan: “Seluruh siswa berstatus Hadir pada hari ini (04-11-2026).” Siswa tanpa catatan absensi tidak otomatis dianggap Hadir, Alpha, atau Menunggu keterangan. Jika tidak ada kategori yang relevan dan belum semua siswa tercatat Hadir, rincian absensi tidak ditampilkan. Override Kalender Akademik tetap berlaku. Isi lengkap disimpan pada menu Komunikasi. Daftar ini hanya ditambahkan pada pengingat sebelum pelajaran.
 
 Contoh setelah jadwal selesai:
 
@@ -50,7 +64,7 @@ WHATSAPP_TEACHER_AUTOMATION_END_DATE = '2027-06-30'
 WHATSAPP_TEACHER_AUTOMATION_EXCLUDED_DATES = ''
 ```
 
-`END_DATE` wajib valid dan membatasi tanggal pelajaran; tanggal awal boleh kosong. Isi daftar tanggal tanpa pelajaran/hari libur sebagai CSV, misalnya `2026-12-25,2027-01-01`. Tidak ada kalender hari libur otomatis; jadwal mingguan tetap berlaku pada hari libur apabila tanggal tersebut tidak dikecualikan. Pengingat untuk sesi dini hari dihitung terhadap tanggal sesi, sehingga jadwal 00:05 mempunyai pengingat 23:55 pada malam sebelumnya.
+`END_DATE` wajib valid dan membatasi tanggal pelajaran; tanggal awal boleh kosong. Isi daftar tanggal tambahan tanpa pelajaran sebagai CSV, misalnya `2026-12-25,2027-01-01`. Hari libur pada Kalender Akademik juga otomatis dikecualikan, sedangkan PJJ tetap memungkinkan pengingat pembelajaran daring. Pengingat dan daftar absensi untuk sesi dini hari mengikuti tanggal pelajaran, sehingga jadwal 00:05 mempunyai pengingat 23:55 pada malam sebelumnya.
 
 ## Deployment dan aktivasi VPS
 

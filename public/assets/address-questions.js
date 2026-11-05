@@ -17,6 +17,7 @@
     });
     var exact=rows.filter(function(row){return row.names.indexOf(name)>=0});
     var found=exact.length?exact:rows.filter(function(row){return row.names.some(function(value){return (' '+value+' ').indexOf(' '+name+' ')>=0})});
+    if(window.AIWalasStudentNames){var matched=window.AIWalasStudentNames.resolve(name,window.students||[]);if(matched.length)found=rows.filter(function(row){return matched.indexOf(row.student)>=0})}
     if(!found.length)return 'Nama siswa "'+name+'" tidak ditemukan pada kelas terpilih. Periksa nama atau gunakan nama lengkap siswa.';
     if(found.length>1)return 'Nama "'+name+'" cocok dengan lebih dari satu siswa:\n'+found.map(function(row,index){return (index+1)+'. '+row.student[0]+' (NIS '+row.student[1]+')'}).join('\n')+'\nTuliskan nama yang lebih lengkap agar alamat yang ditampilkan tepat.';
     var row=found[0],address='';

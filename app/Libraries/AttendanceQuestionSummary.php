@@ -11,7 +11,7 @@ final class AttendanceQuestionSummary
         $now=$now->setTimezone(new \DateTimeZone('Asia/Jakarta'));$end=$now->format('Y-m-d');$db=db_connect();
         $empty=array_fill_keys(self::STATUSES,0);$students=[];
         foreach($db->table('siswa')->select('id,nis,nama_lengkap')->where(['kelas_id'=>$class,'aktif'=>1])->orderBy('nama_lengkap')->get()->getResultArray() as $row){
-            $students[(int)$row['id']]=['id'=>(int)$row['id'],'nis'=>$row['nis'],'nama'=>$row['nama_lengkap'],'jumlah'=>$empty,'bulanan'=>[],'riwayat'=>[]];
+            $students[(int)$row['id']]=['id'=>(int)$row['id'],'nis'=>$row['nis'],'nama'=>$row['nama_lengkap'],'aliases'=>StudentNicknames::forNis((string)$row['nis']),'jumlah'=>$empty,'bulanan'=>[],'riwayat'=>[]];
         }
         if($students&&$end>=self::START){
             $rows=$db->table('absensi')->select('siswa_id,tanggal,semester,status,waktu_scan,keterangan')->where('kelas_id',$class)->whereIn('siswa_id',array_keys($students))->where('tanggal >=',self::START)->where('tanggal <=',$end)->orderBy('tanggal')->orderBy('id')->get()->getResultArray();

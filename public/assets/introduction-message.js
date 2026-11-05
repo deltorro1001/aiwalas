@@ -14,7 +14,7 @@
     var rows=[],seen={};
     function add(label,name,number,salutation,aliases){var normalized=phone(number);if(!normalized&&!includeMissing)return;var key=label+'|'+normalized;if(seen[key])return;seen[key]=true;rows.push({label:label,name:name,phone:normalized,salutation:salutation,aliases:[name].concat(aliases||[])})}
     (window.schoolTeachers||[]).forEach(function(t){add('Guru — '+t.name,t.name,t.phone,t.gender==='L'?'Bapak':t.gender==='P'?'Ibu':'Bapak/Ibu',[t.call||''])});
-    (window.students||[]).forEach(function(t){add('Siswa — '+t[0],t[0],t[5],'');add('Orangtua — '+t[0],'Orangtua '+t[0],t[6],'Bapak/Ibu')});
+    (window.students||[]).forEach(function(t){var aliases=window.AIWalasStudentNames?window.AIWalasStudentNames.aliases(t):[];add('Siswa — '+t[0],t[0],t[5],'',aliases);add('Orangtua — '+t[0],'Orangtua '+t[0],t[6],'Bapak/Ibu',aliases.flatMap(function(alias){return ['Orangtua '+alias,'Orang tua '+alias,'Wali '+alias]}))});
     return rows.sort(function(a,b){return a.label.localeCompare(b.label,'id')});
   }
   function normalizeName(value){return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/^(?:bapak|ibu|pak|bu|bpk|sdr|sdri)\s+/,'').replace(/\s+/g,' ')}

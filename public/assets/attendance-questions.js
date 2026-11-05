@@ -6,6 +6,7 @@
   function dateLabel(value){return value.split('-').reverse().join('-')}
   function attendanceQuestion(value){return /\b(sakit|izin|terlambat|keterlambatan|telat|absen|absensi|kehadiran|alpha|alpa|hadir)\b/i.test(normalize(value))&&!/(penyakit|riwayat kesehatan|alamat|nomor (?:hp|telepon)|surat izin)/i.test(value)}
   function selectedStudents(q,students){
+    if(window.AIWalasStudentNames)return window.AIWalasStudentNames.inQuestion(q,students);
     var needle=' '+q+' ',stop=/^(sakit|izin|hadir|alpha|alpa|libur|menunggu|keterangan|siswa|kelas|anak|nama|yang|dan|hari|bulan|tahun)$/;
     var matches=students.map(function(student){
       if(needle.indexOf(' '+normalize(student.nis)+' ')>=0)return {student:student,phrase:normalize(student.nis)};

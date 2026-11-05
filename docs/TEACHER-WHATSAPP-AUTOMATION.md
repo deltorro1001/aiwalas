@@ -13,10 +13,9 @@ Berlaku bagi semua guru mapel pada jadwal aktif, kecuali **Wahyu Lukman Hakim**,
 
 Contoh pengingat:
 
-> Selamat pagi, Bpk. Budi. Kami mengingatkan bahwa 10 menit lagi Bpk. dijadwalkan mengajar mata pelajaran Editing Film di kelas 11PF1, pukul 08:00–09:00 WIB. Jika berhalangan, mohon informasikan kepada Wali Kelas. Terima kasih.
+> Selamat pagi, Bpk. Budi. Kami menginformasikan bahwa 10 menit lagi Bpk. dijadwalkan mengajar mata pelajaran Editing Film di kelas 11PF1, pukul 08:00–09:00 WIB. Jika berhalangan, mohon informasikan kepada Wali Kelas. Terima kasih.
 >
 > Status kehadiran siswa pada 04-11-2026 (berdasarkan absensi saat pengingat dikirim):
-> 1. Sakit:
 > - Siswa A (surat sakit terlampir)
 > 2. Izin:
 > - Siswa B (surat izin terlampir)
@@ -25,7 +24,7 @@ Contoh pengingat:
 > 4. Menunggu keterangan:
 > - Siswa D
 
-Daftar siswa mengikuti Absensi Harian pada tanggal pelajaran, kelas, dan semester tahun ajaran terkait, diambil saat pengingat akan dikirim. Hanya siswa aktif dengan status Sakit/Izin/Alpha/Menunggu keterangan yang disertakan, dikelompokkan sesuai status dan diurutkan berdasarkan nama. Kelompok kosong tidak ditampilkan; penomoran mengikuti kelompok yang tersedia. Keterangan surat hanya muncul jika berkas pengajuan tersedia, sesuai jenis status, dan rentang tanggalnya mencakup tanggal pelajaran. Pesan memuat keterangan terlampir tanpa mengirim berkas, tautan, atau alasan pribadi pengajuan.
+Daftar siswa mengikuti Absensi Harian pada tanggal pelajaran, kelas, dan semester tahun ajaran terkait, diambil saat pengingat akan dikirim. Hanya siswa aktif dengan status Sakit/Izin/Alpha/Menunggu keterangan yang disertakan, dikelompokkan sesuai status dan diurutkan berdasarkan nama. Kelompok kosong tidak ditampilkan; penomoran mengikuti kelompok yang tersedia. Judul kelompok Sakit dihilangkan; daftar siswa sakit dan penomoran kelompok lain tetap dipertahankan. Keterangan surat hanya muncul jika berkas pengajuan tersedia, sesuai jenis status, dan rentang tanggalnya mencakup tanggal pelajaran. Pesan memuat keterangan terlampir tanpa mengirim berkas, tautan, atau alasan pribadi pengajuan.
 
 Jika seluruh siswa aktif tercatat **Hadir**, cukup tambahkan: “Seluruh siswa berstatus Hadir pada hari ini (04-11-2026).” Siswa tanpa catatan absensi tidak otomatis dianggap Hadir, Alpha, atau Menunggu keterangan. Jika tidak ada kategori yang relevan dan belum semua siswa tercatat Hadir, rincian absensi tidak ditampilkan. Override Kalender Akademik tetap berlaku. Isi lengkap disimpan pada menu Komunikasi. Daftar ini hanya ditambahkan pada pengingat sebelum pelajaran.
 

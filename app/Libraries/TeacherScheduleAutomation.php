@@ -78,7 +78,7 @@ class TeacherScheduleAutomation
         $title=$row['jenis_kelamin']==='L'?'Bpk.':($row['jenis_kelamin']==='P'?'Ibu':'Bpk./Ibu');
         $time=substr($row['jam_mulai'],0,5).'–'.substr($row['jam_selesai'],0,5).' WIB';
         $intro=$greeting.', '.$title.' '.$name.'. ';
-        if($kind==='reminder')return $intro.'Kami mengingatkan bahwa 10 menit lagi '.$title.' dijadwalkan mengajar mata pelajaran '.$row['nama_mata_pelajaran'].' di kelas '.$row['nama_kelas'].', pukul '.$time.'. Jika berhalangan, mohon informasikan kepada Wali Kelas. Terima kasih.';
+        if($kind==='reminder')return $intro.'Kami menginformasikan bahwa 10 menit lagi '.$title.' dijadwalkan mengajar mata pelajaran '.$row['nama_mata_pelajaran'].' di kelas '.$row['nama_kelas'].', pukul '.$time.'. Jika berhalangan, mohon informasikan kepada Wali Kelas. Terima kasih.';
         return $intro.'Terima kasih atas waktu dan pendampingan '.$title.' pada jadwal mata pelajaran '.$row['nama_mata_pelajaran'].' di kelas '.$row['nama_kelas'].', pukul '.$time.'. Jika ada tugas atau informasi pembelajaran untuk siswa, mohon disampaikan kepada Wali Kelas. Terima kasih.';
     }
     public function run(DateTimeImmutable $now,bool $dryRun=true,?int $classId=null): array
@@ -120,7 +120,8 @@ class TeacherScheduleAutomation
         $number=0;
         foreach($groups as $status=>$students){
             if(!$students)continue;
-            $lines[]=(++$number).'. '.$status.':';
+            $number++;
+            if($status!=='Sakit')$lines[]=$number.'. '.$status.':';
             foreach($students as $student){
                 $attachment=$details->forAttendance((int)$student['siswa_id'],$date,$status);
                 $name=trim(preg_replace('/\s+/u',' ',$student['nama_lengkap']));

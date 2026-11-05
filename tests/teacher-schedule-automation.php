@@ -49,7 +49,8 @@ try{
     ensure($service->run($at('2026-10-22 07:50:20'),false,$class)['sent']===1,'Reminder not sent');
     ensure($calls[0][0]==='6281234567890'&&str_contains($calls[0][1],'10 menit lagi')&&str_contains($calls[0][1],$prefix),'Wrong reminder recipient or context');
     $text=$calls[0][1];
-    foreach(['1. Sakit:','2. Izin:','3. Alpha:','4. Menunggu keterangan:','- Sakit Lampiran (surat sakit terlampir)','- Izin Lampiran (surat izin terlampir)','- Alpha Fixture','- Sakit Tanpa Surat','- Izin Tanpa Surat','- Menunggu Fixture'] as $expected)ensure(str_contains($text,$expected),'Missing absence detail: '.$expected);
+    ensure(str_contains($text,'Kami menginformasikan bahwa 10 menit lagi')&&!str_contains($text,'Kami mengingatkan')&&!str_contains($text,'1. Sakit:'),'Reminder wording not updated');
+    foreach(['2. Izin:','3. Alpha:','4. Menunggu keterangan:','- Sakit Lampiran (surat sakit terlampir)','- Izin Lampiran (surat izin terlampir)','- Alpha Fixture','- Sakit Tanpa Surat','- Izin Tanpa Surat','- Menunggu Fixture'] as $expected)ensure(str_contains($text,$expected),'Missing absence detail: '.$expected);
     ensure(substr_count($text,'(surat sakit terlampir)')===1&&substr_count($text,'(surat izin terlampir)')===1,'Attachment matched wrong status or missing file');
     foreach(['Hadir Fixture','Terlambat Fixture','Tanpa Absen','Beda Semester','Beda Tanggal','Tidak Aktif','PRIVATE_REASON_NOT_FOR_TEACHER'] as $excluded)ensure(!str_contains($text,$excluded),'Unrelated/private attendance leaked: '.$excluded);
     ensure(str_contains($text,'22-10-2026'),'Wrong lesson date');
@@ -100,7 +101,7 @@ try{
             elseif($scenario==='incomplete')ensure(!str_contains($text,'Seluruh siswa')&&!str_contains($text,'Status kehadiran siswa'),'Incomplete attendance reported as all present');
             else{
                 $status=$scenario==='pending'?'Menunggu keterangan':'Sakit';
-                ensure(str_contains($text,'1. '.$status.':')&&str_contains($text,'- Menunggu Fixture')&&!str_contains($text,'2. ')&&!str_contains($text,'Seluruh siswa'),'Empty categories were included');
+                ensure(($scenario==='sick'?!str_contains($text,'1. Sakit:'):str_contains($text,'1. '.$status.':'))&&str_contains($text,'- Menunggu Fixture')&&!str_contains($text,'2. ')&&!str_contains($text,'Seluruh siswa'),'Empty categories were included');
                 ensure(!str_contains($text,'tidak dihitung sebagai Alpha'),'Old disclaimer remains');
             }
             $checked=true;return ['ok'=>true,'response'=>['status'=>true]];

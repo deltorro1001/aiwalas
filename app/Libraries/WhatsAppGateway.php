@@ -61,7 +61,7 @@ class WhatsAppGateway
         $message=$error?'Koneksi gateway terputus; periksa histori sebelum mengirim ulang.':(in_array($code,[401,403],true)?'API key gateway ditolak. Periksa konfigurasi wa.sims.id.':($code===404?'Endpoint atau sesi gateway tidak ditemukan.':($negative?'Gateway menolak permintaan.':'Gateway belum mengonfirmasi permintaan. Periksa histori sebelum mengirim ulang.')));
         return ['ok'=>false,'data'=>$data,'http_code'=>$code,'outcome'=>$known?'failed':'unknown','message'=>$message];
     }
-    public function request(string $phone,string $message,string $mediaType='',string $mediaUrl=''): array
+    public function request(string $phone,string $message,string $mediaType='',string $mediaUrl='',string $filename='Laporan-Wali-Kelas.pdf'): array
     {
         $phone=self::phone($phone);
         if(!$phone||trim($message)==='')return ['ok'=>false,'outcome'=>'failed','message'=>'Nomor WhatsApp atau pesan tidak valid.','response'=>['status'=>false]];
@@ -71,7 +71,7 @@ class WhatsAppGateway
         if($mediaUrl!==''){
             if(!in_array($mediaType,['image','video','audio','document'],true)||!filter_var($mediaUrl,FILTER_VALIDATE_URL)||!in_array(parse_url($mediaUrl,PHP_URL_SCHEME),['https','http'],true))return ['ok'=>false,'outcome'=>'failed','message'=>'Media pengiriman tidak valid.','response'=>['status'=>false]];
             $payload+=['mediaType'=>$mediaType,'url'=>$mediaUrl,'caption'=>$message];$path='message/send-media';
-            if($mediaType==='document'){$payload['filename']='Laporan-Wali-Kelas.pdf';$payload['mimetype']='application/pdf';}
+            if($mediaType==='document'){$payload['filename']=preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,179}\.pdf$/D',$filename)?$filename:'Laporan-Wali-Kelas.pdf';$payload['mimetype']='application/pdf';}
         }else $payload['text']=$message;
         $result=$this->apiWithSettings($s,'POST',$path,$payload);$body=$result['data'];
         $confirmed=is_array($body)&&(($body['success']??null)===true||in_array($body['status']??null,[true,1,200,'true','success','sent'],true));

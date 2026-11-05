@@ -131,7 +131,7 @@
   setTimeout(ensureWalasAssessment,1500);
 })();
 </script>
-<script src='<?= base_url('assets/class-attendance-recap.js?v=20261030-teacher-read') ?>'></script>
+<script src='<?= base_url('assets/class-attendance-recap.js?v=20261105-monthly-pdf') ?>'></script>
 <script src='<?= base_url('assets/account-management.js?v=20261028-student-alias') ?>'></script>
 <script src='<?= base_url('assets/teacher-accounts.js?v=20261018') ?>'></script>
 <script src='<?= base_url('assets/notifications-page.js?v=20261021') ?>'></script>
@@ -152,6 +152,7 @@
 <script src='<?= base_url('assets/attendance-questions.js?v=20261105-nicknames') ?>'></script>
 <script src='<?= base_url('assets/help-introduction.js?v=20261103-introduction-direct') ?>'></script>
 <script src='<?= base_url('assets/help-collage.js?v=20261103-collage-command') ?>'></script>
+<script src='<?= base_url('assets/help-class-recap.js?v=20261105-monthly-pdf') ?>'></script>
 <script src='<?= base_url('assets/academic-calendar.js?v=20261102-report-attendance-blue') ?>'></script>
 </body>
 </html>

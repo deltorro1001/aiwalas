@@ -9,7 +9,7 @@ assert re.search(r'^CI_ENVIRONMENT\s*=\s*development\s*$',(ROOT/'.env').read_tex
 BASE='http://localhost:8080/';PHP=shutil.which('php') or '/opt/homebrew/opt/php@8.3/bin/php';MYSQL=shutil.which('mysql') or '/opt/homebrew/bin/mysql'
 def sql(q):return subprocess.check_output([MYSQL,'-h','127.0.0.1','-u','root','aiwalas','-N','-B','-e',q],text=True).strip()
 prefix='recap_'+secrets.token_hex(5);password=secrets.token_hex(16);hashed=subprocess.check_output([PHP,'-r','echo password_hash($argv[1],PASSWORD_DEFAULT);',password],text=True)
-users=[];teacher=None;subject=None;year=None;class_id=None;classes=[];pupils=[]
+users=[];teacher=None;subject=None;year=None;class_id=None;classes=[];pupils=[];recap_media=None
 class Client:
     def __init__(self):
         self.op=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
@@ -37,8 +37,30 @@ try:
     other=Client();other.call('api/auth/login',{'role':'walas','username':prefix+'_1','password':password})
     student=Client();student.call('api/auth/login',{'role':'student','username':prefix+'_student','password':password})
     parent=Client();parent.call('api/auth/login',{'role':'parent','username':prefix+'_0','password':prefix+'_0'})
+    # New delivery API never sends real messages in this test: only denied/invalid requests.
+    send_path='api/absensi/rekap-kelas/kirim-pdf'
+    command={'kelas_id':int(classes[0]),'tahun':2026,'bulan':10,'nomor_tujuan':'081234567890'}
+    Client().call(send_path,command,status=401)
+    student.call(send_path,command,status=403);parent.call(send_path,command,status=403)
+    other.call(send_path,command,status=422)
+    wali.call(send_path,dict(command,bulan=13),status=422)
+    wali.call(send_path,dict(command,nomor_tujuan='invalid'),status=422)
+    # Gateway media tokens are unguessable, expire, and reveal only the selected PDF.
+    import hashlib
+    token=secrets.token_hex(32);filename=secrets.token_hex(32)+'.pdf'
+    recap_media=ROOT/'writable'/'rekap-absen'/filename;recap_media.parent.mkdir(exist_ok=True)
+    pdf=b'%PDF-1.4\nSynthetic recap fixture\n%%EOF';recap_media.write_bytes(pdf)
+    expires=(datetime.datetime.now(ZoneInfo('Asia/Jakarta'))+datetime.timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
+    sql(f"INSERT INTO rekap_absen_pengiriman(session_key,kelas_id,owner_id,tahun,bulan,nomor_tujuan,berkas,token_hash,berlaku_sampai,dibuat_pada) VALUES('{secrets.token_hex(32)}',{classes[0]},{users[0]},2026,10,'6281234567890','{filename}','{hashlib.sha256(token.encode()).hexdigest()}','{expires}',NOW())")
+    response=urllib.request.urlopen(BASE+'media/rekap-absen/'+token)
+    assert response.read()==pdf and response.headers['Content-Type'].startswith('application/pdf') and 'no-store' in response.headers['Cache-Control']
+    sql(f"UPDATE rekap_absen_pengiriman SET berlaku_sampai='2026-01-01 00:00:00' WHERE token_hash='{hashlib.sha256(token.encode()).hexdigest()}'")
+    for media_token in [token,secrets.token_hex(32),'invalid']:
+        try:urllib.request.urlopen(BASE+'media/rekap-absen/'+media_token);raise AssertionError('Invalid/expired PDF token accepted')
+        except urllib.error.HTTPError as error:assert error.code==404
     endpoint='api/absensi/rekap-kelas?kelas_id='+classes[0]+'&tahun=2026&semester='
     secretary=Client();secretary.call('api/auth/login',{'role':'assistant','username':prefix+'_secretary','password':password})
+    secretary.call(send_path,command,status=403)
     bootstrap=secretary.call('api/bootstrap?kelas_id='+classes[1])
     assert str(bootstrap['selectedClassId'])==classes[0] and len(bootstrap['classes'])==1
     anonymous=Client();anonymous.call(endpoint+'Ganjil',status=401)
@@ -97,10 +119,13 @@ try:
     if os.environ.get('AIWALAS_BROWSER_TEST')=='1':
         from browser_client import CDP
         c=CDP();c.call('Runtime.enable');c.call('Page.enable');c.call('Network.enable');c.call('Network.clearBrowserCookies');c.call('Page.navigate',{'url':BASE})
-        c.wait("typeof authRequest==='function' && !!window.AIWalasPages?.attendanceRecapPage")
+        c.wait("document.readyState==='complete'&&typeof authRequest==='function'&&!!window.AIWalasPages?.attendanceRecapPage&&!!window.AIWalasClassRecapCommands")
         credentials=json.dumps({'role':'walas','username':prefix+'_0','password':password})
-        c.js("localStorage.setItem('aiwalas.semester','Ganjil');authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(d=>finishLogin(d.user)).then(()=>authRequest('api/bootstrap?kelas_id="+classes[0]+"')).then(d=>{applyBootstrapData(d);window.page='attendanceRecapPage';window.render()})")
+        c.js("localStorage.setItem('aiwalas.semester','Ganjil');window.activeSemester='Ganjil';document.getElementById('semesterSelect').value='Ganjil';authRequest('api/auth/login',{method:'POST',body:JSON.stringify("+credentials+")}).then(d=>finishLogin(d.user)).then(()=>authRequest('api/bootstrap?kelas_id="+classes[0]+"')).then(d=>{applyBootstrapData(d);window.page='attendanceRecapPage';window.render()})")
         c.wait("document.getElementById('classRecapIdentity')?.textContent.includes('Tahun 2026')")
+        assert c.js("document.getElementById('classRecapTitle').textContent")=='Rekap Absen Kelas Tahunan'
+        assert c.js("document.getElementById('classRecapRosterTitle').textContent")=='Rekap Absen Kelas '+prefix+'_0'
+        assert c.js("Boolean(document.getElementById('classRecapRoster').compareDocumentPosition(document.getElementById('classRecapTitle').closest('section')) & Node.DOCUMENT_POSITION_FOLLOWING)")
         assert c.js("getComputedStyle(document.querySelector('.sidebar [data-page=attendanceRecapPage]')).display")!='none'
         assert c.js("document.querySelectorAll('#classRecapMonthlyRows tr').length")==13
         assert not c.js("!!document.querySelector('#classRecapStudentRows b')")
@@ -180,6 +205,7 @@ try:
         c.js('logout()')
         print('PASS: Class/individual tabs, monthly roster, 12-month student recap, real XLSX export, separate sheets, numeric counts, text NIS, filters, SUM formulas, year filter, refresh after corrections, daily-page links and mobile layout.')
 finally:
+    if recap_media and recap_media.is_file():recap_media.unlink()
     if classes:
         ids=','.join(classes)
         sql('DELETE FROM absensi WHERE kelas_id IN ('+ids+');')

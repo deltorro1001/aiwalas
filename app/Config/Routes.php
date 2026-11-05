@@ -43,6 +43,8 @@ $routes->put('api/siswa/(:num)', 'Api\SiswaController::update/$1', ['filter' => 
 $routes->delete('api/siswa/(:num)', 'Api\SiswaController::delete/$1', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->get('api/absensi/tanya', 'Api\AttendanceQuestionController::index', ['filter'=>['auth','role:wali_kelas']]);
 $routes->get('api/absensi/rekap-kelas', 'Api\RekapAbsenKelasController::index', ['filter'=>['auth','role:wali_kelas,sekretaris,guru']]);
+$routes->post('api/absensi/rekap-kelas/kirim-pdf', 'Api\ClassRecapDeliveryController::send', ['filter'=>['auth','role:wali_kelas']]);
+$routes->get('media/rekap-absen/(:segment)', 'Api\ClassRecapDeliveryController::media/$1');
 $routes->get('api/absensi', 'Api\AbsensiController::index', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa,guru']]);
 $routes->post('api/absensi/qr', 'Api\AbsensiController::createQr', ['filter' => ['auth', 'role:wali_kelas']]);
 $routes->post('api/absensi', 'Api\AbsensiController::save', ['filter' => ['auth', 'role:wali_kelas,sekretaris,siswa']]);

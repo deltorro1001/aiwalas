@@ -78,6 +78,14 @@ class PengajuanSakitController extends BaseApiController
             $db->table('pengajuan_sakit')->insert($row);
             $id=$db->insertID();
             $attendance=\App\Libraries\ParentRequestAttendance::apply($row,'Sakit',(int)$id);
+            $studentName=(string)$student['nama_lengkap'];
+            $dateLabel=$start->format('d-m-Y').($start->format('Y-m-d')!==$end->format('Y-m-d')?' s.d. '.$end->format('d-m-Y'):'');
+            $message="Pengajuan istirahat sakit untuk {$studentName} ({$dateLabel}).";
+            if(trim($row['keterangan']??''))$message.="\nKeterangan orangtua: ".trim($row['keterangan']);
+            if(!empty($row['nama_lampiran']))$message.="\nSurat sakit terlampir.";
+            $classOwner=$db->table('kelas')->select('wali_kelas_id')->where('id',(int)$student['kelas_id'])->get()->getRowArray();
+            $notificationOwner=(int)($classOwner['wali_kelas_id']??$u['id']);
+            $db->table('notifikasi')->insert(['pengguna_id'=>$notificationOwner,'kelas_id'=>(int)$student['kelas_id'],'judul'=>'Pengajuan Istirahat Sakit · '.$studentName,'isi'=>$message,'jenis'=>'Pengajuan Orangtua','sudah_dibaca'=>0]);
             if($db->transStatus()===false)throw new \RuntimeException('Pengajuan gagal disimpan.');
             $db->transCommit();
         }catch(\Throwable $error){

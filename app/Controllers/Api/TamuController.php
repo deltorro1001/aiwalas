@@ -28,10 +28,8 @@ class TamuController extends BaseApiController
                 $home['attachment_notes'][(string)$student['id']]=$attachments->forAttendance((int)$student['id'],$date,$status)['keterangan_lampiran'];
             }
             $owner=$db->table('kelas')->select('wali_kelas_id')->where('id',$class['id'])->get()->getRowArray();
-            if(!empty($owner['wali_kelas_id'])){
-                [$start,$end]=\App\Libraries\NotificationDate::range($date);
-                $home['notifications']=$db->table('notifikasi')->select('judul,isi,dibuat_pada')->where('pengguna_id',$owner['wali_kelas_id'])->where('dibuat_pada >=',$start)->where('dibuat_pada <',$end)->orderBy('dibuat_pada','DESC')->orderBy('id','DESC')->limit(10)->get()->getResultArray();
-            }
+            [$start,$end]=\App\Libraries\NotificationDate::range($date);
+            $home['notifications']=$db->table('notifikasi')->select('judul,isi,jenis,dibuat_pada')->groupStart()->where('pengguna_id',(int)($owner['wali_kelas_id']??0))->orWhere('kelas_id',(int)$class['id'])->groupEnd()->where('dibuat_pada >=',$start)->where('dibuat_pada <',$end)->orderBy('dibuat_pada','DESC')->orderBy('id','DESC')->limit(10)->get()->getResultArray();
             $schedule=$db->table('jadwal_kelas j')->select('j.hari,j.jam_mulai,j.jam_selesai,m.nama_mata_pelajaran,g.nama_lengkap AS nama_guru')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('guru g','g.id=j.guru_id','left')->where('j.kelas_id',$class['id'])->whereIn('j.hari',['Senin','Selasa','Rabu','Kamis','Jumat'])->orderBy('j.jam_mulai')->get()->getResultArray();
             $announcements=$db->table('pengumuman_tamu')->select('id,judul,isi,tanggal_agenda,dibuat_pada')->where(['kelas_id'=>$class['id'],'terbit'=>1])->orderBy('id','DESC')->get()->getResultArray();
         }

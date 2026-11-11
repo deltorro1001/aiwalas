@@ -87,7 +87,7 @@ class PengajuanIzinController extends BaseApiController
             if(!empty($row['nama_lampiran']))$message.="\nSurat izin terlampir.";
             $classOwner=$db->table('kelas')->select('wali_kelas_id')->where('id',(int)$student['kelas_id'])->get()->getRowArray();
             $notificationOwner=(int)($classOwner['wali_kelas_id']??$u['id']);
-            $db->table('notifikasi')->insert(['pengguna_id'=>$notificationOwner,'kelas_id'=>(int)$student['kelas_id'],'judul'=>'Pengajuan Izin · '.$studentName,'isi'=>$message,'jenis'=>'Pengajuan Orangtua','sudah_dibaca'=>0]);
+            $db->table('notifikasi')->insert(['pengguna_id'=>$notificationOwner,'kelas_id'=>(int)$student['kelas_id'],'judul'=>'Pengajuan Izin · '.$studentName,'isi'=>$message,'jenis'=>'Pengajuan Izin #'.$id,'sudah_dibaca'=>0]);
             if($db->transStatus()===false)throw new \RuntimeException('Pengajuan gagal disimpan.');
             $db->transCommit();
         }catch(\Throwable $error){
@@ -96,6 +96,34 @@ class PengajuanIzinController extends BaseApiController
             return $this->respond(['message'=>'Pengajuan belum tersimpan. Silakan coba kembali.'],500);
         }
         return $this->respond(['ok'=>true,'id'=>$id,'absensi'=>$attendance,'message'=>'Pengajuan berhasil dikirim. Status Izin otomatis diisi pada hari sekolah; Libur dan PJJ tetap berlaku.'],201);
+    }
+
+    public function delete(int $id)
+    {
+        $query=$this->visibleQuery();
+        if(!$query)return $this->respond(['message'=>'Pengajuan hanya dapat dihapus oleh orangtua atau wali kelas.'],403);
+        $row=$query->select('p.*,s.nama_lengkap')->where('p.id',$id)->get()->getRowArray();
+        if(!$row)return $this->respond(['message'=>'Pengajuan tidak ditemukan.'],404);
+
+        $db=db_connect();
+        try{
+            $db->transBegin();
+            $db->table('absensi')->where(['siswa_id'=>(int)$row['siswa_id'],'kelas_id'=>(int)$row['kelas_id'],'status'=>'Izin','dicatat_oleh'=>(int)$row['pengguna_id']])
+                ->where('tanggal >=',$row['tanggal_mulai'])->where('tanggal <=',$row['tanggal_selesai'])
+                ->like('keterangan','Pengajuan izin orangtua #'.$id.':','after')->delete();
+            $db->table('notifikasi')->where(['kelas_id'=>(int)$row['kelas_id'],'judul'=>'Pengajuan Izin · '.$row['nama_lengkap'],'jenis'=>'Pengajuan Izin #'.$id])->delete();
+            $db->table('pengajuan_izin')->where('id',$id)->delete();
+            if($db->transStatus()===false)throw new \RuntimeException('Pengajuan gagal dihapus.');
+            $db->transCommit();
+        }catch(\Throwable $error){
+            $db->transRollback();
+            log_message('error','Penghapusan pengajuan izin gagal: {error}',['error'=>$error->getMessage()]);
+            return $this->respond(['message'=>'Pengajuan belum berhasil dihapus. Silakan coba kembali.'],500);
+        }
+        if(preg_match('/^[a-f0-9]{48}\.(pdf|jpg|png)$/D',(string)$row['berkas_lampiran'])){
+            $path=WRITEPATH.'pengajuan-izin/'.$row['berkas_lampiran'];if(is_file($path))unlink($path);
+        }
+        return $this->respond(['ok'=>true,'message'=>'Pengajuan izin berhasil dihapus.']);
     }
 
     public function attachment(int $id)

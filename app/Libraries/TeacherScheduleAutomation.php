@@ -57,7 +57,8 @@ class TeacherScheduleAutomation
                 ->join('guru g','g.id=j.guru_id')->join('mata_pelajaran m','m.id=j.mata_pelajaran_id')->join('pengguna u','u.id=k.wali_kelas_id','left')
                 ->where(['t.aktif'=>1,'g.aktif'=>1,'m.aktif'=>1,'j.hari'=>$days[(int)$day->format('w')]]);
             if($classId!==null)$query->where('j.kelas_id',$classId);
-            foreach($query->orderBy('j.jam_mulai')->get()->getResultArray() as $row){
+            $scheduleRows=SchoolCalendar::applyNoCeremonyMonday($query->orderBy('j.jam_mulai')->get()->getResultArray(),$date);
+            foreach($scheduleRows as $row){
                 if(self::isExcludedTeacher($row['teacher_name']))continue;
                 if(!preg_match('/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/',$row['jam_mulai'])||!preg_match('/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/',$row['jam_selesai'])||$row['jam_mulai']>=$row['jam_selesai'])continue;
                 $lessonStart=new DateTimeImmutable($date.' '.$row['jam_mulai'],self::zone());

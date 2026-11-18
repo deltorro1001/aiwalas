@@ -31,7 +31,7 @@
 <script src='<?= base_url('assets/family-questions.js?v=20261103-specific-parents') ?>'></script>
 <script src='<?= base_url('assets/student-name-matching.js?v=20261105-nicknames') ?>'></script>
 <script src='<?= base_url('assets/address-questions.js?v=20261105-nicknames') ?>'></script>
-<script src='<?= base_url('assets/app.js?v=20261105-nicknames') ?>'></script>
+<script src='<?= base_url('assets/app.js?v=20261118-monday-no-ceremony') ?>'></script>
 <script src='<?= base_url('assets/walas-assessment.js?v=20261102-parent-narratives') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261102-report-attendance-blue') ?>'></script>
@@ -49,7 +49,7 @@
 <script src='<?= base_url('assets/ledger-import.js?v=20261010-mapel-guru-update') ?>'></script>
 <script src='<?= base_url('assets/ledger-page.js?v=20260918-name-left') ?>'></script>
 <script src='<?= base_url('assets/hud-chart.js?v=20261022-student-summary') ?>'></script>
-<script src='<?= base_url('assets/dashboard-summary.js?v=20261104-guest-home') ?>'></script>
+<script src='<?= base_url('assets/dashboard-summary.js?v=20261118-monday-no-ceremony') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'></script>
 <script src='<?= base_url('assets/attendance-ui.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/attendance-live.js?v=20261030-teacher-read') ?>'></script>
@@ -153,7 +153,7 @@
 <script src='<?= base_url('assets/help-introduction.js?v=20261103-introduction-direct') ?>'></script>
 <script src='<?= base_url('assets/help-collage.js?v=20261103-collage-command') ?>'></script>
 <script src='<?= base_url('assets/help-class-recap.js?v=20261105-monthly-pdf') ?>'></script>
-<script src='<?= base_url('assets/academic-calendar.js?v=20261102-report-attendance-blue') ?>'></script>
+<script src='<?= base_url('assets/academic-calendar.js?v=20261118-monday-no-ceremony') ?>'></script>
 </body>
 </html>
 

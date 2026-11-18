@@ -29,6 +29,41 @@ final class SchoolCalendar
     public static function specialHolidayDates(): array {return array_keys(array_filter(self::entries(),static fn($row)=>$row['dampak_absensi']==='Libur'));}
     public static function attendanceOverrideDates(): array {return array_keys(array_filter(self::entries(),static fn($row)=>in_array($row['dampak_absensi'],['Libur','PJJ','TanpaAbsen'],true)));}
     public static function isPjj(string $date): bool {return (self::entries()[$date]['dampak_absensi']??'')==='PJJ';}
+    public static function isNoCeremonyMonday(string $date): bool
+    {
+        $entry=self::entries()[$date]??null;
+        if(!$entry||$entry['jenis']!=='Senin Tanpa Upacara')return false;
+        $day=\DateTimeImmutable::createFromFormat('!Y-m-d',$date,new \DateTimeZone('Asia/Jakarta'));
+        return $day&&$day->format('Y-m-d')===$date&&$day->format('N')==='1';
+    }
+    /** Apply the alternate Monday timetable while leaving both recess periods fixed. */
+    public static function applyNoCeremonyMonday(array $rows,string $date,bool $includeBreaks=false): array
+    {
+        if(!self::isNoCeremonyMonday($date))return $rows;
+        $times=['KIK'=>['06:45:00','08:15:00'],'Sejarah'=>['08:15:00','09:45:00'],'Editing Film'=>['10:00:00','12:15:00'],'Bahasa Inggris'=>['12:45:00','14:15:00']];
+        foreach($rows as &$row){
+            if(($row['hari']??'Senin')!=='Senin')continue;
+            $subject=trim((string)($row['nama_mata_pelajaran']??''));
+            if(isset($times[$subject])){
+                [$row['jam_mulai'],$row['jam_selesai']]=$times[$subject];
+            }else{
+                foreach(['jam_mulai','jam_selesai'] as $field){
+                    if(empty($row[$field]))continue;
+                    $time=substr((string)$row[$field],0,8);
+                    $parsed=\DateTimeImmutable::createFromFormat('!H:i:s',$time,new \DateTimeZone('Asia/Jakarta'));
+                    if(!$parsed)$parsed=\DateTimeImmutable::createFromFormat('!H:i',$time,new \DateTimeZone('Asia/Jakarta'));
+                    if($parsed)$row[$field]=$parsed->modify('-45 minutes')->format(strlen((string)$row[$field])>5?'H:i:s':'H:i');
+                }
+            }
+        }
+        unset($row);
+        if($includeBreaks){
+            $rows[]=['hari'=>'Senin','jam_mulai'=>'09:45:00','jam_selesai'=>'10:00:00','nama_mata_pelajaran'=>'Istirahat Pertama','nama_lengkap'=>'Waktu istirahat','keterangan'=>'Waktu istirahat'];
+            $rows[]=['hari'=>'Senin','jam_mulai'=>'12:15:00','jam_selesai'=>'12:45:00','nama_mata_pelajaran'=>'Istirahat Kedua','nama_lengkap'=>'Waktu istirahat','keterangan'=>'Waktu istirahat'];
+        }
+        usort($rows,static fn($a,$b)=>strcmp((string)($a['jam_mulai']??''),(string)($b['jam_mulai']??'')));
+        return $rows;
+    }
     public static function attendanceOverride(string $date): ?string
     {
         $entry=self::entries()[$date]??null;

@@ -15,18 +15,22 @@ class KalenderAkademikController extends BaseApiController
         $errors=$this->validatePayload($p,[
             'tanggal_mulai'=>'required|valid_date[Y-m-d]',
             'tanggal_selesai'=>'required|valid_date[Y-m-d]',
-            'jenis'=>'required|in_list[PJJ,Hari Libur,Hari Pengambilan Raport,Agenda Lainnya]',
+            'jenis'=>'required|in_list[PJJ,Hari Libur,Hari Pengambilan Raport,Agenda Lainnya,Senin Tanpa Upacara]',
             'judul'=>'permit_empty|max_length[160]',
             'dampak_absensi'=>'required|in_list[PJJ,Libur,Normal,TanpaAbsen]',
             'keterangan'=>'permit_empty|max_length[2000]',
         ]);
         if($errors)return $this->respond(['ok'=>false,'message'=>'Periksa tanggal, jenis agenda, judul, dan dampak absensi.','errors'=>$errors],422);
         $start=$p['tanggal_mulai'];$end=$p['tanggal_selesai'];
+        if($p['jenis']==='Senin Tanpa Upacara'){
+            for($day=new \DateTimeImmutable($start);$day->format('Y-m-d')<=$end;$day=$day->modify('+1 day'))if($day->format('N')!=='1')return $this->respond(['ok'=>false,'message'=>'Jadwal tanpa upacara hanya dapat diaktifkan pada tanggal hari Senin.'],422);
+            if(($p['dampak_absensi']??'')!=='Normal')return $this->respond(['ok'=>false,'message'=>'Jadwal tanpa upacara tetap menggunakan absensi hari sekolah biasa.'],422);
+        }
         $title=trim($p['judul']??'');
         if($title===''&&($p['tanpa_judul']??false)!==true)return $this->respond(['ok'=>false,'message'=>'Isi judul atau pilih Tanpa Judul Agenda.'],422);
         if($p['jenis']==='Hari Pengambilan Raport'&&$title==='Hari Pengambilan Raport')$title='Pengambilan Raport';
         if($start<'2026-01-01'||$end>'2100-12-31'||$end<$start||(new \DateTimeImmutable($start))->diff(new \DateTimeImmutable($end))->days>365)return $this->respond(['ok'=>false,'message'=>'Pilih rentang maksimal 366 hari, mulai tahun 2026 hingga 2100. '],422);
-        $effect=$p['jenis']==='Hari Pengambilan Raport'?'TanpaAbsen':($p['jenis']==='PJJ'?'PJJ':($p['jenis']==='Hari Libur'?'Libur':$p['dampak_absensi']));
+        $effect=$p['jenis']==='Hari Pengambilan Raport'?'TanpaAbsen':($p['jenis']==='PJJ'?'PJJ':($p['jenis']==='Hari Libur'?'Libur':($p['jenis']==='Senin Tanpa Upacara'?'Normal':$p['dampak_absensi'])));
         $db=db_connect();$db->transBegin();
         try{
             for($day=new \DateTimeImmutable($start);$day->format('Y-m-d')<=$end;$day=$day->modify('+1 day')){

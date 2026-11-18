@@ -17,7 +17,18 @@
     const late = listStudents((status) => status === "Terlambat");
     const counts = studentSummary ? studentSummary.status : (window.dashboardData && window.dashboardData.status) || {};
     const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    const schedule = studentData ? (studentData.jadwal_hari_ini || []).map((row) => [String(row.jam_mulai).slice(0,5) + '-' + String(row.jam_selesai).slice(0,5), row.nama_mata_pelajaran, row.nama_lengkap || row.keterangan || 'Guru belum ditentukan']) : (window.realtimeWeeklySchedule && window.realtimeWeeklySchedule[dayNames[new Date().getDay()]]) || [];
+    const summaryDate = studentData && studentData.kalender ? studentData.kalender.tanggal : (window.AIWalasCalendar ? window.AIWalasCalendar.today() : '');
+    const summaryDay = summaryDate ? dayNames[new Date(summaryDate + 'T00:00:00Z').getUTCDay()] : dayNames[new Date().getDay()];
+    let schedule = studentData ? (studentData.jadwal_hari_ini || []).map((row) => [String(row.jam_mulai).slice(0,5) + '-' + String(row.jam_selesai).slice(0,5), row.nama_mata_pelajaran, row.nama_lengkap || row.keterangan || 'Guru belum ditentukan']) : (window.realtimeWeeklySchedule && window.realtimeWeeklySchedule[summaryDay]) || [];
+    if (!studentData && summaryDate && window.AIWalasCalendar && window.AIWalasCalendar.entry(summaryDate) && window.AIWalasCalendar.entry(summaryDate).jenis === 'Senin Tanpa Upacara') {
+      const mondayTimes = {'kik':'06:45-08:15','sejarah':'08:15-09:45','editingfilm':'10:00-12:15','bahasainggris':'12:45-14:15'};
+      schedule = schedule.filter((item) => String(item[1] || '').toUpperCase() !== 'UPACARA').map((item) => {
+        const key = String(item[1] || '').toLowerCase().replace(/[^a-z]/g, '');
+        return mondayTimes[key] ? [mondayTimes[key], item[1], item[2]] : item;
+      });
+      schedule.push(['09:45-10:00','Istirahat Pertama','Waktu istirahat'],['12:15-12:45','Istirahat Kedua','Waktu istirahat']);
+      schedule.sort((a,b) => String(a[0]).localeCompare(String(b[0])));
+    }
     summaryPanel.dataset.summaryReady = "1";
     summaryPanel.classList.add("summary-panel", "dashboard-carousel");
     const notificationPanel = Array.from(grid.children).find((element) => element.classList.contains("panel") && element !== summaryPanel);

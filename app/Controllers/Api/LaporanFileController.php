@@ -162,17 +162,18 @@ class LaporanFileController extends WhatsAppController
             'dibuat_oleh' => (int) ($user['id'] ?? 0),
         ], true);
         $result = $this->gatewayRequest($phone, $message, 'document', $url);
-        $ok = $result['ok'];
+        $accepted = $result['ok'];
+        $delivered = !empty($result['delivery_confirmed']);
+        $failed = ($result['outcome'] ?? '') === 'failed';
         $model->update($id, [
-            'status_pengiriman' => $ok ? 'Terkirim' : (($result['outcome']??'unknown')==='failed'?'Gagal':'Disiapkan'),
-            'dikirim_pada' => $ok ? date('Y-m-d H:i:s') : null,
+            'status_pengiriman' => $delivered ? 'Terkirim' : ($failed ? 'Gagal' : 'Disiapkan'),
+            'dikirim_pada' => $delivered ? date('Y-m-d H:i:s') : null,
         ]);
         return $this->respond([
-            'ok' => $ok,
-            'message' => $ok ? 'Laporan PDF dikirim melalui Gateway kepada ' . $teacher['nama_lengkap'] . '.'
-                : ($result['message'] ?: 'Gateway gagal mengirim laporan PDF. Silakan coba lagi.'),
-            'data' => ['id' => $id, 'status' => $ok ? 'Terkirim' : 'Pending'],
-        ], $ok ? 200 : 502);
+            'ok' => $accepted,
+            'message' => $result['message'] ?: 'Gateway belum mengonfirmasi permintaan.',
+            'data' => ['id' => $id, 'status' => $delivered ? 'Terkirim' : ($failed ? 'Gagal' : 'Pending')],
+        ], $accepted ? 200 : 502);
     }
 
     public function download(string $token)

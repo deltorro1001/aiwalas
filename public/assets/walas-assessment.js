@@ -36,7 +36,7 @@
             document.getElementById('gatewayGradeError').textContent='Gateway WhatsApp belum siap.';return;
           }
           window.sendWhatsAppGateway({kelas_id:window.activeClassId||1,nomor_tujuan:phone,nama_penerima:label,isi_pesan:text})
-            .then(function(){closeModal();toast('Pesan '+label+' terkirim melalui Gateway.');})
+            .then(function(result){closeModal();var delivered=result&&result.data&&result.data.status==='Terkirim';toast(delivered?'Pesan '+label+' diterima penerima.':'Permintaan pesan '+label+' diterima gateway dan dicatat Pending.');})
             .catch(function(error){send.disabled=false;send.textContent='Kirim via Gateway';var err=document.getElementById('gatewayGradeError');if(err)err.textContent=error.message||'Gateway gagal mengirim pesan.';});
         };
       };

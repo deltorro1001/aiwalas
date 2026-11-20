@@ -38,7 +38,7 @@
       var payload={kelas_id:classId,nomor_tujuan:destination,nama_penerima:recipient,isi_pesan:AIWalasIntroduction.buildText(contact.name||'',contact.salutation===undefined?'Bapak/Ibu':contact.salutation)};
       Promise.resolve().then(function(){return window.sendWhatsAppGateway(payload)}).then(function(result){
         if(!result||result.ok!==true)throw new Error(result&&result.message||'Gateway belum mengonfirmasi pengiriman.');
-        if(active()){box.textContent='Perkenalan AIWalas terkirim melalui gateway ke '+(contact.name||'nomor tujuan')+' ('+destination+'). Riwayat tersimpan di menu Komunikasi.';input.value='';toast('Perkenalan AIWalas terkirim.')}
+        if(active()){var delivered=result.status==='Terkirim';box.textContent=delivered?'Perkenalan AIWalas dikonfirmasi diterima melalui gateway oleh '+(contact.name||'nomor tujuan')+' ('+destination+'). Riwayat tersimpan di menu Komunikasi.':'Gateway menerima permintaan perkenalan untuk '+(contact.name||'nomor tujuan')+' ('+destination+'), tetapi penerimaan belum terkonfirmasi. Riwayat berstatus Pending di menu Komunikasi.';input.value='';toast(delivered?'Perkenalan diterima.':'Perkenalan tercatat Pending.')}
       }).catch(function(reason){if(active()){box.textContent='Perkenalan belum berhasil dikonfirmasi terkirim.';error.textContent=(reason.message||'Pengiriman gagal.')+' Periksa histori Komunikasi sebelum mengirim ulang.';}}).finally(function(){inFlight.delete(key);pending=false;if(form.isConnected){button.disabled=false;input.disabled=false;button.textContent='Kirim'}});
     }
     button.onclick=function(){

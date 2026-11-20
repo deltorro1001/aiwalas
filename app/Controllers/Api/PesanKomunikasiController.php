@@ -10,14 +10,14 @@ class PesanKomunikasiController extends BaseApiController
      if(!$db->table('kelas')->where(['id'=>$class,'wali_kelas_id'=>$user['id']])->countAllResults())return $this->respond(['ok'=>false,'message'=>'Kelas tidak dapat diakses.'],404);
      $status=$this->request->getGet('status')?:'all';
      if(!in_array($status,['all','sent','pending'],true))return $this->respond(['ok'=>false,'message'=>'Status komunikasi tidak valid.'],422);
-     $query=$db->table('pesan_komunikasi p')->select('p.*,s.nis,s.nama_lengkap,COALESCE(k.status,g.status,d.status) AS automation_status,COALESCE(k.dicoba_pada,g.attempted_at,d.attempted_at) AS attempted_at,COALESCE(k.result_note,g.result_note,d.result_note) AS result_note')->join('siswa s','s.id=p.siswa_id','left')->join('teacher_schedule_dispatches d','d.message_id=p.id','left')->join('student_grade_dispatches g','g.message_id=p.id','left')->join('foto_kolase_pengiriman k','k.message_id=p.id','left')->where(['p.kelas_id'=>$class,'p.dibuat_oleh'=>$user['id']]);
+     $query=$db->table('pesan_komunikasi p')->select('p.*,s.nis,s.nama_lengkap,COALESCE(k.status,g.status,d.status,l.status) AS automation_status,COALESCE(k.dicoba_pada,g.attempted_at,d.attempted_at,l.dibuat_pada) AS attempted_at,COALESCE(k.result_note,g.result_note,d.result_note,l.result_note) AS result_note')->join('siswa s','s.id=p.siswa_id','left')->join('teacher_schedule_dispatches d','d.message_id=p.id','left')->join('student_grade_dispatches g','g.message_id=p.id','left')->join('foto_kolase_pengiriman k','k.message_id=p.id','left')->join('status_kedisiplinan_pengiriman l','l.message_id=p.id','left')->where(['p.kelas_id'=>$class,'p.dibuat_oleh'=>$user['id']]);
      if($status==='sent')$query->where('p.status_pengiriman','Terkirim');
      if($status==='pending')$query->where('p.status_pengiriman !=','Terkirim');
      $page=min(1000000,max(1,(int)$this->request->getGet('page')));$limit=25;
      $total=(clone $query)->countAllResults();$rows=$query->orderBy('p.id','DESC')->limit($limit,($page-1)*$limit)->get()->getResultArray();
      foreach($rows as &$row){
          $row['delivery_status']=$row['status_pengiriman']==='Terkirim'?'Terkirim':'Pending';
-         $row['delivery_note']=$row['delivery_status']==='Terkirim'?'Diterima gateway.':($row['result_note']?:($row['status_pengiriman']==='Gagal'?'Pengiriman gagal; perlu diperiksa.':'Belum ada konfirmasi pengiriman.'));
+         $row['delivery_note']=$row['delivery_status']==='Terkirim'?'Penerimaan oleh penerima sudah terkonfirmasi.':($row['result_note']?:($row['status_pengiriman']==='Gagal'?'Pengiriman gagal; perlu diperiksa.':'Belum ada konfirmasi pengiriman.'));
      }
      unset($row);$this->response->setHeader('Cache-Control','no-store');
      return $this->respond(['data'=>$rows,'total'=>$total,'page'=>$page,'has_more'=>$page*$limit<$total]);

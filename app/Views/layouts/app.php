@@ -32,12 +32,12 @@
 <script src='<?= base_url('assets/student-name-matching.js?v=20261105-nicknames') ?>'></script>
 <script src='<?= base_url('assets/address-questions.js?v=20261105-nicknames') ?>'></script>
 <script src='<?= base_url('assets/app.js?v=20261118-monday-no-ceremony') ?>'></script>
-<script src='<?= base_url('assets/walas-assessment.js?v=20261102-parent-narratives') ?>'></script>
+<script src='<?= base_url('assets/walas-assessment.js?v=20261120-gateway-pending') ?>'></script>
 <script src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'></script>
 <script src='<?= base_url('assets/student-qr-attendance.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/teacher-role.js?v=20261030-teacher-read') ?>'></script>
-<script src='<?= base_url('assets/whatsapp-gateway.js?v=20261031-sims-send-helper') ?>'></script>
-<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261022-exclusions') ?>'></script>
+<script src='<?= base_url('assets/whatsapp-gateway.js?v=20261120-gateway-pending') ?>'></script>
+<script src='<?= base_url('assets/teacher-schedule-reminders.js?v=20261120-gateway-pending') ?>'></script>
 <script src='<?= base_url('assets/students-page.js?v=20260918-import-excel') ?>'></script>
 <script src='<?= base_url('assets/school-teachers.js?v=20260913-teachers-export6') ?>'></script>
 <script src='<?= base_url('assets/school-teachers-mapel.js?v=20260918-mapel-kelas-imported') ?>'></script>
@@ -118,7 +118,7 @@
 <script src='<?= base_url('assets/semester-context.js?v=20261028-secretary-menus') ?>'></script>
 <script src='<?= base_url('assets/ledger-live.js?v=20260930-final2') ?>'></script>
 <script src='<?= base_url('assets/attendance-realtime.js?v=20261021-date-filter') ?>'></script>
-<script src='<?= base_url('assets/attendance-whatsapp.js?v=20261102-parent-narratives') ?>'></script>
+<script src='<?= base_url('assets/attendance-whatsapp.js?v=20261120-gateway-pending') ?>'></script>
 <script>
 (function(){
   function ensureWalasAssessment(){
@@ -144,16 +144,16 @@
 <script src='<?= base_url('assets/request-attachment-preview.js?v=20261105-parent-letter') ?>'></script>
 <script src='<?= base_url('assets/parent-sick-request.js?v=20261112-delete-request') ?>'></script>
 <script src='<?= base_url('assets/parent-leave-request.js?v=20261112-delete-request') ?>'></script>
-<script src='<?= base_url('assets/photo-uploads.js?v=20261028-single-page') ?>'></script>
+<script src='<?= base_url('assets/photo-uploads.js?v=20261120-gateway-pending') ?>'></script>
 <script src='<?= base_url('assets/page-router.js?v=20261029-tasks-six') ?>'></script>
 <script src='<?= base_url('assets/attendance-status-colors.js?v=20261102-report-attendance-blue') ?>'></script>
 <script src='<?= base_url('assets/dashboard-attendance-live.js?v=20261031-present-black') ?>'></script>
 <script src='<?= base_url('assets/guest-portal.js?v=20261104-guest-home') ?>'></script>
 <script src='<?= base_url('assets/attendance-questions.js?v=20261105-nicknames') ?>'></script>
-<script src='<?= base_url('assets/help-introduction.js?v=20261103-introduction-direct') ?>'></script>
-<script src='<?= base_url('assets/help-collage.js?v=20261103-collage-command') ?>'></script>
-<script src='<?= base_url('assets/help-class-recap.js?v=20261105-monthly-pdf') ?>'></script>
-<script src='<?= base_url('assets/help-discipline-lateness.js?v=20261120-report-errors') ?>'></script>
+<script src='<?= base_url('assets/help-introduction.js?v=20261120-gateway-pending') ?>'></script>
+<script src='<?= base_url('assets/help-collage.js?v=20261120-gateway-pending') ?>'></script>
+<script src='<?= base_url('assets/help-class-recap.js?v=20261120-gateway-pending') ?>'></script>
+<script src='<?= base_url('assets/help-discipline-lateness.js?v=20261120-gateway-pending') ?>'></script>
 <script src='<?= base_url('assets/academic-calendar.js?v=20261118-monday-no-ceremony') ?>'></script>
 </body>
 </html>

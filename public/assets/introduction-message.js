@@ -58,8 +58,8 @@
       if(!confirm('Kirim pesan perkenalan AIWalas kepada '+recipient+' ('+destination+')?'))return;
       busy=true;state();send.textContent='Mengirim…';feedback.textContent='';
       try{
-        await window.sendWhatsAppGateway({kelas_id:classId,nomor_tujuan:destination,nama_penerima:recipient,isi_pesan:body});
-        if(active()){feedback.textContent='Pesan diterima gateway dan dicatat di menu Komunikasi.';toast('Perkenalan AIWalas terkirim.');closeModal();if(window.page==='communication')window.render()}
+        var result=await window.sendWhatsAppGateway({kelas_id:classId,nomor_tujuan:destination,nama_penerima:recipient,isi_pesan:body});
+        if(active()){var delivered=result&&result.data&&result.data.status==='Terkirim';feedback.textContent=delivered?'Penerimaan pesan telah dikonfirmasi dan dicatat di menu Komunikasi.':'Gateway menerima permintaan, tetapi penerimaan belum dikonfirmasi. Status Pending dicatat di menu Komunikasi.';toast(delivered?'Perkenalan diterima.':'Perkenalan tercatat Pending.');closeModal();if(window.page==='communication')window.render()}
       }catch(failure){if(active())error.textContent=failure.message||'Pengiriman belum terkonfirmasi. Periksa histori Komunikasi sebelum mengirim ulang.';}
       finally{if(active()){busy=false;state();send.textContent='Kirim via Gateway'}}
     };

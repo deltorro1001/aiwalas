@@ -155,7 +155,8 @@ class TeacherScheduleAutomation
             $response=($this->send)($event['phone'],$event['text']);
             $body=$response['response']??null;
             $confirmation=is_array($body)?($body['status']??$body['success']??null):null;
-            if(($response['ok']??false)&&in_array($confirmation,[true,1,200,'true','success','sent'],true)){$status='sent';$note='Diterima gateway.';}
+            if(($response['ok']??false)&&($response['outcome']??'')==='sent'){$status='sent';$note='Gateway mengonfirmasi pesan diterima penerima.';}
+            elseif(($response['ok']??false)&&($response['outcome']??'')==='accepted'){$status='pending';$note='Gateway menerima permintaan; penerimaan oleh guru belum terkonfirmasi.';}
             elseif(($response['ok']??false)===false&&is_array($body)&&in_array($confirmation,[false,0,'false','error','failed'],true)){$status='failed';$note='Gateway menolak pengiriman.';}
             else{$status='unknown';$note='Hasil gateway belum terkonfirmasi; periksa histori sebelum mengirim ulang.';}
         }catch(\Throwable $error){$status='unknown';$note='Koneksi gateway terputus; periksa histori sebelum mengirim ulang.';}

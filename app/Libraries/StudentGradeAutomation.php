@@ -80,7 +80,8 @@ final class StudentGradeAutomation
             $status='unknown';$note='Belum ada konfirmasi; periksa gateway sebelum mengirim ulang.';
             try{
                 $response=($this->send)($phone,$text);$body=$response['response']??null;$confirmation=is_array($body)?($body['status']??$body['success']??null):null;
-                if(($response['ok']??false)&&in_array($confirmation,[true,1,200,'true','success','sent'],true)){$status='sent';$note='Diterima gateway.';}
+                if(($response['ok']??false)&&($response['outcome']??'')==='sent'){$status='sent';$note='Gateway mengonfirmasi pesan diterima.';}
+                elseif(($response['ok']??false)&&($response['outcome']??'')==='accepted'){$status='pending';$note='Gateway menerima permintaan; penerimaan oleh siswa belum terkonfirmasi.';}
                 elseif(!($response['ok']??false)&&in_array($confirmation,[false,0,'false','error','failed'],true)){$status='failed';$note='Gateway menolak pengiriman; perlu diperiksa.';}
             }catch(\Throwable $error){/* Delivery may have occurred before a timeout. */}
             $db->transBegin();

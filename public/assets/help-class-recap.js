@@ -48,8 +48,8 @@
       try{
         if(!active())throw new Error('Pengiriman dihentikan karena dialog, kelas, atau akun berubah.');
         var result=await authRequest('api/absensi/rekap-kelas/kirim-pdf',{method:'POST',body:JSON.stringify({kelas_id:classId,tahun:command.year,bulan:command.month,nomor_tujuan:phone,nama_penerima:recipient})});
-        if(!result||result.ok!==true||result.status!=='sent')throw new Error(result&&result.message||'Gateway belum mengonfirmasi pengiriman.');
-        if(active()){box.textContent='PDF rekap '+label+' '+(result.already?'sudah pernah diterima gateway untuk ':'terkirim melalui gateway ke ')+(contact.name||'nomor tujuan')+' ('+phone+'). '+(result.already?'Tidak dikirim ulang. ':'')+'Hasil tercatat di menu Komunikasi.';input.value='';toast(result.already?'Rekap sudah pernah terkirim.':'Rekap terkirim.')}
+        if(!result||result.ok!==true||!['sent','pending'].includes(result.status))throw new Error(result&&result.message||'Gateway belum mengonfirmasi permintaan.');
+        if(active()){box.textContent=result.status==='sent'?'PDF rekap '+label+' dikonfirmasi diterima melalui gateway oleh '+(contact.name||'nomor tujuan')+' ('+phone+'). Hasil tercatat di menu Komunikasi.':'Gateway menerima permintaan PDF rekap '+label+' untuk '+(contact.name||'nomor tujuan')+' ('+phone+'), tetapi penerimaan belum terkonfirmasi. Status Pending tercatat di Komunikasi. '+(result.already?'Pesan tidak dikirim ulang.':'');input.value='';toast(result.status==='sent'?'Rekap diterima.':'Rekap tercatat Pending.')}
       }catch(reason){if(active()){box.textContent='Rekap belum berhasil dikonfirmasi terkirim.';error.textContent=(reason.message||'Pengiriman PDF rekap gagal.')+' Periksa Komunikasi sebelum mengirim ulang.';}}
       finally{pending=false;inFlight.delete(key);if(form.isConnected){button.disabled=false;input.disabled=false;button.textContent='Kirim'}}
     }

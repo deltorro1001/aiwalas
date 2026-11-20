@@ -17,7 +17,7 @@ class PesanKomunikasiController extends BaseApiController
      $total=(clone $query)->countAllResults();$rows=$query->orderBy('p.id','DESC')->limit($limit,($page-1)*$limit)->get()->getResultArray();
      foreach($rows as &$row){
          $row['delivery_status']=$row['status_pengiriman']==='Terkirim'?'Terkirim':'Pending';
-         $row['delivery_note']=$row['delivery_status']==='Terkirim'?'Penerimaan oleh penerima sudah terkonfirmasi.':($row['result_note']?:($row['status_pengiriman']==='Gagal'?'Pengiriman gagal; perlu diperiksa.':'Belum ada konfirmasi pengiriman.'));
+         $row['delivery_note']=$row['delivery_status']==='Terkirim'?'Gateway melaporkan pengiriman berhasil.':($row['result_note']?:($row['status_pengiriman']==='Gagal'?'Gateway menolak pengiriman.':'Gateway belum melaporkan hasil berhasil.'));
      }
      unset($row);$this->response->setHeader('Cache-Control','no-store');
      return $this->respond(['data'=>$rows,'total'=>$total,'page'=>$page,'has_more'=>$page*$limit<$total]);

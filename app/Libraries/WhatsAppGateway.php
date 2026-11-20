@@ -80,15 +80,15 @@ class WhatsAppGateway
             }
         }else $payload['text']=$message;
         $result=$this->apiWithSettings($s,'POST',$path,$payload);$body=$result['data'];
-        $accepted=is_array($body)&&(($body['success']??null)===true||in_array($body['status']??null,[true,1,200,'true','success','sent','accepted','queued'],true));
+        $confirmed=is_array($body)&&(($body['success']??null)===true||in_array($body['status']??null,[true,1,200,'true','success','sent','accepted','queued'],true));
         $details=is_array($body['data']??null)?$body['data']:$body;
         $delivery=(string)($details['deliveryStatus']??$details['messageStatus']??$details['delivery_status']??$details['status']??'');
         $delivered=in_array(strtolower($delivery),['delivered','read','received'],true);
-        $ok=$result['ok']&&($accepted||$delivered);
-        $outcome=$delivered?'sent':($ok?'accepted':($result['ok']?'unknown':$result['outcome']));
-        // An HTTP/API success confirms acceptance by the gateway, not delivery to the recipient.
-        $response=$ok?['success'=>true,'status'=>$delivered?'delivered':'accepted','accepted'=>true,'delivery_confirmed'=>$delivered]:($outcome==='failed'?['success'=>false,'status'=>false]:['http_code'=>$result['http_code']]);
-        $message=$delivered?'Gateway mengonfirmasi pesan diterima penerima.':($ok?'Permintaan diterima gateway; penerimaan oleh penerima belum dikonfirmasi.':($result['message']?:'Gateway belum mengonfirmasi permintaan; periksa histori sebelum mengirim ulang.'));
+        $ok=$result['ok']&&($confirmed||$delivered);
+        $outcome=$ok?'sent':($result['ok']?'unknown':$result['outcome']);
+        // wa.sims.id reports successful sends with success/status fields; preserve that contract.
+        $response=$ok?['success'=>true,'status'=>true,'delivery_confirmed'=>$delivered]:($outcome==='failed'?['success'=>false,'status'=>false]:['http_code'=>$result['http_code']]);
+        $message=$ok?'Gateway melaporkan pengiriman berhasil.':($result['message']?:'Gateway belum memberikan hasil pengiriman yang berhasil.');
         return ['ok'=>$ok,'outcome'=>$outcome,'delivery_confirmed'=>$delivered,'message'=>$message,'response'=>$response];
     }
     public static function phone($value): string

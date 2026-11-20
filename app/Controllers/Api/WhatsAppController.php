@@ -86,8 +86,8 @@ class WhatsAppController extends BaseApiController
             if(!$student)return $this->respond(['message'=>'Siswa tidak dapat diakses.'],403);
         }
         $model=new PesanKomunikasiModel();$id=$model->insert(['kelas_id'=>(int)$class,'siswa_id'=>$student['id']??null,'pengirim'=>$user['nama_lengkap']??'AIWalas','penerima'=>trim($recipient)?:$phone,'nomor_tujuan'=>$phone,'isi_pesan'=>trim($message),'kategori'=>'WhatsApp','status_pengiriman'=>'Disiapkan','dibuat_oleh'=>(int)$user['id']],true);
-        $result=$this->gatewayRequest($phone,trim($message));$accepted=$result['ok'];$delivered=!empty($result['delivery_confirmed']);$failed=($result['outcome']??'')==='failed';$status=$delivered?'Terkirim':($failed?'Gagal':'Disiapkan');$model->update($id,['status_pengiriman'=>$status,'dikirim_pada'=>$delivered?date('Y-m-d H:i:s'):null]);
-        return $this->respond(['ok'=>$accepted,'message'=>$result['message'],'data'=>['id'=>$id,'status'=>$delivered?'Terkirim':($failed?'Gagal':'Pending')]],$accepted?200:502);
+        $result=$this->gatewayRequest($phone,trim($message));$accepted=$result['ok'];$sent=($result['outcome']??'')==='sent';$failed=($result['outcome']??'')==='failed';$status=$sent?'Terkirim':($failed?'Gagal':'Disiapkan');$model->update($id,['status_pengiriman'=>$status,'dikirim_pada'=>$sent?date('Y-m-d H:i:s'):null]);
+        return $this->respond(['ok'=>$accepted,'message'=>$result['message'],'data'=>['id'=>$id,'status'=>$sent?'Terkirim':($failed?'Gagal':'Pending')]],$accepted?200:502);
     }
     public function webhook()
     {

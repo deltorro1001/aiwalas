@@ -25,7 +25,9 @@ final class ClassRecapDelivery
         $semester=$month<=6?'Genap':'Ganjil';$data=ClassAttendanceRecap::build($klass,$year,$semester,$db);
         if(!$data['siswa'])throw new \InvalidArgumentException('Belum ada siswa aktif pada kelas ini.');
         $snapshot=hash('sha256',json_encode([$klass,$year,$month,$semester,ClassAttendancePdf::roster($data,$month)],JSON_THROW_ON_ERROR));
-        $key=hash('sha256',implode('|',[$owner,$class,$year,$month,$phone,$snapshot]));
+        // Each explicit help command starts a new send attempt. The UI prevents
+        // double clicks; an older pending row must not permanently block retry.
+        $key=hash('sha256',implode('|',[$owner,$class,$year,$month,$phone,$snapshot,bin2hex(random_bytes(16))]));
         $now=new \DateTimeImmutable('now',new \DateTimeZone('Asia/Jakarta'));$token=bin2hex(random_bytes(32));$file=bin2hex(random_bytes(32)).'.pdf';$path=WRITEPATH.'rekap-absen/'.$file;
         $period=ClassAttendancePdf::MONTHS[$month-1].' '.$year;
         $filename='Rekap-Absen-Kelas-'.preg_replace('/[^A-Za-z0-9_-]/','-',$klass['nama_kelas']).'-'.$year.'-'.sprintf('%02d',$month).'.pdf';
@@ -35,7 +37,7 @@ final class ClassRecapDelivery
             $locked=$db->query('SELECT id FROM kelas WHERE id=? AND wali_kelas_id=? FOR UPDATE',[$class,$owner])->getRowArray();
             if(!$locked)throw new \InvalidArgumentException('Kelas tidak dapat diakses.');
             $existing=$db->table('rekap_absen_pengiriman')->where('session_key',$key)->get()->getRowArray();
-            if($existing){$state=$existing['status']==='sent'?'pending':$existing['status'];if($state==='pending'&&$existing['status']==='sent'){$db->table('pesan_komunikasi')->where('id',$existing['message_id'])->update(['status_pengiriman'=>'Disiapkan','dikirim_pada'=>null]);$db->table('rekap_absen_pengiriman')->where('id',$existing['id'])->update(['status'=>'pending','result_note'=>'Gateway pernah menerima permintaan, tetapi penerimaan oleh penerima belum terkonfirmasi.']);}$db->transCommit();return ['ok'=>in_array($state,['sent','pending'],true),'status'=>$state,'already'=>true,'message'=>$state==='pending'?'Rekap tercatat Pending; penerimaan oleh penerima belum terkonfirmasi. Pesan tidak dikirim ulang.':'Rekap ini pernah atau sedang diproses. Periksa Komunikasi sebelum mengirim ulang.'];}
+            if($existing){$db->transCommit();return ['ok'=>$existing['status']==='sent','status'=>$existing['status'],'already'=>true,'message'=>$existing['status']==='sent'?'Rekap sudah dikirim melalui gateway.':'Rekap ini sedang diproses.'];}
             $pdf=ClassAttendancePdf::create($data,$month,$now);
             if(!is_dir(dirname($path))&&!mkdir(dirname($path),0770,true)&&!is_dir(dirname($path)))throw new \RuntimeException('Penyimpanan PDF belum tersedia.');
             if(file_put_contents($path,$pdf,LOCK_EX)!==strlen($pdf))throw new \RuntimeException('PDF gagal disimpan.');
@@ -44,11 +46,11 @@ final class ClassRecapDelivery
             if(!$db->transStatus())throw new \RuntimeException('Pengiriman rekap belum dapat dicatat.');
             $db->transCommit();
         }catch(\Throwable $error){$db->transRollback();if(is_file($path))unlink($path);throw $error;}
-        $status='unknown';$note='Gateway belum mengonfirmasi hasil. Periksa Komunikasi sebelum mengirim ulang.';
+        $status='unknown';$note='Gateway belum melaporkan hasil pengiriman.';
         try{
             $response=($this->send)($phone,$text,rtrim($this->base,'/').'/media/rekap-absen/'.$token,$filename);$body=$response['response']??[];$confirmation=$body['status']??$body['success']??null;
-            if(($response['ok']??false)&&($response['outcome']??'')==='sent'){$status='sent';$note='Gateway mengonfirmasi PDF rekap diterima penerima.';}
-            elseif(($response['ok']??false)&&($response['outcome']??'')==='accepted'){$status='pending';$note='Gateway menerima permintaan PDF; penerimaan oleh penerima belum terkonfirmasi.';}
+            if(($response['ok']??false)&&in_array(($response['outcome']??''),['sent','accepted'],true)){$status='sent';$note='PDF rekap berhasil dikirim melalui gateway.';}
+            elseif(($response['ok']??false)&&in_array($confirmation,[true,1,200,'true','success','sent','accepted','queued'],true)){$status='sent';$note='PDF rekap berhasil dikirim melalui gateway.';}
             elseif(!($response['ok']??false)&&in_array($confirmation,[false,0,'false','error','failed'],true)){$status='failed';$note='Gateway menolak pengiriman rekap.';}
         }catch(\Throwable $error){$note='Koneksi gateway terputus. Periksa Komunikasi sebelum mengirim ulang.';}
         $db->transBegin();

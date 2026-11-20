@@ -163,7 +163,7 @@ class LaporanFileController extends WhatsAppController
         ], true);
         $result = $this->gatewayRequest($phone, $message, 'document', $url);
         $accepted = $result['ok'];
-        $delivered = !empty($result['delivery_confirmed']);
+        $delivered = ($result['outcome'] ?? '') === 'sent';
         $failed = ($result['outcome'] ?? '') === 'failed';
         $model->update($id, [
             'status_pengiriman' => $delivered ? 'Terkirim' : ($failed ? 'Gagal' : 'Disiapkan'),

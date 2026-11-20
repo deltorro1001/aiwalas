@@ -153,6 +153,7 @@
 <script src='<?= base_url('assets/help-introduction.js?v=20261103-introduction-direct') ?>'></script>
 <script src='<?= base_url('assets/help-collage.js?v=20261103-collage-command') ?>'></script>
 <script src='<?= base_url('assets/help-class-recap.js?v=20261105-monthly-pdf') ?>'></script>
+<script src='<?= base_url('assets/help-discipline-lateness.js?v=20261120-direct-report') ?>'></script>
 <script src='<?= base_url('assets/academic-calendar.js?v=20261118-monday-no-ceremony') ?>'></script>
 </body>
 </html>

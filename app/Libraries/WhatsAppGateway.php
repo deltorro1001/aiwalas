@@ -71,7 +71,13 @@ class WhatsAppGateway
         if($mediaUrl!==''){
             if(!in_array($mediaType,['image','video','audio','document'],true)||!filter_var($mediaUrl,FILTER_VALIDATE_URL)||!in_array(parse_url($mediaUrl,PHP_URL_SCHEME),['https','http'],true))return ['ok'=>false,'outcome'=>'failed','message'=>'Media pengiriman tidak valid.','response'=>['status'=>false]];
             $payload+=['mediaType'=>$mediaType,'url'=>$mediaUrl,'caption'=>$message];$path='message/send-media';
-            if($mediaType==='document'){$payload['filename']=preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,179}\.pdf$/D',$filename)?$filename:'Laporan-Wali-Kelas.pdf';$payload['mimetype']='application/pdf';}
+            if($mediaType==='document'){
+                $extension=strtolower(pathinfo($filename,PATHINFO_EXTENSION));
+                $mime=['pdf'=>'application/pdf','xls'=>'application/vnd.ms-excel','xlsx'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'][$extension]??null;
+                $validName=preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,179}\.(?:pdf|xls|xlsx)$/iD',$filename);
+                $payload['filename']=$validName&&$mime?$filename:'Laporan-Wali-Kelas.pdf';
+                $payload['mimetype']=$validName&&$mime?$mime:'application/pdf';
+            }
         }else $payload['text']=$message;
         $result=$this->apiWithSettings($s,'POST',$path,$payload);$body=$result['data'];
         $confirmed=is_array($body)&&(($body['success']??null)===true||in_array($body['status']??null,[true,1,200,'true','success','sent'],true));

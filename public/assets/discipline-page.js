@@ -9,15 +9,16 @@
   function datesFor(student){var dates=(student.tanggal_pelanggaran||{})[kind];if(!dates){var record=student.records[kind]||{};dates=[record.tanggal||(kind==='terlambat'?student.keterlambatan.tanggal:null)].filter(Boolean)}return dates.map(formatDate).join('\n')||' - '}
   function reasonsFor(student){var dates=(student.tanggal_pelanggaran||{}).terlambat||[],reasons=student.alasan_keterlambatan||{};return dates.map(function(date){return reasons[date]||'Belum diisi'}).join('\n')||' - '}
   function cells(student){var record=student.records[kind]||{},late=student.keterlambatan;return [student.nama_lengkap,student.nis].concat(fields[kind].map(function(field){return field==='jumlah_terlambat'?late.jumlah:field==='tanggal'?datesFor(student):field==='alasan'&&kind==='terlambat'?reasonsFor(student):(record[field]||' - ')})).concat([(student.status_kedisiplinan||{})[kind]||(kind==='terlambat'?late.status:'Baik')])}
-  function cellHtml(value,index){return (index===2+fields[kind].indexOf('tanggal')||(kind==='terlambat'&&index===2+fields[kind].indexOf('alasan')))?'<td class="discipline-event-dates">'+String(value).split('\n').map(esc).join('<br>')+'</td>':'<td>'+esc(value)+'</td>'}
+  function cellHtml(value,index,alternate){var classes=[];if(alternate)classes.push('discipline-row-alt-cell');if(index===2+fields[kind].indexOf('tanggal'))classes.push('discipline-event-dates');if(kind==='terlambat'&&index===2+fields[kind].indexOf('alasan'))classes.push('discipline-event-reason-cell');return '<td'+(classes.length?' class="'+classes.join(' ')+'"':'')+'>'+((classes.indexOf('discipline-event-dates')>=0)?String(value).split('\n').map(esc).join('<br>'):esc(value))+'</td>'}
   function headers(){return ['Nama Siswa','NIS'].concat(fields[kind].map(function(field){return labels[field]})).concat(['Status Kedisiplinan'])}
-  function studentRowsHtml(student,withAction){
-    if(kind!=='terlambat')return '<tr>'+cells(student).map(cellHtml).join('')+(withAction?'<td>'+editButton(student)+'</td>':'')+'</tr>';
+  function studentRowsHtml(student,withAction,alternate){
+    var rowClass='discipline-student-row'+(alternate?' discipline-row-alt':'');
+    if(kind!=='terlambat')return '<tr class="'+rowClass+' discipline-student-start" data-discipline-student="'+esc(student.id)+'">'+cells(student).map(function(value,index){return cellHtml(value,index,alternate)}).join('')+(withAction?'<td'+(alternate?' class="discipline-row-alt-cell"':'')+'>'+editButton(student)+'</td>':'')+'</tr>';
     var dates=(student.tanggal_pelanggaran||{}).terlambat||[],reasons=student.alasan_keterlambatan||{},late=student.keterlambatan;
     if(!dates.length)dates=[''];
     return dates.map(function(date,index){
-      var span=' rowspan="'+dates.length+'"';
-      return '<tr data-discipline-student="'+esc(student.id)+'">'+(index===0?'<td'+span+'>'+esc(student.nama_lengkap)+'</td><td'+span+'>'+esc(student.nis)+'</td><td'+span+'>'+esc(late.jumlah)+'</td>':'')+'<td class="discipline-event-dates">'+esc(date?formatDate(date):' - ')+'</td><td class="discipline-event-reason-cell">'+esc(date?(reasons[date]||'Belum diisi'):' - ')+'</td>'+(index===0?'<td'+span+'>'+esc(late.status)+'</td>'+(withAction?'<td'+span+'>'+editButton(student)+'</td>':''):'')+'</tr>';
+      var span=' rowspan="'+dates.length+'"',alt=alternate?' class="discipline-row-alt-cell"':'';
+      return '<tr class="'+rowClass+(index===0?' discipline-student-start':'')+'" data-discipline-student="'+esc(student.id)+'">'+(index===0?'<td'+span+alt+'>'+esc(student.nama_lengkap)+'</td><td'+span+alt+'>'+esc(student.nis)+'</td><td'+span+alt+'>'+esc(late.jumlah)+'</td>':'')+'<td class="discipline-event-dates'+(alternate?' discipline-row-alt-cell':'')+'">'+esc(date?formatDate(date):' - ')+'</td><td class="discipline-event-reason-cell'+(alternate?' discipline-row-alt-cell':'')+'">'+esc(date?(reasons[date]||'Belum diisi'):' - ')+'</td>'+(index===0?'<td'+span+alt+'>'+esc(late.status)+'</td>'+(withAction?'<td'+span+alt+'>'+editButton(student)+'</td>':''):'')+'</tr>';
     }).join('');
   }
   function editButton(student){if(window.currentRole!=='walas')return '<button type="button" class="panel-action" disabled title="Hanya wali kelas yang dapat mengedit">Edit</button>';return '<button type="button" class="panel-action" data-stored-discipline="'+esc(student.id)+'">Edit</button>'}
@@ -25,7 +26,7 @@
     var body=document.getElementById('storedDisciplineRows');if(!body)return;
     document.getElementById('storedDisciplineCols').innerHTML=columnWidths[kind].map(function(width){return '<col style="width:'+width+'%">'}).join('');
     document.getElementById('storedDisciplineHead').innerHTML='<tr>'+headers().concat(['Aksi']).map(function(label){return '<th>'+esc(label)+'</th>'}).join('')+'</tr>';
-    body.innerHTML=rows.map(function(student){return studentRowsHtml(student,true)}).join('')||'<tr><td colspan="9">Belum ada siswa.</td></tr>';
+    body.innerHTML=rows.map(function(student,index){return studentRowsHtml(student,true,index%2===1)}).join('')||'<tr><td colspan="9">Belum ada siswa.</td></tr>';
     body.querySelectorAll('[data-stored-discipline]').forEach(function(button){button.onclick=function(){edit(rows.find(function(student){return String(student.id)===button.dataset.storedDiscipline}))}});
   }
   function edit(student){
@@ -84,7 +85,7 @@
     document.getElementById('pageContent').innerHTML='<div class="page discipline-page"><div class="page-heading"><div><div class="eyebrow">REPORT</div><h1>Status Kedisiplinan</h1><p>Pantauan Kedisiplinan Siswa</p></div><div class="discipline-actions"><select id="storedDisciplineCategory" class="filter-btn">'+Object.keys(titles).map(function(key){return '<option value="'+key+'"'+(key===kind?' selected':'')+'>'+esc(titles[key])+'</option>'}).join('')+'</select><button type="button" id="exportStoredDiscipline" class="outline-btn">Export</button></div></div><p id="storedDisciplineLoadError" class="login-error" role="alert"></p><section class="panel table-panel"><div class="table-wrap"><table class="discipline-records-table"><colgroup id="storedDisciplineCols"></colgroup><thead id="storedDisciplineHead"></thead><tbody id="storedDisciplineRows"><tr><td>Memuat catatan...</td></tr></tbody></table></div></section></div>';
     document.getElementById('storedDisciplineCategory').onchange=function(){kind=this.value;paint()};
     document.getElementById('exportStoredDiscipline').onclick=function(){
-      var html='<table><tr>'+headers().map(function(label){return '<th>'+esc(label)+'</th>'}).join('')+'</tr>'+rows.map(function(student){return studentRowsHtml(student,false)}).join('')+'</table>',url=URL.createObjectURL(new Blob(['\ufeff<html><meta charset="utf-8"><body>'+html+'</body></html>'],{type:'application/vnd.ms-excel'})),link=document.createElement('a');link.href=url;link.download='Status_Kedisiplinan_'+kind+'.xls';link.click();setTimeout(function(){URL.revokeObjectURL(url)},1000);
+      var html='<table><tr>'+headers().map(function(label){return '<th>'+esc(label)+'</th>'}).join('')+'</tr>'+rows.map(function(student,index){return studentRowsHtml(student,false,index%2===1)}).join('')+'</table>',url=URL.createObjectURL(new Blob(['\ufeff<html><meta charset="utf-8"><body>'+html+'</body></html>'],{type:'application/vnd.ms-excel'})),link=document.createElement('a');link.href=url;link.download='Status_Kedisiplinan_'+kind+'.xls';link.click();setTimeout(function(){URL.revokeObjectURL(url)},1000);
     };
     rows=[];
     authRequest('api/kedisiplinan?kelas_id='+encodeURIComponent(classId),{cache:'no-store'}).then(function(data){

@@ -9,7 +9,7 @@ class RekapAbsenKelasController extends BaseApiController
         $year=$this->request->getGet('tahun')??$now->format('Y');
         $class=$this->request->getGet('kelas_id');
         $semester=$this->request->getGet('semester')??'Ganjil';
-        if(!is_string($year)||!preg_match('/^[0-9]{4}$/D',$year)||(int)$year<2026||(int)$year>9998)return $this->respond(['message'=>'Pilih tahun yang valid mulai 2026.'],422);
+        if(!is_string($year)||!preg_match('/^[0-9]{4}$/D',$year)||(int)$year<1000||(int)$year>9998)return $this->respond(['message'=>'Pilih tahun yang valid (1000–9998).'],422);
         if(!is_string($class)||!preg_match('/^[1-9][0-9]*$/D',$class))return $this->respond(['message'=>'Kelas wajib dipilih.'],422);
         if(!in_array($semester,['Ganjil','Genap'],true))return $this->respond(['message'=>'Semester tidak valid.'],422);
         $db=db_connect();

@@ -152,7 +152,7 @@
 <script src='<?= base_url('assets/attendance-questions.js?v=20261105-nicknames') ?>'></script>
 <script src='<?= base_url('assets/help-introduction.js?v=20261120-gateway-pending') ?>'></script>
 <script src='<?= base_url('assets/help-collage.js?v=20261120-collage-retry') ?>'></script>
-<script src='<?= base_url('assets/help-class-recap.js?v=20261120-gateway-pending') ?>'></script>
+<script src='<?= base_url('assets/help-class-recap.js?v=20261120-unlimited-history') ?>'></script>
 <script src='<?= base_url('assets/help-discipline-lateness.js?v=20261120-gateway-pending') ?>'></script>
 <script src='<?= base_url('assets/academic-calendar.js?v=20261118-monday-no-ceremony') ?>'></script>
 </body>

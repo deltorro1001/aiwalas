@@ -6,7 +6,7 @@ class ClassRecapDeliveryController extends BaseApiController
     public function send()
     {
         $p=$this->payload();
-        $errors=$this->validatePayload($p,['kelas_id'=>'required|is_natural_no_zero','tahun'=>'required|integer|greater_than_equal_to[2026]|less_than_equal_to[9998]','bulan'=>'required|integer|greater_than_equal_to[1]|less_than_equal_to[12]','nomor_tujuan'=>'required|max_length[30]','nama_penerima'=>'permit_empty|max_length[180]']);
+        $errors=$this->validatePayload($p,['kelas_id'=>'required|is_natural_no_zero','tahun'=>'required|integer|greater_than_equal_to[1000]|less_than_equal_to[9998]','bulan'=>'required|integer|greater_than_equal_to[1]|less_than_equal_to[12]','nomor_tujuan'=>'required|max_length[30]','nama_penerima'=>'permit_empty|max_length[180]']);
         if($errors)return $this->respond(['ok'=>false,'message'=>'Isi kelas, bulan, tahun, dan nomor tujuan dengan benar.','errors'=>$errors],422);
         if(!is_string($p['nomor_tujuan'])||!is_string($p['nama_penerima']??''))return $this->respond(['ok'=>false,'message'=>'Nomor/nama penerima tidak valid.'],422);
         try{

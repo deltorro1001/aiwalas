@@ -10,7 +10,7 @@
       var today=window.AIWalasCalendar?AIWalasCalendar.today():new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
       month=selected?selected.bulan:Number(today.slice(5,7));year=selected?selected.tahun:Number(today.slice(0,4));
     }else if(match){month=/^\d+$/.test(match[1])?Number(match[1]):months.indexOf(match[1])+1;year=Number(match[2]);}
-    if(!month||month<1||month>12||!year||year<2026||year>9998)return {error:'Pilih bulan dan tahun yang valid mulai 2026. Contoh: Kirim Rekap Absen Kelas Oktober 2026 ke Ibu Nani.'};
+    if(!month||month<1||month>12||!year||year<1000||year>9998)return {error:'Pilih bulan dan tahun yang valid (tahun 1000–9998). Contoh: Kirim Rekap Absen Kelas Oktober 2026 ke Ibu Nani.'};
     var target=parts[2].trim().replace(/[.!?]+$/,'').trim().replace(/^(?:nomor(?:\s+(?:telepon|whatsapp|wa|hp))?|no\.?\s*(?:telepon|whatsapp|wa|hp)?)\s*:?\s*(?=[+\d])/i,'');
     if(!target)return {error:'Isi nama atau nomor tujuan setelah kata ke.'};
     if(/^[+\d][\d\s().-]*$/.test(target)){

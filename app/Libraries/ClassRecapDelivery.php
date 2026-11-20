@@ -14,7 +14,7 @@ final class ClassRecapDelivery
     }
     public function send(int $class,int $year,int $month,string $number,int $owner,string $recipient=''): array
     {
-        if($year<2026||$year>9998||$month<1||$month>12)throw new \InvalidArgumentException('Bulan dan tahun rekap tidak valid.');
+        if($year<1000||$year>9998||$month<1||$month>12)throw new \InvalidArgumentException('Bulan dan tahun rekap tidak valid.');
         $phone=WhatsAppGateway::phone($number);if(!$phone)throw new \InvalidArgumentException('Nomor WhatsApp tujuan tidak valid.');
         $recipient=trim($recipient);if(mb_strlen($recipient)>180)throw new \InvalidArgumentException('Nama penerima terlalu panjang.');
         $db=$this->db;$klass=$db->table('kelas')->select('id,nama_kelas')->where(['id'=>$class,'wali_kelas_id'=>$owner])->get()->getRowArray();
@@ -23,7 +23,7 @@ final class ClassRecapDelivery
         if(!in_array(parse_url($this->base,PHP_URL_SCHEME),['http','https'],true)||!$host||in_array($host,['localhost','::1','[::1]','0.0.0.0'],true)||str_starts_with($host,'127.'))throw new \InvalidArgumentException('Gateway memerlukan alamat aplikasi publik untuk mengambil PDF. Pengiriman tersedia pada VPS.');
         if($this->real&&!(new WhatsAppGateway())->configured())throw new \InvalidArgumentException('Gateway WhatsApp belum siap. Periksa menu WhatsApp Gateway.');
         $semester=$month<=6?'Genap':'Ganjil';$data=ClassAttendanceRecap::build($klass,$year,$semester,$db);
-        if(!$data['siswa'])throw new \InvalidArgumentException('Belum ada siswa aktif pada kelas ini.');
+        if(!$data['siswa'])throw new \InvalidArgumentException('Belum ada data siswa pada kelas ini.');
         $snapshot=hash('sha256',json_encode([$klass,$year,$month,$semester,ClassAttendancePdf::roster($data,$month)],JSON_THROW_ON_ERROR));
         // Each explicit help command starts a new send attempt. The UI prevents
         // double clicks; an older pending row must not permanently block retry.

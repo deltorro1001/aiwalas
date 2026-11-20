@@ -9,7 +9,7 @@ final class ClassAttendanceRecap
         $empty=static fn()=>['sakit'=>0,'izin'=>0,'alpha'=>0,'terlambat'=>0];
         $months=[];for($month=1;$month<=12;$month++)$months[$month]=['bulan'=>$month]+$empty();
         $students=[];
-        foreach($db->table('siswa')->select('id,nis,nama_lengkap')->where(['kelas_id'=>(int)$klass['id'],'aktif'=>1])->orderBy('nama_lengkap')->get()->getResultArray() as $row){
+        foreach($db->table('siswa')->select('id,nis,nama_lengkap')->where('kelas_id',(int)$klass['id'])->orderBy('nama_lengkap')->get()->getResultArray() as $row){
             $row['bulanan']=$months;$row['total']=$empty();$students[$row['id']]=$row;
         }
         if($students){

@@ -53,28 +53,21 @@ final class PhotoCollageDelivery
             $db->query('SELECT id FROM foto_kolase_halaman WHERE id=? FOR UPDATE',[$page]);
             $query=$db->table('foto_kolase_pengiriman')->where('halaman_id',$page)->groupStart()->where('nomor_tujuan',$phone);
             if($teacher!==null)$query->orWhere('guru_id',$teacher);
-            $existing=$query->groupEnd()->orderBy("CASE WHEN status = 'sent' THEN 0 ELSE 1 END",'ASC',false)->orderBy('id','DESC')->get()->getRowArray();
-            if($existing){
-                if($existing['status']==='sent'){
-                    if(!empty($existing['message_id']))$db->table('pesan_komunikasi')->where('id',$existing['message_id'])->update(['status_pengiriman'=>'Disiapkan','dikirim_pada'=>null]);
-                    $db->table('foto_kolase_pengiriman')->where('id',$existing['id'])->update(['status'=>'pending','result_note'=>'Gateway pernah menerima permintaan, tetapi penerimaan oleh penerima belum terkonfirmasi.']);
-                    $db->transCommit();
-                    return ['ok'=>true,'status'=>'pending','already'=>true,'message'=>'Kolase sebelumnya tercatat diterima gateway, tetapi penerimaan oleh penerima belum terkonfirmasi. Kolase tidak dikirim ulang.'];
-                }
+            $existing=$query->groupEnd()->orderBy('id','DESC')->get()->getRowArray();
+            if($existing&&$existing['status']==='processing'&&strtotime($existing['dicoba_pada'])>time()-300){
                 $db->transCommit();
-                if($existing['status']==='pending')return ['ok'=>true,'status'=>'pending','already'=>true,'message'=>'Kolase ini sudah tercatat Pending dan tidak dikirim ulang. Periksa Komunikasi.'];
-                return ['ok'=>false,'status'=>$existing['status'],'already'=>true,'message'=>'Kolase ini pernah atau sedang diproses. Periksa status di Komunikasi sebelum mengirim ulang.'];
+                return ['ok'=>true,'status'=>'processing','already'=>true,'message'=>'Pengiriman kolase untuk tujuan ini sedang diproses.'];
             }
             $db->table('pesan_komunikasi')->insert(['kelas_id'=>$row['kelas_id'],'pengirim'=>'AIWalas','penerima'=>$recipient,'nomor_tujuan'=>$phone,'isi_pesan'=>$text,'kategori'=>'Kolase Foto Siswa','status_pengiriman'=>'Disiapkan','dibuat_oleh'=>$owner]);$message=$db->insertID();
             $db->table('foto_kolase_pengiriman')->insert(['halaman_id'=>$page,'guru_id'=>$teacher,'nomor_tujuan'=>$phone,'status'=>'processing','result_note'=>'Sedang dikirim ke gateway.','token_hash'=>hash('sha256',$token),'berlaku_sampai'=>$now->modify('+24 hours')->format('Y-m-d H:i:s'),'dicoba_pada'=>$stamp,'message_id'=>$message]);$dispatch=$db->insertID();
             if(!$db->transStatus())throw new RuntimeException('Pencatatan pengiriman gagal.');
             $db->transCommit();
         }catch(\Throwable $error){$db->transRollback();throw $error;}
-        $status='unknown';$note='Belum ada konfirmasi; periksa gateway sebelum mengirim ulang.';
+        $status='unknown';$note='Gateway belum melaporkan hasil pengiriman.';
         try{
             $response=($this->send)($phone,$text,rtrim($this->base,'/').'/media/kolase/'.$token);$body=$response['response']??null;$confirmation=is_array($body)?($body['status']??$body['success']??null):null;
-            if(($response['ok']??false)&&($response['outcome']??'')==='sent'){$status='sent';$note='Gateway mengonfirmasi kolase diterima penerima.';}
-            elseif(($response['ok']??false)&&($response['outcome']??'')==='accepted'){$status='pending';$note='Gateway menerima permintaan kolase; penerimaan oleh penerima belum terkonfirmasi.';}
+            if(($response['ok']??false)&&in_array(($response['outcome']??''),['sent','accepted'],true)){$status='sent';$note='Kolase berhasil dikirim melalui gateway.';}
+            elseif(($response['ok']??false)&&in_array($confirmation,[true,1,200,'true','success','sent','accepted','queued'],true)){$status='sent';$note='Kolase berhasil dikirim melalui gateway.';}
             elseif(!($response['ok']??false)&&in_array($confirmation,[false,0,'false','error','failed'],true)){$status='failed';$note='Gateway menolak kolase; perlu diperiksa.';}
         }catch(\Throwable $error){/* A timeout may occur after the gateway accepted the media. */}
         $db->transBegin();

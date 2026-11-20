@@ -89,8 +89,8 @@
           if(!active())throw new Error('Pengiriman dihentikan karena halaman atau akun berubah.');
           feedback.textContent='Mengirim kolase...';
           var result=await authRequest('api/upload-foto/kolase/halaman/'+item.id+'/kirim',{method:'POST',body:JSON.stringify({guru_id:teacherId})});
-          if(!result||result.ok!==true||!['sent','pending'].includes(result.status))throw new Error(result&&result.message||'Gateway belum mengonfirmasi permintaan.');
-          if(active()){closeModal();message.className='photo-success';message.textContent=result.status==='sent'?'Kolase dikonfirmasi diterima penerima. Lihat hasilnya di Komunikasi.':'Permintaan kolase diterima gateway dan dicatat Pending di Komunikasi; penerimaan oleh guru belum terkonfirmasi.'}
+          if(!result||result.ok!==true||!['sent','pending','processing'].includes(result.status))throw new Error(result&&result.message||'Pengiriman kolase gagal.');
+          if(active()){closeModal();message.className='photo-success';message.textContent=result.status==='sent'?'Kolase berhasil dikirim melalui WhatsApp. Lihat riwayatnya di Komunikasi.':result.status==='processing'?'Pengiriman kolase sedang diproses. Lihat riwayatnya di Komunikasi.':'Gateway belum melaporkan hasil akhir. Percobaan tercatat di Komunikasi.'}
         }catch(error){if(feedback.isConnected){feedback.className='login-error';feedback.textContent=error.message+' Periksa Komunikasi sebelum mencoba lagi.'}if(active()){message.className='login-error';message.textContent='Pengiriman kolase belum terkonfirmasi. '+error.message}}
         finally{busy=false;if(active())buttons();if(confirm.isConnected){confirm.textContent='Proses selesai';document.getElementById('cancelModal').disabled=false;document.getElementById('cancelModal').textContent='Tutup'}}
       };
